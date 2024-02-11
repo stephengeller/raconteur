@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.56.0",
+    "moment": "^2.30.1",
+    "openai": "^4.27.0",
+    "prettier": "^3.2.5"
+  },
+  "name": "hypedoc",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "repository": "git@github.com:stephengeller/pull-request-hypedoc.git",
+  "author": "Stephen Geller <sgeller@squareup.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/index.ts"
+  },
+  "devDependencies": {
+    "@octokit/types": "^12.4.0",
+    "@types/node": "^20.11.17",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
