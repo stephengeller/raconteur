@@ -13,26 +13,26 @@ template_path=$(find .github -type f -iname "pull_request_template.md" | head -n
 template_content=""
 
 if [[ -n $template_path ]]; then
-   echo "🤖 PR template found at $template_path, will format accordingly based on the diff with ${dest_branch}."
-  template_content=$(cat "$template_path" | jq -Rs .)
+    echo "🤖 PR template found at $template_path, will format accordingly based on the diff with ${dest_branch}."
+    template_content=$(cat "$template_path")
   
-read -r -d '' system_content <<EOF
-You are a helpful assistant. Generate a detailed and structured PR description for software changes using the provided git diff. 
-Make the PR description fit this pull request template format so that I can copy-paste it into GitHub.
+    read -r -d '' system_content <<EOF
+You are a helpful assistant. Generate a detailed and structured PR description for software changes using the provided git diff.
+Also generate a title for the PR following the Conventional Commits format.
+Make the PR description fit this pull request template format so that I can copy-paste it into GitHub:
+
+$template_content
 EOF
-    system_content+="$template_content"
 else
-  echo "🤖 No PR template found, will generate a generic PR description."
-read -r -d '' system_content <<EOF
+    echo "🤖 No PR template found, will generate a generic PR description."
+    read -r -d '' system_content <<EOF
 You are a helpful assistant. Generate a detailed and structured PR for software changes using the provided git diff. 
+Also generate a title for the PR following the Conventional Commits format.
 Make the PR friendly and easy to read, using emojis where appropriate.
+
+Ensure the PR has sections like 'Title', 'Description', 'Changes' and 'Notes'. 
 EOF
-
-  system_content+="\nEnsure the PR has sections like 'Title', 'Description', 'Changes' and 'Notes'. "
 fi
-
-echo $system_content
-exit 0
 
 # Use jq to create the JSON payload
 json_payload=$(jq -n \
