@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Function to prompt for user confirmation to continue
+confirm_continue() {
+    read -p "Press Enter to continue..." 
+}
+
+echo "Starting setup for PR Hypedocifier..."
+
+# Install dependencies
+echo "Installing dependencies..."
+yarn install
+confirm_continue
+
+# Instructions and opening GitHub token page
+echo "1. You need to generate a new Personal Access Token (PAT) on GitHub with 'repo' scope."
+echo "   After opening the GitHub tokens page, click on 'Generate new token', select 'repo' scope, and generate the token."
+echo "   Visit: https://github.com/settings/tokens"
+open https://github.com/settings/tokens # Adjust for non-macOS systems if necessary
+confirm_continue
+
+# Instructions for obtaining OpenAI API Key
+echo "2. Obtain an API key from OpenAI by visiting the following link. Sign in and access or create a new API key."
+echo "   Visit: https://platform.openai.com/account/api-keys"
+open https://platform.openai.com/account/api-keys # Adjust for non-macOS systems if necessary
+confirm_continue
+
+# Instructions for updating the .env file
+echo "3. Now, create or update the .env file in the root of your project directory."
+echo "   Add or update it with your GitHub token, OpenAI API key, and GitHub username in the following format:"
+echo "   GITHUB_TOKEN=your_github_token_here"
+echo "   OPENAI_API_KEY=your_openai_api_key_here"
+echo "   GITHUB_USERNAME=your_github_username_here"
+echo "   Replace the placeholders with your actual values."
+confirm_continue
+
+# Final instructions
+echo "Setup is almost complete. Please ensure that you've added your tokens and username to the .env file as instructed."
+echo "After completing these steps, you can run the summarizer by executing 'yarn start'."
+echo "Setup complete! 🎉"

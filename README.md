@@ -11,19 +11,33 @@ Before you begin, ensure you have the following installed:
 
 ## Setup
 
-### **Clone the repository and install dependencies**
+### Automated Setup
+
+To simplify the initial setup process, use the setup script that guides you through installing dependencies, generating necessary tokens, and configuring your `.env` file.
+
+To run the setup script, navigate to your project directory in the terminal and execute:
+
+```bash
+./setup.sh
+```
+
+### Manual Setup
+
+Follow the prompts and instructions in the terminal to complete your setup.
+
+#### **Clone the repository and install dependencies**
 ```bash
 git clone https://github.com/stephengeller/pull-request-hypedoc
 cd pull-request-hypedoc
 yarn install
 ```
 
-### **Environment Configuration**
+#### **Environment Configuration**
 
 Secure handling of sensitive information such as GitHub tokens and OpenAI API keys is managed through a .env file.
 
-- Generate a new Personal Access Token (PAT) from GitHub with `repo` scope.
-- Obtain an API key from platform.openai.com/api-keys (SSO with your squareup account)
+- [Generate a new Personal Access Token (PAT) from GitHub with](https://github.com/settings/tokens) `repo` scope.
+- Obtain an API key from https://platform.openai.com/api-keys (SSO with your squareup account)
 - Create a .env file in the root of your project and open it in a text editor.
 - Add your GitHub token and OpenAI API key to the .env file in the following format:
 ```bash
