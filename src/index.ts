@@ -19,7 +19,19 @@ class PRSummarizer {
   constructor() {
     this.octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
     this.username = process.env.GITHUB_USERNAME;
-    this.sinceDate = moment().subtract(2, "weeks").format();
+
+    // Set the period for which to fetch PRs, default to 2 weeks
+    const periodValue: number = parseInt(
+      process.env.PR_FETCH_PERIOD_VALUE || "2",
+    );
+
+    // Set the period unit for which to fetch PRs, default to weeks, but can be set to days, months, etc.
+    const periodUnit: moment.unitOfTime.DurationConstructor =
+      (process.env
+        .PR_FETCH_PERIOD_UNIT as moment.unitOfTime.DurationConstructor) ||
+      "weeks";
+
+    this.sinceDate = moment().subtract(periodValue, periodUnit).format();
   }
 
   private async fetchMergedPRs(): Promise<PullRequest[]> {
@@ -78,11 +90,13 @@ class PRSummarizer {
   }
 
   public async run(): Promise<void> {
-    console.log("\nFetching merged PRs...\n");
+    console.log(`
+Fetching merged PRs since ${moment(this.sinceDate).format("Do MMM YYYY")}...
+`);
     try {
       const prs = await this.fetchMergedPRs();
       this.generateHypedocEntries(prs);
-      console.log("\n\nRunning ChatGPT to summarise the PRs...\n\n");
+      console.log("\nRunning ChatGPT to summarise the PRs...\n");
       await this.summarizePRs(prs);
     } catch (error) {
       console.error(`Failed to process PRs: ${error}`);
