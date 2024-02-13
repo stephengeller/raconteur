@@ -1,9 +1,9 @@
 import * as fs from "fs";
 import prompts from "prompts";
-import {config} from "dotenv";
-import {exec} from "child_process";
-import {promisify} from "util";
-import clipboardy from "clipboardy";
+import { config } from "dotenv";
+import { exec } from "child_process";
+import { promisify } from "util";
+// import clipboardy from "clipboardy";
 import chalk from "chalk";
 import axios from "axios";
 
@@ -13,29 +13,29 @@ config(); // Load .env file
 process.on("SIGINT", () => {
   console.log(chalk.red("\nExiting gracefully..."));
   process.exit(0);
-})
+});
 
 export async function callChatGPTApi(
-    systemContent: string,
-    userContent: string,
+  systemContent: string,
+  userContent: string,
 ): Promise<string> {
   try {
     const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-4-0125-preview", // Ensure this is the correct model identifier
-          messages: [
-            {
-              role: "system",
-              content: systemContent,
-            },
-            {
-              role: "user",
-              content: userContent,
-            },
-          ],
-        },
-        { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } },
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4-0125-preview", // Ensure this is the correct model identifier
+        messages: [
+          {
+            role: "system",
+            content: systemContent,
+          },
+          {
+            role: "user",
+            content: userContent,
+          },
+        ],
+      },
+      { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } },
     );
 
     // Assuming the API response structure matches the expected format.
@@ -46,7 +46,6 @@ export async function callChatGPTApi(
     throw error; // Rethrow or handle as needed
   }
 }
-
 
 async function findTemplate(): Promise<string | null> {
   const templatePaths = [
@@ -93,9 +92,8 @@ async function getPRDescription(
   systemContent: string,
   diffContent: string,
 ): Promise<string> {
-  try {
-    console.log(chalk.blue("🤖 Generating PR description..."));
-    return await callChatGPTApi(systemContent, diffContent);
+  console.log(chalk.blue("🤖 Generating PR description..."));
+  return await callChatGPTApi(systemContent, diffContent);
 }
 
 async function main() {
@@ -200,7 +198,7 @@ async function main() {
   });
 
   if (copyToClipboard.value) {
-    clipboardy.writeSync(prDescription);
+    // clipboardy.writeSync(prDescription);
     console.log(chalk.green("✅  PR description copied to clipboard!"));
   }
 }
