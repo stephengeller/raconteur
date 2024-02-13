@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node src/index.ts",
+    "start": "node --loader ts-node/esm src/index.ts",
     "prdesc": "node --loader ts-node/esm src/generatePrDescription.ts\n"
   },
   "devDependencies": {

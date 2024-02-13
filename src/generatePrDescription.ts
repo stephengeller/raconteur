@@ -1,11 +1,11 @@
 import * as fs from "fs";
-import axios from "axios";
 import prompts from "prompts";
-import { config } from "dotenv";
-import { exec } from "child_process";
-import { promisify } from "util";
+import {config} from "dotenv";
+import {exec} from "child_process";
+import {promisify} from "util";
 import clipboardy from "clipboardy";
 import chalk from "chalk";
+import axios from "axios";
 
 config(); // Load .env file
 
@@ -13,7 +13,40 @@ config(); // Load .env file
 process.on("SIGINT", () => {
   console.log(chalk.red("\nExiting gracefully..."));
   process.exit(0);
-});
+})
+
+export async function callChatGPTApi(
+    systemContent: string,
+    userContent: string,
+): Promise<string> {
+  try {
+    const response = await axios.post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-4-0125-preview", // Ensure this is the correct model identifier
+          messages: [
+            {
+              role: "system",
+              content: systemContent,
+            },
+            {
+              role: "user",
+              content: userContent,
+            },
+          ],
+        },
+        { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } },
+    );
+
+    // Assuming the API response structure matches the expected format.
+    // You might need to adjust this based on the actual response format.
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error("Error calling ChatGPT API:", error);
+    throw error; // Rethrow or handle as needed
+  }
+}
+
 
 async function findTemplate(): Promise<string | null> {
   const templatePaths = [
@@ -62,31 +95,7 @@ async function getPRDescription(
 ): Promise<string> {
   try {
     console.log(chalk.blue("🤖 Generating PR description..."));
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        model: "gpt-4-0125-preview", // Ensure this is the correct model identifier
-        messages: [
-          {
-            role: "system",
-            content: systemContent,
-          },
-          {
-            role: "user",
-            content: diffContent,
-          },
-        ],
-      },
-      { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } },
-    );
-
-    // Assuming the API response structure matches the expected format.
-    // You might need to adjust this based on the actual response format.
-    return response.data.choices[0].message.content.trim();
-  } catch (error) {
-    console.error("Error fetching PR description:", error);
-    throw error; // Rethrow or handle as needed
-  }
+    return await callChatGPTApi(systemContent, diffContent);
 }
 
 async function main() {
