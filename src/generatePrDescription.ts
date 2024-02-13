@@ -1,8 +1,9 @@
 import * as fs from "fs";
-import * as path from "path";
 import axios from "axios";
 import prompts from "prompts";
 import { config } from "dotenv";
+import { exec } from "child_process";
+import { promisify } from "util";
 
 config(); // Load .env file
 
@@ -19,41 +20,69 @@ async function findTemplate(): Promise<string | null> {
   return null;
 }
 
-async function getPRDescription(prompt: string): Promise<string> {
-  const response = await axios.post(
-    "https://api.openai.com/v1/completions",
-    {
-      prompt,
-      model: "text-davinci-003", // Update to the latest model you're using
-      temperature: 0.7,
-      max_tokens: 2048,
-    },
-    { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } },
-  );
+const execAsync = promisify(exec);
 
-  return response.data.choices[0].text.trim();
+async function getGitDiff(destBranch: string): Promise<string> {
+  try {
+    // Replace `origin/main` with your `destBranch` variable
+    const { stdout } = await execAsync(`git diff ${destBranch}`);
+    return stdout;
+  } catch (error) {
+    console.error("Error getting git diff:", error);
+    throw error; // Rethrow or handle as needed
+  }
+}
+
+async function getPRDescription(
+  systemContent: string,
+  diffContent: string,
+): Promise<string> {
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4-0125-preview", // Ensure this is the correct model identifier
+        messages: [
+          {
+            role: "system",
+            content: systemContent,
+          },
+          {
+            role: "user",
+            content: diffContent,
+          },
+        ],
+      },
+      { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } },
+    );
+
+    // Assuming the API response structure matches the expected format.
+    // You might need to adjust this based on the actual response format.
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error("Error fetching PR description:", error);
+    throw error; // Rethrow or handle as needed
+  }
 }
 
 async function main() {
   const template = await findTemplate();
+  let attachTemplate: prompts.Answers<string> = { value: false };
 
   let systemContent =
     "You are a helpful assistant. Generate a detailed and structured PR description using the provided git diff.";
 
   if (template) {
-    const attachTemplate = await prompts({
+    console.log(`Prompt so far:\n${systemContent}`);
+
+    attachTemplate = await prompts({
       type: "confirm",
       name: "value",
-      message: "Do you want to attach the PR template to the prompt?",
+      message:
+        "Template found for this repo - do you want to attach it to the prompt?",
       initial: true,
     });
-
-    if (attachTemplate.value) {
-      systemContent += `\n\nPlease make the PR description fit this pull request template format:\n${template}`;
-    }
   }
-
-  console.log(`Generated Prompt:\n${systemContent}`);
 
   const customPrompt = await prompts({
     type: "toggle",
@@ -73,11 +102,21 @@ async function main() {
     systemContent = response.value;
   }
 
-  const prDescription = await getPRDescription(systemContent);
+  console.log(`\nPrompt so far:\n${systemContent}`);
+
+  if (attachTemplate.value) {
+    systemContent += `\n\nPlease make the PR description fit this pull request template format:\n${template}`;
+  }
+
+  const prDescription = await getPRDescription(
+    systemContent,
+    await getGitDiff("origin/main"),
+  );
   console.log(`\nGenerated PR Description:\n${prDescription}`);
 }
 
 main().catch((error) => {
-  console.error("Error:", error);
+  console.error("Error:", error.message);
+  console.error(error);
   process.exit(1);
 });

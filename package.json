@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@octokit/rest": "^20.0.2",
+    "@types/prompts": "^2.4.9",
     "dotenv": "^16.4.3",
     "eslint": "^8.56.0",
     "moment": "^2.30.1",
@@ -24,6 +25,7 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "axios": "^1.6.7",
+    "promisify": "^0.0.3",
     "prompts": "^2.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
