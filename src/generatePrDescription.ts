@@ -108,8 +108,14 @@ async function main() {
   const template = await findTemplate();
   let attachTemplate: prompts.Answers<string> = { value: false };
 
-  let prompt =
-    "You are a helpful assistant. Generate a detailed and structured PR description using the provided git diff.";
+  let prompt = `
+    You are a helpful assistant. Generate a clear, concise and structured PR description using the provided git diff. 
+    Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
+    Unless you believe there's a better one, the default description structure is as follows:
+    ## What (if applied, this commit will)
+    ## Why (A clear explanation of why this change is necessary)
+    ## Testing (The best way to verify the implementation)
+    `;
 
   if (template) {
     attachTemplate = await prompts({
@@ -144,6 +150,27 @@ async function main() {
     prompt = response.value;
   }
 
+  const extraContextPrompt = await prompts({
+    type: "toggle",
+    name: "value",
+    message: chalk.yellow("✏️ Do you want to add any context to the prompt?"),
+    initial: false,
+    active: "yes",
+    inactive: "no",
+    hint: "What's the context of this PR?",
+    instructions:
+      "This could be a summary of the changes or any additional context.",
+  });
+
+  if (extraContextPrompt.value) {
+    const response = await prompts({
+      type: "text",
+      name: "value",
+      message: chalk.cyan("📝 Enter your extra context:"),
+    });
+    prompt += response.value;
+  }
+
   if (attachTemplate.value && template) {
     const pullRequestTemplatePrompt = `\n\nPlease make the PR description fit this pull request template format:\n${template}`;
     prompt += pullRequestTemplatePrompt;
@@ -158,7 +185,7 @@ async function main() {
     type: "toggle",
     name: "value",
     message: chalk.yellow("📋 Copy the PR description to the clipboard?"),
-    initial: false,
+    initial: true,
     active: "yes",
     inactive: "no",
   });
