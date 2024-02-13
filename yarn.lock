@@ -606,9 +606,9 @@ doctrine@^3.0.0:
     esutils "^2.0.2"
 
 dotenv@^16.4.3:
-  version "16.4.3"
-  resolved "https://artifactory.global.square/artifactory/api/npm/square-npm/dotenv/-/dotenv-16.4.3.tgz#481235ec516c4e47d2612a478482ee36607f70c1"
-  integrity sha512-II98GFrje5psQTSve0E7bnwMFybNLqT8Vu8JIFWRjsE3khyNUm/loZupuy5DVzG2IXf/ysxvrixYOQnM6mjD3A==
+  version "16.4.4"
+  resolved "https://artifactory.global.square/artifactory/api/npm/square-npm/dotenv/-/dotenv-16.4.4.tgz#a26e7bb95ebd36272ebb56edb80b826aecf224c1"
+  integrity sha512-XvPXc8XAQThSjAbY6cQ/9PcBXmFoWuw1sQ3b8HqUCR6ziGXjkTi//kB9SWa2UwqlgdAIuRqAa/9hVljzPehbYg==
 
 es5-ext@^0.10.35, es5-ext@^0.10.46, es5-ext@^0.10.50, es5-ext@^0.10.53, es5-ext@^0.10.61, es5-ext@~0.10.14, es5-ext@~0.10.2, es5-ext@~0.10.46:
   version "0.10.62"
@@ -1252,9 +1252,9 @@ onetime@^6.0.0:
     mimic-fn "^4.0.0"
 
 openai@^4.27.0:
-  version "4.27.0"
-  resolved "https://artifactory.global.square/artifactory/api/npm/square-npm/openai/-/openai-4.27.0.tgz#4ada66a19c369b202e8a939b8bd287e4dca036f4"
-  integrity sha512-j1ZEx9NiBpm31rxWqQTjQt1QvH/8001xHsc/pRoPjkRDYWONCb+qkR6L9C7Wl6ar72Mz1ybtn1bv6fqAoTPlKw==
+  version "4.28.0"
+  resolved "https://artifactory.global.square/artifactory/api/npm/square-npm/openai/-/openai-4.28.0.tgz#ded00e3d98c25758b5406c9675ec27a957e00930"
+  integrity sha512-JM8fhcpmpGN0vrUwGquYIzdcEQHtFuom6sRCbbCM6CfzZXNuRk33G7KfeRAIfnaCxSpzrP5iHtwJzIm6biUZ2Q==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"

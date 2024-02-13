@@ -1,6 +1,5 @@
 {
   "name": "hypedoc",
-  "type": "module",
   "version": "1.0.0",
   "main": "src/index.ts",
   "repository": "git@github.com:stephengeller/pull-request-hypedoc.git",
@@ -8,8 +7,8 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --loader ts-node/esm src/index.ts",
-    "prdesc": "node --loader ts-node/esm src/generatePrDescription.ts\n"
+    "start": "ts-node src/index.ts",
+    "prdesc": "ts-node src/generatePrDescription.ts"
   },
   "devDependencies": {
     "@octokit/rest": "^20.0.2",

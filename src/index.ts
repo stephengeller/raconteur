@@ -151,7 +151,7 @@ class PRSummarizer {
     fs.writeFileSync(tempFilePath, prsData);
 
     try {
-      const hypedocSummaries = await callChatGPTApi(PROMPT, tempFilePath);
+      const hypedocSummaries = await callChatGPTApi(PROMPT, prsData);
       console.log(chalk.green("🚀 Hypedoc summaries generated:\n\n"));
       console.log(hypedocSummaries);
       fs.unlinkSync(tempFilePath);
