@@ -30,10 +30,25 @@ async function findTemplate(): Promise<string | null> {
 
 const execAsync = promisify(exec);
 
-async function getGitDiff(destBranch: string): Promise<string> {
+async function getGitDiff(
+  repoDir: string,
+  destBranch: string = "origin/main",
+): Promise<string> {
   try {
-    // Replace `origin/main` with your `destBranch` variable
-    const { stdout } = await execAsync(`git diff ${destBranch}`);
+    // Use the -C flag to specify the directory for the git command
+    const { stdout } = await execAsync(
+      `git -C "${repoDir}" diff ${destBranch}`,
+    );
+
+    if (!stdout) {
+      console.error(
+        chalk.red(
+          "❌  No git diff found. Please ensure you have changes in your branch.",
+        ),
+      );
+      process.exit(1);
+    }
+
     return stdout;
   } catch (error) {
     console.error("Error getting git diff:", error);
@@ -75,6 +90,19 @@ async function getPRDescription(
 }
 
 async function main() {
+  const repoDir = process.env.CURRENT_DIR || process.cwd();
+  const diff = await getGitDiff(repoDir, "origin/main");
+
+  console.log(`Operating in directory: ${repoDir}`);
+  if (!repoDir) {
+    console.error(
+      chalk.red(
+        "❌ Environment variable CURRENT_DIR is not set. Please run this script in a git repository.",
+      ),
+    );
+    process.exit(1);
+  }
+
   console.log(chalk.blue("🤖 Let's prepare your PR description. 🚀"));
 
   const template = await findTemplate();
@@ -121,7 +149,6 @@ async function main() {
     prompt += pullRequestTemplatePrompt;
   }
 
-  const diff = await getGitDiff("origin/main");
   const prDescription = await getPRDescription(prompt, diff);
   console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
   console.log(prDescription);
