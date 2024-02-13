@@ -5,7 +5,8 @@ import * as fs from "fs";
 import dotenv from "dotenv";
 import chalk from "chalk";
 import prompts from "prompts";
-import axios from "axios";
+import { callChatGPTApi } from "./ChatGPTApi";
+import { copyToClipboard } from "./copyToClipboard";
 
 dotenv.config();
 
@@ -43,38 +44,6 @@ Jan 25, 2024:
 - Managed cross-departmental teams to kickstart the Beta Launch of the New Platform.
 - Coordinated with the Design Team to implement a new UI/UX for the Customer Portal.
 `;
-
-export async function callChatGPTApi(
-  systemContent: string,
-  userContent: string,
-): Promise<string> {
-  try {
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        model: "gpt-4-0125-preview", // Ensure this is the correct model identifier
-        messages: [
-          {
-            role: "system",
-            content: systemContent,
-          },
-          {
-            role: "user",
-            content: userContent,
-          },
-        ],
-      },
-      { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } },
-    );
-
-    // Assuming the API response structure matches the expected format.
-    // You might need to adjust this based on the actual response format.
-    return response.data.choices[0].message.content.trim();
-  } catch (error) {
-    console.error("Error calling ChatGPT API:", error);
-    throw error; // Rethrow or handle as needed
-  }
-}
 
 class PRSummarizer {
   private octokit: Octokit;
@@ -121,7 +90,7 @@ class PRSummarizer {
     ) as PullRequest[];
   }
 
-  private async summarizePRs(prs: PullRequest[]): Promise<void> {
+  private async summarizePRs(prs: PullRequest[]): Promise<string | undefined> {
     // Convert PRs to a format suitable for prompts
     const choices = prs.map((pr, index) => ({
       title: `${pr.title} (merged ${moment(pr.closed_at).format("Do MMM YYYY")})`,
@@ -155,6 +124,7 @@ class PRSummarizer {
       console.log(chalk.green("🚀 Hypedoc summaries generated:\n\n"));
       console.log(hypedocSummaries);
       fs.unlinkSync(tempFilePath);
+      return hypedocSummaries;
     } catch (error) {
       console.error(chalk.red(`Error executing command: ${error}`));
     }
@@ -181,7 +151,22 @@ class PRSummarizer {
     try {
       const prs = await this.fetchMergedPRs();
       console.log(chalk.blue(`Found [${prs.length}] pull requests...`));
-      await this.summarizePRs(prs);
+      const summaries = await this.summarizePRs(prs);
+
+      // Ask if the user wants to copy the response to the clipboard
+      const copyToClipboardPrompt = await prompts({
+        type: "toggle",
+        name: "value",
+        message: chalk.yellow("📋 Copy the PR description to the clipboard?"),
+        initial: true,
+        active: "yes",
+        inactive: "no",
+      });
+
+      if (copyToClipboardPrompt.value && summaries) {
+        await copyToClipboard(summaries);
+        console.log(chalk.green("✅  PR description copied to clipboard!"));
+      }
     } catch (error) {
       console.error(chalk.red(`Failed to process PRs: ${error}`));
     }
