@@ -69,20 +69,21 @@ async function main() {
   const template = await findTemplate();
   let attachTemplate: prompts.Answers<string> = { value: false };
 
-  let systemContent =
+  let prompt =
     "You are a helpful assistant. Generate a detailed and structured PR description using the provided git diff.";
 
   if (template) {
-    console.log(`Prompt so far:\n${systemContent}`);
-
     attachTemplate = await prompts({
-      type: "confirm",
+      type: "toggle",
       name: "value",
-      message:
-        "Template found for this repo - do you want to attach it to the prompt?",
+      active: "yes",
+      inactive: "no",
+      message: "PR template found for this repo - apply it to the description?",
       initial: true,
     });
   }
+
+  console.log(`Here is the prompt so far:\n\n${prompt}\n`);
 
   const customPrompt = await prompts({
     type: "toggle",
@@ -99,19 +100,16 @@ async function main() {
       name: "value",
       message: "Enter your custom prompt:",
     });
-    systemContent = response.value;
+    prompt = response.value;
   }
-
-  console.log(`\nPrompt so far:\n${systemContent}`);
 
   if (attachTemplate.value) {
-    systemContent += `\n\nPlease make the PR description fit this pull request template format:\n${template}`;
+    const pullRequestTemplatePrompt = `\n\nPlease make the PR description fit this pull request template format:\n${template}`;
+    prompt += pullRequestTemplatePrompt;
   }
 
-  const prDescription = await getPRDescription(
-    systemContent,
-    await getGitDiff("origin/main"),
-  );
+  const diff = await getGitDiff("origin/main");
+  const prDescription = await getPRDescription(prompt, diff);
   console.log(`\nGenerated PR Description:\n${prDescription}`);
 }
 
