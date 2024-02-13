@@ -4,8 +4,16 @@ import prompts from "prompts";
 import { config } from "dotenv";
 import { exec } from "child_process";
 import { promisify } from "util";
+import clipboardy from "clipboardy";
+import chalk from "chalk";
 
 config(); // Load .env file
+
+// Register SIGINT handler
+process.on("SIGINT", () => {
+  console.log(chalk.red("\nExiting gracefully..."));
+  process.exit(0);
+});
 
 async function findTemplate(): Promise<string | null> {
   const templatePaths = [
@@ -38,6 +46,7 @@ async function getPRDescription(
   diffContent: string,
 ): Promise<string> {
   try {
+    console.log(chalk.blue("🤖 Generating PR description..."));
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
@@ -66,6 +75,8 @@ async function getPRDescription(
 }
 
 async function main() {
+  console.log(chalk.blue("🤖 Let's prepare your PR description. 🚀"));
+
   const template = await findTemplate();
   let attachTemplate: prompts.Answers<string> = { value: false };
 
@@ -78,17 +89,19 @@ async function main() {
       name: "value",
       active: "yes",
       inactive: "no",
-      message: "PR template found for this repo - apply it to the description?",
+      message: chalk.yellow(
+        "📄 PR template found - apply it to the description?",
+      ),
       initial: true,
     });
   }
 
-  console.log(`Here is the prompt so far:\n\n${prompt}\n`);
+  console.log(chalk.blue(`Here's the prompt so far:\n\n${prompt}`));
 
   const customPrompt = await prompts({
     type: "toggle",
     name: "value",
-    message: "Do you want to modify the prompt?",
+    message: chalk.yellow("✏️ Do you want to customize the prompt?"),
     initial: false,
     active: "yes",
     inactive: "no",
@@ -98,19 +111,35 @@ async function main() {
     const response = await prompts({
       type: "text",
       name: "value",
-      message: "Enter your custom prompt:",
+      message: chalk.cyan("📝 Enter your custom prompt:"),
     });
     prompt = response.value;
   }
 
-  if (attachTemplate.value) {
+  if (attachTemplate.value && template) {
     const pullRequestTemplatePrompt = `\n\nPlease make the PR description fit this pull request template format:\n${template}`;
     prompt += pullRequestTemplatePrompt;
   }
 
   const diff = await getGitDiff("origin/main");
   const prDescription = await getPRDescription(prompt, diff);
-  console.log(`\nGenerated PR Description:\n${prDescription}`);
+  console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
+  console.log(prDescription);
+
+  // Ask if the user wants to copy the response to the clipboard
+  const copyToClipboard = await prompts({
+    type: "toggle",
+    name: "value",
+    message: chalk.yellow("📋 Copy the PR description to the clipboard?"),
+    initial: false,
+    active: "yes",
+    inactive: "no",
+  });
+
+  if (copyToClipboard.value) {
+    clipboardy.writeSync(prDescription);
+    console.log(chalk.green("✅  PR description copied to clipboard!"));
+  }
 }
 
 main().catch((error) => {
