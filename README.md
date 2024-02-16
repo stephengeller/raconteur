@@ -18,7 +18,7 @@ To simplify the initial setup process, use the setup script that guides you thro
 To run the setup script, navigate to your project directory in the terminal and execute:
 
 ```bash
-./setup.sh
+./script/setupg
 ```
 
 ### Manual Setup
