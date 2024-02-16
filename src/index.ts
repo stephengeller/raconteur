@@ -1,6 +1,5 @@
 import { Octokit } from "@octokit/rest";
 import moment from "moment";
-import { exec } from "child_process";
 import * as fs from "fs";
 import dotenv from "dotenv";
 import chalk from "chalk";
@@ -22,7 +21,7 @@ interface PullRequest {
   closed_at: string;
 }
 
-const PROMPT = `
+let PROMPT = `
 Please create a short, concise summary of each of the following PRs, so that I can put it in my hypedoc to reference in the future.
 
 It should:
@@ -73,7 +72,7 @@ class PRSummarizer {
       .format();
   }
 
-  private async fetchMergedPRs(): Promise<PullRequest[]> {
+  private async fetchMergedPRs(): Promise<PullRequest[] | undefined> {
     if (!this.username) {
       throw new Error("GitHub username is not set in environment variables.");
     }
@@ -119,6 +118,29 @@ class PRSummarizer {
     const tempFilePath: string = "./temp_prs_data.json";
     fs.writeFileSync(tempFilePath, prsData);
 
+    console.log(chalk.blue(`Here's the prompt so far:\n\n${PROMPT}`));
+
+    const extraContextPrompt = await prompts({
+      type: "toggle",
+      name: "value",
+      message: chalk.yellow("✏️ Do you want to add any context to the prompt?"),
+      initial: false,
+      active: "yes",
+      inactive: "no",
+      hint: "What's the context of this PR?",
+      instructions:
+        "This could be a summary of the changes or any additional context.",
+    });
+
+    if (extraContextPrompt.value) {
+      const response = await prompts({
+        type: "text",
+        name: "value",
+        message: chalk.cyan("📝 Enter your extra context:"),
+      });
+      PROMPT += response.value;
+    }
+
     try {
       const hypedocSummaries = await callChatGPTApi(PROMPT, prsData);
       console.log(chalk.green("🚀 Hypedoc summaries generated:\n\n"));
@@ -130,28 +152,13 @@ class PRSummarizer {
     }
   }
 
-  private executeCommand(command: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      exec(command, (error, stdout, stderr) => {
-        if (error) {
-          reject(`exec error: ${error}`);
-          return;
-        }
-        if (stderr) {
-          console.log(chalk.gray(`stderr: ${stderr}`));
-        }
-        resolve(stdout);
-      });
-    });
-  }
-
   public async run(): Promise<void> {
     console.log(chalk.cyan("Fetching merged PRs..."));
     await this.setSinceDate();
     try {
       const prs = await this.fetchMergedPRs();
 
-      if (prs.length === 0) {
+      if (!prs || prs.length === 0) {
         console.log(
           chalk.yellow(
             "No PRs found for the specified duration. Have you authorized squareup for your personal access token?",
@@ -159,6 +166,7 @@ class PRSummarizer {
         );
         return;
       }
+
       console.log(chalk.blue(`Found [${prs.length}] pull requests...`));
       const summaries = await this.summarizePRs(prs);
 
