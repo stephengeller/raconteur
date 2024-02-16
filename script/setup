@@ -1,40 +1,46 @@
 #!/bin/bash
 
+# ANSI color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+NC='\033[0m' # No Color
+
 # Function to prompt for user confirmation to continue
 confirm_continue() {
     read -p "Press Enter to continue..." 
 }
 
-echo "Starting setup for PR Hypedocifier..."
+echo -e "${GREEN}Starting setup for PR Hypedocifier...${NC}\n"
 
 # Instructions and opening GitHub token page
-echo "1. You need to generate a new Personal Access Token (PAT) on GitHub with 'repo' scope."
-echo "   After opening the GitHub tokens page, click on 'Generate new token', select 'repo' scope, and generate the token."
-echo "   Visit: https://github.com/settings/tokens"
+echo -e "${BLUE}1. Generate a new Personal Access Token (PAT) on GitHub with 'repo' scope.${NC}"
+echo -e "   Visit: ${YELLOW}https://github.com/settings/tokens${NC}"
+echo -e "   Click on 'Generate new token', select 'repo' scope, and generate the token."
+echo -e "   Find the token you created, click on 'Enable SSO' next to it, and then 'Authorize' for 'squareup'."
 open https://github.com/settings/tokens # Adjust for non-macOS systems if necessary
 confirm_continue
 
 # Instructions for obtaining OpenAI API Key
-echo "2. Obtain an API key from OpenAI by visiting the following link. Sign in and access or create a new API key."
-echo "   Visit: https://platform.openai.com/account/api-keys"
+echo -e "${BLUE}3. Obtain an API key from OpenAI.${NC}"
+echo -e "   Visit: ${YELLOW}https://platform.openai.com/account/api-keys${NC}"
+echo -e "   Sign in and access or create a new API key."
 open https://platform.openai.com/account/api-keys # Adjust for non-macOS systems if necessary
 confirm_continue
 
 # Instructions for updating the .env file
-echo "3. Now, create or update the .env file in the root of your project directory."
-echo "   Add or update it with your GitHub token, OpenAI API key, and GitHub username in the following format:"
-echo "   GITHUB_TOKEN=your_github_token_here"
-echo "   OPENAI_API_KEY=your_openai_api_key_here"
-echo "   GITHUB_USERNAME=your_github_username_here"
-echo "   Replace the placeholders with your actual values."
+echo -e "${BLUE}4. Create or update the .env file in the root of your project directory.${NC}"
+echo -e "${GREEN}The .env file should look exactly like this (without the angle brackets):${NC}"
+echo -e "${YELLOW}GITHUB_TOKEN=<your_github_token_here>${NC}"
+echo -e "${YELLOW}OPENAI_API_KEY=<your_openai_api_key_here>${NC}"
+echo -e "${YELLOW}GITHUB_USERNAME=<your_github_username_here>${NC}"
 confirm_continue
 
 # Install dependencies
-echo "Installing dependencies, please ensure you're on the VPN first..."
-confirm_continue
+echo -e "${BLUE}Installing dependencies...${NC}"
 yarn install
 
-# Final instructions
-echo "Setup is almost complete. Please ensure that you've added your tokens and username to the .env file as instructed."
-echo "After completing these steps, you can run the summarizer by executing 'yarn start'."
-echo "Setup complete! 🎉"
+# Completion message
+echo -e "${GREEN}\n\nSetup complete! 🎉${NC}"
+echo -e "You can run the summarizer by executing ${YELLOW}'yarn start'${NC}."
