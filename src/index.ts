@@ -87,7 +87,7 @@ class PRSummarizer {
 
     return searchResponse.data.items.filter((pr) =>
       moment(pr.closed_at).isAfter(this.sinceDate),
-    ) as PullRequest[];
+    ) as PullRequest[] | undefined;
   }
 
   private async summarizePRs(prs: PullRequest[]): Promise<string | undefined> {
@@ -150,6 +150,15 @@ class PRSummarizer {
     await this.setSinceDate();
     try {
       const prs = await this.fetchMergedPRs();
+
+      if (prs.length === 0) {
+        console.log(
+          chalk.yellow(
+            "No PRs found for the specified duration. Have you authorized squareup for your personal access token?",
+          ),
+        );
+        return;
+      }
       console.log(chalk.blue(`Found [${prs.length}] pull requests...`));
       const summaries = await this.summarizePRs(prs);
 
