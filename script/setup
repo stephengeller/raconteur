@@ -7,11 +7,6 @@ confirm_continue() {
 
 echo "Starting setup for PR Hypedocifier..."
 
-# Install dependencies
-echo "Installing dependencies..."
-yarn install
-confirm_continue
-
 # Instructions and opening GitHub token page
 echo "1. You need to generate a new Personal Access Token (PAT) on GitHub with 'repo' scope."
 echo "   After opening the GitHub tokens page, click on 'Generate new token', select 'repo' scope, and generate the token."
@@ -33,6 +28,11 @@ echo "   OPENAI_API_KEY=your_openai_api_key_here"
 echo "   GITHUB_USERNAME=your_github_username_here"
 echo "   Replace the placeholders with your actual values."
 confirm_continue
+
+# Install dependencies
+echo "Installing dependencies, please ensure you're on the VPN first..."
+confirm_continue
+yarn install
 
 # Final instructions
 echo "Setup is almost complete. Please ensure that you've added your tokens and username to the .env file as instructed."
