@@ -15,10 +15,14 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
+const DIRECTORY = process.env.CURRENT_DIR || process.cwd();
+
 async function findTemplate(): Promise<string | null> {
   const templatePaths = [
-    ".github/pull_request_template.md",
-    ".github/PULL_REQUEST_TEMPLATE.md",
+    `${DIRECTORY}/.github/pull_request_template.md`,
+    `${DIRECTORY}/./pull_request_template.md`,
+    `${DIRECTORY}/.github/PULL_REQUEST_TEMPLATE.md`,
+    `${DIRECTORY}/./PULL_REQUEST_TEMPLATE.md`,
   ];
   for (const templatePath of templatePaths) {
     if (fs.existsSync(templatePath)) {
@@ -65,11 +69,9 @@ async function getPRDescription(
 }
 
 async function main() {
-  const repoDir = process.env.CURRENT_DIR || process.cwd();
-  const diff = await getGitDiff(repoDir, "origin/main");
+  const diff = await getGitDiff(DIRECTORY, "origin/main");
 
-  console.log(`Operating in directory: ${repoDir}`);
-  if (!repoDir) {
+  if (!DIRECTORY) {
     console.error(
       chalk.red(
         "❌ Environment variable CURRENT_DIR is not set. Please run this script in a git repository.",
@@ -83,8 +85,7 @@ async function main() {
   const template = await findTemplate();
   let attachTemplate: prompts.Answers<string> = { value: false };
 
-  let prompt = `
-    You are a helpful assistant. Generate a clear, concise and structured PR description using the provided git diff. 
+  let prompt = `You are a helpful assistant. Generate a clear, concise and structured PR description using the provided git diff. 
     Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.`;
 
   if (template) {
@@ -100,7 +101,7 @@ async function main() {
     });
   }
 
-  console.log(chalk.blue(`Here's the prompt so far:\n\n${prompt}`));
+  console.log(chalk.blue(`Here's the prompt so far:\n${prompt}`));
 
   const customPrompt = await prompts({
     type: "toggle",
