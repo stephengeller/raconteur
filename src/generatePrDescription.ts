@@ -85,12 +85,7 @@ async function main() {
 
   let prompt = `
     You are a helpful assistant. Generate a clear, concise and structured PR description using the provided git diff. 
-    Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
-    Unless you believe there's a better one, the default description structure is as follows:
-    ## What (if applied, this commit will)
-    ## Why (A clear explanation of why this change is necessary)
-    ## Testing (The best way to verify the implementation)
-    `;
+    Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.`;
 
   if (template) {
     attachTemplate = await prompts({
@@ -147,8 +142,15 @@ async function main() {
   }
 
   if (attachTemplate.value && template) {
-    const pullRequestTemplatePrompt = `\n\nPlease make the PR description fit this pull request template format:\n${template}`;
+    const pullRequestTemplatePrompt = `
+    
+    Please make the PR description fit this pull request template format:\n${template}`;
     prompt += pullRequestTemplatePrompt;
+  } else {
+    prompt += `Unless you believe there's a better one, the description structure is as follows:
+    ## What (if applied, this commit will)
+    ## Why (A clear explanation of why this change is necessary)
+    ## Testing (The best way to verify the implementation)`;
   }
 
   const prDescription = await getPRDescription(prompt, diff);
