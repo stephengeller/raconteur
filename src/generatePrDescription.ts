@@ -15,18 +15,18 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-const DIRECTORY = process.env.CURRENT_DIR || process.cwd();
+const DIR_PATH = process.env.CURRENT_DIR || process.cwd();
 
-async function findTemplate(): Promise<string | null> {
+async function findTemplate(): Promise<[string, string] | null> {
   const templatePaths = [
-    `${DIRECTORY}/.github/pull_request_template.md`,
-    `${DIRECTORY}/./pull_request_template.md`,
-    `${DIRECTORY}/.github/PULL_REQUEST_TEMPLATE.md`,
-    `${DIRECTORY}/./PULL_REQUEST_TEMPLATE.md`,
+    `${DIR_PATH}/.github/pull_request_template.md`,
+    `${DIR_PATH}/pull_request_template.md`,
+    `${DIR_PATH}/.github/PULL_REQUEST_TEMPLATE.md`,
+    `${DIR_PATH}/PULL_REQUEST_TEMPLATE.md`,
   ];
   for (const templatePath of templatePaths) {
     if (fs.existsSync(templatePath)) {
-      return fs.readFileSync(templatePath, "utf8");
+      return [fs.readFileSync(templatePath, "utf8"), templatePath];
     }
   }
   return null;
@@ -69,9 +69,9 @@ async function getPRDescription(
 }
 
 async function main() {
-  const diff = await getGitDiff(DIRECTORY, "origin/main");
+  const diff = await getGitDiff(DIR_PATH, "origin/main");
 
-  if (!DIRECTORY) {
+  if (!DIR_PATH) {
     console.error(
       chalk.red(
         "❌ Environment variable CURRENT_DIR is not set. Please run this script in a git repository.",
@@ -82,7 +82,13 @@ async function main() {
 
   console.log(chalk.blue("🤖 Let's prepare your PR description. 🚀"));
 
-  const template = await findTemplate();
+  const result = await findTemplate();
+  let template, templatePath;
+
+  if (result !== null) {
+    [template, templatePath] = result;
+  }
+
   let attachTemplate: prompts.Answers<string> = { value: false };
 
   let prompt = `You are a helpful assistant. Generate a clear, concise and structured PR description using the provided git diff. 
@@ -95,7 +101,7 @@ async function main() {
       active: "yes",
       inactive: "no",
       message: chalk.yellow(
-        "📄 PR template found - apply it to the description?",
+        `📄 PR template found at [${chalk.cyan(templatePath)}] - apply it to the description?`,
       ),
       initial: true,
     });
@@ -106,7 +112,7 @@ async function main() {
   const customPrompt = await prompts({
     type: "toggle",
     name: "value",
-    message: chalk.yellow("✏️ Do you want to customize the prompt?"),
+    message: chalk.yellow("✏️ Do you want to write your own prompt?"),
     initial: false,
     active: "yes",
     inactive: "no",
