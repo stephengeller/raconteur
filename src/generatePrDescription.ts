@@ -101,7 +101,7 @@ async function main() {
       active: "yes",
       inactive: "no",
       message: chalk.yellow(
-        `📄 PR template found at [${chalk.cyan(templatePath)}] - apply it to the description?`,
+        `📄 PR template found at [${chalk.green(templatePath)}] - apply it to the description?`,
       ),
       initial: true,
     });
@@ -134,9 +134,6 @@ async function main() {
     initial: false,
     active: "yes",
     inactive: "no",
-    hint: "What's the context of this PR?",
-    instructions:
-      "This could be a summary of the changes or any additional context.",
   });
 
   if (extraContextPrompt.value) {
