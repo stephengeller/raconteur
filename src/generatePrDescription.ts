@@ -16,6 +16,7 @@ process.on("SIGINT", () => {
 });
 
 const DIR_PATH = process.env.CURRENT_DIR || process.cwd();
+const CUSTOM_PROMPT_PATH = `./customPrDescriptionPrompt.txt`;
 
 async function findTemplate(): Promise<[string, string] | null> {
   const templatePaths = [
@@ -30,6 +31,30 @@ async function findTemplate(): Promise<[string, string] | null> {
     }
   }
   return null;
+}
+
+function loadCustomPrompt(): string | null {
+  try {
+    if (fs.existsSync(CUSTOM_PROMPT_PATH)) {
+      return fs.readFileSync(CUSTOM_PROMPT_PATH, "utf8");
+    }
+  } catch (error) {
+    console.warn(
+      chalk.yellow(
+        `Warning: Failed to load custom prompt from ${CUSTOM_PROMPT_PATH}`,
+      ),
+    );
+  }
+  return null;
+}
+
+function saveCustomPrompt(prompt: string): void {
+  try {
+    fs.writeFileSync(CUSTOM_PROMPT_PATH, prompt, "utf8");
+    console.log(chalk.green("✅  Custom prompt saved for future use."));
+  } catch (error) {
+    console.error(chalk.red(`Error saving custom prompt: ${error}`));
+  }
 }
 
 const execAsync = promisify(exec);
@@ -91,9 +116,6 @@ async function main() {
 
   let attachTemplate: prompts.Answers<string> = { value: false };
 
-  let prompt = `You are a helpful assistant. Generate a clear, concise and structured PR description using the provided git diff. 
-    Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.`;
-
   if (template) {
     attachTemplate = await prompts({
       type: "toggle",
@@ -101,18 +123,25 @@ async function main() {
       active: "yes",
       inactive: "no",
       message: chalk.yellow(
-        `📄 PR template found at [${chalk.green(templatePath)}] - apply it to the description?`,
+        `📄 PR template found at ${chalk.yellow(templatePath)} - apply it to the description?`,
       ),
       initial: true,
     });
   }
 
-  console.log(chalk.blue(`Here's the prompt so far:\n${prompt}`));
+  let prompt =
+    loadCustomPrompt() ||
+    `You are a helpful assistant. Generate a clear, concise and structured PR description using the provided git diff. 
+    Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.`;
+
+  console.log(
+    chalk.blue(`Here's the prompt so far:\n\t${chalk.green(prompt)}`),
+  );
 
   const customPrompt = await prompts({
     type: "toggle",
     name: "value",
-    message: chalk.yellow("✏️ Do you want to write your own prompt?"),
+    message: chalk.yellow("✏️ Do you want to re-write the prompt?"),
     initial: false,
     active: "yes",
     inactive: "no",
@@ -125,6 +154,7 @@ async function main() {
       message: chalk.cyan("📝 Enter your custom prompt:"),
     });
     prompt = response.value;
+    saveCustomPrompt(prompt);
   }
 
   const extraContextPrompt = await prompts({
