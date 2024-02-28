@@ -15,6 +15,7 @@
     "@octokit/types": "^12.4.0",
     "@types/node": "^20.11.17",
     "@types/prompts": "^2.4.9",
+    "@types/yargs": "^17.0.32",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "axios": "^1.6.7",
@@ -29,6 +30,7 @@
     "promisify": "^0.0.3",
     "prompts": "^2.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "yargs": "^17.7.2"
   }
 }

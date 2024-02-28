@@ -2,10 +2,30 @@ import * as fs from "fs";
 import prompts from "prompts";
 import { config } from "dotenv";
 import { exec } from "child_process";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 import { promisify } from "util";
 import chalk from "chalk";
 import { copyToClipboard } from "./copyToClipboard";
 import { callChatGPTApi } from "./ChatGPTApi";
+
+const DEFAULT_BRANCH = "main";
+
+// Parse arguments
+const argv = yargs(hideBin(process.argv))
+  .option("branch", {
+    alias: "b",
+    description: "Specify the branch to compare with",
+    type: "string",
+    default: "main",
+  })
+  .help()
+  .alias("help", "h")
+  .parseSync();
+
+if (argv?.branch != DEFAULT_BRANCH) {
+  console.log(chalk.yellow(`Comparing with branch ${chalk.bold(argv.branch)}`));
+}
 
 config(); // Load .env file
 
