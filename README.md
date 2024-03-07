@@ -1,6 +1,9 @@
-# PR Hypedocifier & PR Description Generator
+# Raconteur
+[Setup](#setup) | [Usage](#usage) | [Contributions](#contributions)
 
-PR Hypedocifier is a tool designed to summarize merged pull requests for a given GitHub user, emphasizing the impact and benefits of each PR. The repository also hosts the PR Description Generator, a utility to create detailed descriptions for your pull requests using OpenAI's GPT models. Both tools leverage the GitHub and OpenAI APIs to fetch PR information and generate concise summaries or detailed descriptions.
+Raconteur is a project comprised of two tools:
+1. **PR Hypedocifier**, designed to summarize merged pull requests for a given GitHub user, emphasizing the impact and benefits of each PR. 
+2. **PR Description Generator**, a utility to create detailed descriptions for your pull requests using OpenAI's GPT models. Both tools leverage the GitHub and OpenAI APIs to fetch PR information and generate concise summaries or detailed descriptions.
 
 ## Prerequisites
 
@@ -25,8 +28,8 @@ Follow the prompts and instructions in the terminal to complete your setup.
 
 #### **Clone the repository and install dependencies**
 ```bash
-git clone https://github.com/stephengeller/pull-request-hypedoc
-cd pull-request-hypedoc
+git clone https://github.com/stephengeller/raconteur
+cd raconteur
 yarn install
 ```
 
@@ -54,36 +57,9 @@ yarn start
 
 This will fetch merged PRs, generate summaries, and copy the latest summary to your clipboard.
 
-#### Configuring the PR Fetch Period
-
-By default, PR Hypedocifier fetches pull requests merged within the last 2 weeks. You can customize this period by setting environment variables in your `.env` file.
-
-1. **PR_FETCH_PERIOD_VALUE**: Specifies the numerical value of the time period.
-2. **PR_FETCH_PERIOD_UNIT**: Specifies the unit of the time period (e.g., `days`, `weeks`, `months`).
-
-For example, to fetch PRs from the last 3 months, your `.env` file should include:
-
-```plaintext
-PR_FETCH_PERIOD_VALUE=3
-PR_FETCH_PERIOD_UNIT=months
-```
-
 #### Customizing the Detailed Prompt
 
-The script includes a section for defining a detailed prompt that guides the generation of pull request summaries. You can customize this prompt to fit your specific needs or preferences.
-
-1. Open `call-chatgpt.sh` in your preferred text editor.
-2. Locate the `detailed_prompt` variable definition. It should look like this:
-
-    ```bash
-    detailed_prompt="Please create a short, concise summary of each of the following PRs, so that I can put it in my hypedoc to reference in the future. [Your detailed instructions here]"
-    ```
-
-3. Modify the text within the quotation marks to update the instructions according to your requirements. Ensure to keep the prompt clear and concise to guide the summary generation effectively.
-
-4. Save your changes and run the script as usual to fetch and summarize PRs using your updated prompt.
-
-By customizing the detailed prompt, you can tailor the summaries to highlight specific aspects of your PRs, such as their impact, benefits, and key changes.
+When you run the PR Description Generator and choose to write a custom prompt, your prompt is saved automatically. The next time you use the generator, it will reuse your saved prompt, simplifying the process for consistent use.
 
 ## **PR Description Generator**
 The PR Description Generator allows you to create detailed PR descriptions from within any git repository.
@@ -91,10 +67,10 @@ The PR Description Generator allows you to create detailed PR descriptions from 
 ### Setting up the Alias
 For convenience, you can set up an alias to use the PR Description Generator from any directory:
 ```bash
-alias prdesc='CURRENT_DIR=$(pwd) yarn --cwd ~/path/to/pull-request-hypedoc run prdesc'
+alias prdesc='CURRENT_DIR=$(pwd) yarn --cwd ~/path/to/raconteur run prdesc'
 ```
 
-Replace ~/path/to/pull-request-hypedoc with the actual path to the pull-request-hypedoc repository on your system. Add this alias to your ~/.bashrc, ~/.zshrc, or equivalent shell configuration file and source it.
+Replace `~/path/to/raconteur` with the actual path to the raconteur repository on your system. Add this alias to your` ~/.bashrc`, `~/.zshrc`, or equivalent shell configuration file and source it.
 
 Running the PR Description Generator
 Navigate to the directory of the repository you wish to generate a PR description for, and run:
@@ -107,5 +83,3 @@ Follow the interactive prompts to customize and generate your PR description.
 ## Contributions
 
 Contributions are welcome! Please feel free to submit a pull request or create an issue if you have any suggestions or find any bugs.
-
-
