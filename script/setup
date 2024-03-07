@@ -41,6 +41,12 @@ confirm_continue
 echo -e "${BLUE}Installing dependencies...${NC}"
 yarn install
 
+echo -e "${BLUE}Configuring alias for PR Description Generator...${NC}"
+ALIAS_COMMAND="alias prdesc='CURRENT_DIR=\$(pwd) yarn --cwd $(pwd) run prdesc'"
+echo -e "Add the following line to your ~/.bashrc or ~/.zshrc to set up the alias:\n${YELLOW}${ALIAS_COMMAND}${NC}"
+echo -e "${GREEN}Tip: Run the following command to add it automatically:${NC}"
+echo -e "echo \"${ALIAS_COMMAND}\" >> ~/.zshrc\n"
+
 # Completion message
 echo -e "${GREEN}\n\nSetup complete! 🎉${NC}"
 echo -e "You can run the summarizer by executing ${YELLOW}'yarn start'${NC}."

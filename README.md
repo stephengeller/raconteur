@@ -1,6 +1,6 @@
-# PR Hypedocifier
+# PR Hypedocifier & PR Description Generator
 
-PR Hypedocifier is a tool designed to summarize merged pull requests for a given GitHub user, emphasizing the impact and benefits of each PR. It uses the GitHub and OpenAI APIs to fetch PR information and generate concise summaries.
+PR Hypedocifier is a tool designed to summarize merged pull requests for a given GitHub user, emphasizing the impact and benefits of each PR. The repository also hosts the PR Description Generator, a utility to create detailed descriptions for your pull requests using OpenAI's GPT models. Both tools leverage the GitHub and OpenAI APIs to fetch PR information and generate concise summaries or detailed descriptions.
 
 ## Prerequisites
 
@@ -13,12 +13,10 @@ Before you begin, ensure you have the following installed:
 
 ### Automated Setup
 
-To simplify the initial setup process, use the setup script that guides you through installing dependencies, generating necessary tokens, and configuring your `.env` file.
-
-To run the setup script, navigate to your project directory in the terminal and execute:
+To simplify the initial setup process, use the setup script that guides you through installing dependencies, generating necessary tokens, and configuring your `.env` file for both PR Hypedocifier and PR Description Generator.
 
 ```bash
-./script/setupg
+./script/setup
 ```
 
 ### Manual Setup
@@ -48,14 +46,15 @@ GITHUB_USERNAME=your_github_username_here
   Replace `your_github_token_here` and `your_openai_api_key_here` with your actual GitHub token and OpenAI API key.
 
 ## **Usage**
-To run the summarizer, execute:
+### PR Hypedocifier
+To run the PR Hypedocifier summarizer:
 ```bash
 yarn start
 ```
 
 This will fetch merged PRs, generate summaries, and copy the latest summary to your clipboard.
 
-## Configuring the PR Fetch Period
+#### Configuring the PR Fetch Period
 
 By default, PR Hypedocifier fetches pull requests merged within the last 2 weeks. You can customize this period by setting environment variables in your `.env` file.
 
@@ -69,7 +68,7 @@ PR_FETCH_PERIOD_VALUE=3
 PR_FETCH_PERIOD_UNIT=months
 ```
 
-## Customizing the Detailed Prompt
+#### Customizing the Detailed Prompt
 
 The script includes a section for defining a detailed prompt that guides the generation of pull request summaries. You can customize this prompt to fit your specific needs or preferences.
 
@@ -85,6 +84,25 @@ The script includes a section for defining a detailed prompt that guides the gen
 4. Save your changes and run the script as usual to fetch and summarize PRs using your updated prompt.
 
 By customizing the detailed prompt, you can tailor the summaries to highlight specific aspects of your PRs, such as their impact, benefits, and key changes.
+
+## **PR Description Generator**
+The PR Description Generator allows you to create detailed PR descriptions from within any git repository.
+
+### Setting up the Alias
+For convenience, you can set up an alias to use the PR Description Generator from any directory:
+```bash
+alias prdesc='CURRENT_DIR=$(pwd) yarn --cwd ~/path/to/pull-request-hypedoc run prdesc'
+```
+
+Replace ~/path/to/pull-request-hypedoc with the actual path to the pull-request-hypedoc repository on your system. Add this alias to your ~/.bashrc, ~/.zshrc, or equivalent shell configuration file and source it.
+
+Running the PR Description Generator
+Navigate to the directory of the repository you wish to generate a PR description for, and run:
+```bash
+prdesc
+```
+
+Follow the interactive prompts to customize and generate your PR description.
 
 ## Contributions
 
