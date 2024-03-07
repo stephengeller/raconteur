@@ -7,31 +7,38 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 
-# Function to prompt for user confirmation to continue
+# Function to prompt for user confirmation to continue, with custom message
 confirm_continue() {
-    read -p "Press Enter to continue..." 
+    local prompt_message="$1"
+    read -rp "$prompt_message" 
 }
 
 echo -e "${GREEN}Starting setup for PR Hypedocifier...${NC}\n"
 
-# Instructions and opening GitHub token page
+# Instructions and prompt before opening GitHub token page
 echo -e "${BLUE}1. Generate a new Personal Access Token (PAT) on GitHub with 'repo' scope.${NC}"
-echo -e "   Visit: ${YELLOW}https://github.com/settings/tokens${NC}"
-echo -e "   Click on 'Generate new token', select 'repo' scope, and generate the token."
-echo -e "   Find the token you created, click on 'Enable SSO' next to it, and then 'Authorize' for 'squareup'."
+echo -e "   You'll need this token to allow the script to interact with your GitHub repositories."
+echo -e "   ${YELLOW}!!! Once you've generated your token, click on 'Enable SSO' next to it, and then 'Authorize' for 'squareup' !!!${NC}"
+confirm_continue "Press Enter to open https://github.com/settings/tokens..."
+
+# Open GitHub token page
 open https://github.com/settings/tokens # Adjust for non-macOS systems if necessary
+echo -e "\n${YELLOW}After generating your token, press Enter to continue...${NC}"
 confirm_continue
 
-# Instructions for obtaining OpenAI API Key
-echo -e "${BLUE}3. Obtain an API key from OpenAI.${NC}"
-echo -e "   Visit: ${YELLOW}https://platform.openai.com/account/api-keys${NC}"
-echo -e "   Sign in and access or create a new API key."
+# Instructions for obtaining OpenAI API Key, with prompt before opening the page
+echo -e "${BLUE}2. Obtain an API key from OpenAI.${NC}"
+echo -e "   This key enables the script to generate PR descriptions using OpenAI's GPT models."
+confirm_continue "Press Enter to open https://platform.openai.com/account/api-keys..."
+
+# Open OpenAI API key page
 open https://platform.openai.com/account/api-keys # Adjust for non-macOS systems if necessary
+echo -e "${YELLOW}After obtaining your API key, press Enter to continue...${NC}"
 confirm_continue
 
 # Instructions for updating the .env file
 echo -e "${BLUE}4. Create or update the .env file in the root of your project directory.${NC}"
-echo -e "${GREEN}The .env file should look exactly like this (without the angle brackets):${NC}"
+echo -e "${GREEN}The .env file should look exactly like this (with your custom values):${NC}"
 echo -e "${YELLOW}GITHUB_TOKEN=<your_github_token_here>${NC}"
 echo -e "${YELLOW}OPENAI_API_KEY=<your_openai_api_key_here>${NC}"
 echo -e "${YELLOW}GITHUB_USERNAME=<your_github_username_here>${NC}"
@@ -41,11 +48,12 @@ confirm_continue
 echo -e "${BLUE}Installing dependencies...${NC}"
 yarn install
 
-echo -e "${BLUE}Configuring alias for PR Description Generator...${NC}"
+echo -e "${BLUE}\nConfiguring alias for PR Description Generator...${NC}"
 ALIAS_COMMAND="alias prdesc='CURRENT_DIR=\$(pwd) yarn --cwd $(pwd) run prdesc'"
 echo -e "Add the following line to your ~/.bashrc or ~/.zshrc to set up the alias:\n${YELLOW}${ALIAS_COMMAND}${NC}"
 echo -e "${GREEN}Tip: Run the following command to add it automatically:${NC}"
 echo -e "echo \"${ALIAS_COMMAND}\" >> ~/.zshrc\n"
+confirm_continue "After updating your shell configuration, press Enter to continue..."
 
 # Completion message
 echo -e "${GREEN}\n\nSetup complete! 🎉${NC}"
