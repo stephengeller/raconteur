@@ -7,6 +7,8 @@ import { getStagedGitDiff } from "./git";
 
 dotenv.config();
 
+process.chdir(process.env.CURRENT_DIR || process.cwd());
+
 async function generateCommitMessage(diff: string): Promise<string> {
   if (!diff.trim()) {
     console.log(chalk.yellow("No changes detected in staged files."));

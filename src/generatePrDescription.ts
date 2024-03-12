@@ -11,6 +11,8 @@ import { getGitDiff } from "./git";
 
 const DEFAULT_BRANCH = "main";
 
+process.chdir(process.env.CURRENT_DIR || process.cwd());
+
 // Parse arguments
 const argv = yargs(hideBin(process.argv))
   .option("branch", {
