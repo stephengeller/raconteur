@@ -8,10 +8,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const execAsync = promisify(exec);
+const DIR_PATH = process.env.CURRENT_DIR || process.cwd();
 
 async function getStagedGitDiff(): Promise<string> {
   try {
-    const { stdout } = await execAsync("git diff --cached");
+    const { stdout } = await execAsync(`git -C ${DIR_PATH} diff --cached`);
     return stdout;
   } catch (error) {
     console.error(chalk.red("Error obtaining staged git diff:"), error);
