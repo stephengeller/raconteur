@@ -1,24 +1,11 @@
-import { exec } from "child_process";
-import { promisify } from "util";
+import { spawn } from "child_process";
 import chalk from "chalk";
 import prompts from "prompts"; // Import prompts
 import { callChatGPTApi } from "./ChatGPTApi";
 import dotenv from "dotenv";
+import { getStagedGitDiff } from "./git";
 
 dotenv.config();
-
-const execAsync = promisify(exec);
-const DIR_PATH = process.env.CURRENT_DIR || process.cwd();
-
-async function getStagedGitDiff(): Promise<string> {
-  try {
-    const { stdout } = await execAsync(`git -C ${DIR_PATH} diff --cached`);
-    return stdout;
-  } catch (error) {
-    console.error(chalk.red("Error obtaining staged git diff:"), error);
-    process.exit(1);
-  }
-}
 
 async function generateCommitMessage(diff: string): Promise<string> {
   if (!diff.trim()) {
@@ -39,12 +26,28 @@ async function generateCommitMessage(diff: string): Promise<string> {
 }
 
 async function commitChanges(commitMessage: string): Promise<void> {
-  try {
-    await execAsync(`git commit -m "${commitMessage}"`);
-    console.log(chalk.green("Changes committed successfully."));
-  } catch (error) {
-    console.error(chalk.red("Failed to commit changes:"), error);
-  }
+  return new Promise((resolve, reject) => {
+    const commit = spawn("git", ["commit", "-m", commitMessage], {
+      stdio: "inherit",
+    });
+
+    commit.on("close", (code) => {
+      if (code === 0) {
+        console.log(chalk.green("Changes committed successfully."));
+        resolve();
+      } else {
+        console.error(
+          chalk.red(`Failed to commit changes with exit code: ${code}`),
+        );
+        reject(new Error(`git commit command failed with exit code ${code}`));
+      }
+    });
+
+    commit.on("error", (error) => {
+      console.error(chalk.red("Failed to commit changes:"), error);
+      reject(error);
+    });
+  });
 }
 
 async function main() {
