@@ -11,8 +11,6 @@ import { getGitDiff } from "./git";
 
 const DEFAULT_BRANCH = "main";
 
-process.chdir(process.env.CURRENT_DIR || process.cwd());
-
 // Parse arguments
 const argv = yargs(hideBin(process.argv))
   .option("branch", {
@@ -71,11 +69,11 @@ function loadCustomPrompt(): string | null {
 }
 
 async function getPRDescription(
-  systemContent: string,
+  prompt: string,
   diffContent: string,
 ): Promise<string> {
   console.log(chalk.blue("🤖 Generating PR description..."));
-  return await callChatGPTApi(systemContent, diffContent);
+  return await callChatGPTApi(prompt, diffContent);
 }
 
 async function main() {
@@ -124,7 +122,7 @@ async function main() {
   );
 
   prompt = await maybeRewritePrompt(prompt);
-  prompt += await extraContextPrompt(prompt);
+  prompt += await extraContextPrompt();
 
   if (attachTemplate.value && template) {
     const pullRequestTemplatePrompt = `

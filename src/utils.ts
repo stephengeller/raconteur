@@ -27,8 +27,7 @@ export async function maybeRewritePrompt(inputPrompt: string): Promise<string> {
   return finalPrompt ?? inputPrompt;
 }
 
-export async function extraContextPrompt(inputPrompt: string): Promise<string> {
-  let finalPrompt = inputPrompt;
+export async function extraContextPrompt(): Promise<string> {
   const extraContextPrompt = await prompts({
     type: "toggle",
     name: "value",
@@ -42,12 +41,12 @@ export async function extraContextPrompt(inputPrompt: string): Promise<string> {
     const response = await prompts({
       type: "text",
       name: "value",
-      message: chalk.cyan("📝 Enter your extra contegxt:"),
+      message: chalk.cyan("📝 Enter your extra context:"),
     });
-    finalPrompt += response.value;
+    return `\nHere's some extra context: ${response.value}`;
+  } else {
+    return "";
   }
-
-  return finalPrompt;
 }
 
 function saveCustomPrompt(prompt: string): void {
