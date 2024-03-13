@@ -29,7 +29,10 @@ async function generateCommitMessage(diff: string): Promise<string> {
 
 async function commitChanges(commitMessage: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const commit = spawn("git", ["commit", "-m", commitMessage], {
+    // Remove starting and ending backticks from the commit message
+    const cleanedCommitMessage = commitMessage.replace(/^`|`$/g, "");
+
+    const commit = spawn("git", ["commit", "-m", cleanedCommitMessage], {
       stdio: "inherit",
     });
 
