@@ -13,7 +13,7 @@ confirm_continue() {
     read -rp "$prompt_message" 
 }
 
-echo -e "${GREEN}Starting setup for PR Hypedocifier...${NC}\n"
+echo -e "${GREEN}Starting setup for Raconteur...${NC}\n"
 
 # Instructions and prompt before opening GitHub token page
 echo -e "${BLUE}1. Generate a new Personal Access Token (PAT) on GitHub with 'repo' scope.${NC}"
@@ -26,7 +26,7 @@ open https://github.com/settings/tokens # Adjust for non-macOS systems if necess
 echo -e "\n${YELLOW}After generating your token, press Enter to continue...${NC}"
 confirm_continue
 
-# Instructions for obtaining OpenAI API Key, with prompt before opening the page
+# Instructions for obtaining OpenAI API Key
 echo -e "${BLUE}2. Obtain an API key from OpenAI.${NC}"
 echo -e "   This key enables the script to generate PR descriptions using OpenAI's GPT models."
 confirm_continue "Press Enter to open https://platform.openai.com/account/api-keys..."
@@ -36,12 +36,25 @@ open https://platform.openai.com/account/api-keys # Adjust for non-macOS systems
 echo -e "${YELLOW}After obtaining your API key, press Enter to continue...${NC}"
 confirm_continue
 
+# Instructions for generating Jira API Token
+echo -e "${BLUE}3. Generate a Jira API Token.${NC}"
+echo -e "   You'll need this token to query Jira issues for enriching PR descriptions."
+echo -e "   ${YELLOW}!!! Use your Squareup email to sign in. !!!${NC}"
+confirm_continue "Press Enter to open https://id.atlassian.com/manage-profile/security/api-tokens..."
+
+# Open Jira API token creation page
+open https://id.atlassian.com/manage-profile/security/api-tokens # Adjust for non-macOS systems if necessary
+echo -e "${YELLOW}After generating your Jira API token, press Enter to continue...${NC}"
+confirm_continue
+
 # Instructions for updating the .env file
 echo -e "${BLUE}4. Create or update the .env file in the root of your project directory.${NC}"
 echo -e "${GREEN}The .env file should look exactly like this (with your custom values):${NC}"
 echo -e "${YELLOW}GITHUB_TOKEN=<your_github_token_here>${NC}"
 echo -e "${YELLOW}OPENAI_API_KEY=<your_openai_api_key_here>${NC}"
 echo -e "${YELLOW}GITHUB_USERNAME=<your_github_username_here>${NC}"
+echo -e "${YELLOW}JIRA_USERNAME=<your_squareup_email>${NC}"
+echo -e "${YELLOW}JIRA_API_TOKEN=<generated_jira_api_token>${NC}"
 confirm_continue
 
 # Install dependencies
