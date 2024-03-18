@@ -6,6 +6,7 @@ import chalk from "chalk";
 import prompts from "prompts";
 import { callChatGPTApi } from "./ChatGPTApi";
 import { copyToClipboard } from "./copyToClipboard";
+import { exec } from "child_process";
 
 dotenv.config();
 
@@ -138,7 +139,7 @@ class PRSummarizer {
         name: "value",
         message: chalk.cyan("📝 Enter your extra context:"),
       });
-      PROMPT += response.value;
+      PROMPT += `Here is some extra context to be considered: ${response.value}`;
     }
 
     try {
@@ -183,6 +184,30 @@ class PRSummarizer {
       if (copyToClipboardPrompt.value && summaries) {
         await copyToClipboard(summaries);
         console.log(chalk.green("✅  PR description copied to clipboard!"));
+      }
+
+      // prompt user to navigate to https://my.sqprod.co/chat and ask for a summary from Slack and other apps for sgeller
+
+      // string variable containing a prompt for chatGPT to ask for a summary of my achievements over the past week
+      const chatPrompt = `You are a helpful assistant. Generate a clear, concise and structured summary of my achievements over the past week, sourcing from Slack and other apps. Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.`;
+      console.log(
+        "Here is a prompt to paste into Square's chatGPT: ",
+        chalk.green(chatPrompt),
+      );
+      const openChatPrompt = await prompts({
+        type: "toggle",
+        name: "value",
+        message: chalk.yellow(
+          "📋 Open https://my.sqprod.co/chat to ask for a summary?",
+        ),
+        initial: true,
+        active: "yes",
+        inactive: "no",
+      });
+
+      if (openChatPrompt.value) {
+        // open  https://my.sqprod.co/chat in a browser
+        exec("open https://my.sqprod.co/chat");
       }
     } catch (error) {
       console.error(chalk.red(`Failed to process PRs: ${error}`));

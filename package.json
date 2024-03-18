@@ -14,6 +14,7 @@
   "devDependencies": {
     "@octokit/rest": "^20.0.2",
     "@octokit/types": "^12.4.0",
+    "@types/jira-client": "^7.1.9",
     "@types/node": "^20.11.17",
     "@types/prompts": "^2.4.9",
     "@types/yargs": "^17.0.32",
@@ -25,6 +26,7 @@
     "clipboardy": "^4.0.0",
     "dotenv": "^16.4.3",
     "eslint": "^8.56.0",
+    "jira-client": "^8.2.2",
     "moment": "^2.30.1",
     "openai": "^4.27.0",
     "prettier": "^3.2.5",

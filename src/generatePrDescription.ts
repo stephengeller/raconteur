@@ -6,7 +6,11 @@ import { hideBin } from "yargs/helpers";
 import chalk from "chalk";
 import { copyToClipboard } from "./copyToClipboard";
 import { callChatGPTApi } from "./ChatGPTApi";
-import { extraContextPrompt, maybeRewritePrompt } from "./utils";
+import {
+  extraContextPrompt,
+  getJiraTicketDescription,
+  maybeRewritePrompt,
+} from "./utils";
 import { getGitDiff } from "./git";
 
 const DEFAULT_BRANCH = "main";
@@ -122,7 +126,12 @@ async function main() {
   );
 
   prompt = await maybeRewritePrompt(prompt);
+  prompt += await getJiraTicketDescription();
   prompt += await extraContextPrompt();
+
+  console.log(
+    chalk.blue(`Here's the prompt so far:\n\t${chalk.green(prompt)}`),
+  );
 
   if (attachTemplate.value && template) {
     const pullRequestTemplatePrompt = `

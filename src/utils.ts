@@ -1,7 +1,11 @@
 import fs from "fs";
 import chalk from "chalk";
 import prompts from "prompts";
+import JiraApi from "jira-client";
 import { CUSTOM_PROMPT_PATH } from "./generatePrDescription";
+import { config } from "dotenv";
+
+config(); // Load .env file
 
 export async function maybeRewritePrompt(inputPrompt: string): Promise<string> {
   let finalPrompt = null;
@@ -44,6 +48,39 @@ export async function extraContextPrompt(): Promise<string> {
       message: chalk.cyan("📝 Enter your extra context:"),
     });
     return `\nHere's some extra context: ${response.value}`;
+  } else {
+    return "";
+  }
+}
+
+export async function getJiraTicketDescription(): Promise<string> {
+  const jira = new JiraApi({
+    protocol: "https",
+    host: "block.atlassian.net",
+    username: process.env.JIRA_USERNAME,
+    password: process.env.JIRA_API_TOKEN,
+    apiVersion: "2",
+    strictSSL: true,
+  });
+
+  // prompt user for ticket number
+  const response = await prompts({
+    type: "text",
+    name: "value",
+    message: chalk.yellow("Enter the Jira ticket number:"),
+  });
+
+  if (response.value) {
+    // ES7
+    try {
+      const issue = await jira.findIssue(response.value);
+      const description = issue.fields.description;
+      console.log(issue);
+      return `\n\nHere are the contents of the Jira ticket, please use it to gain more context on the changes: \n${description}`;
+    } catch (err) {
+      console.error(err);
+      return "";
+    }
   } else {
     return "";
   }
