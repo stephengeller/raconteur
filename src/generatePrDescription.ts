@@ -118,8 +118,12 @@ async function main() {
 
   let prompt =
     loadCustomPrompt() ||
-    `You are a helpful assistant. Generate a clear, concise and structured PR description using the provided git diff. 
-    Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.`;
+    `
+You are a helpful assistant. Generate a clear, concise and structured PR description using the provided git diff. 
+Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
+    
+Please also generate a PR title, following the Conventional Commit format.
+    `;
 
   console.log(
     chalk.blue(`Here's the prompt so far:\n\t${chalk.green(prompt)}`),

@@ -71,12 +71,18 @@ export async function getJiraTicketDescription(): Promise<string> {
   });
 
   if (response.value) {
+    const ticketNumber = response.value.toUpperCase();
     // ES7
     try {
-      const issue = await jira.findIssue(response.value);
+      const issue = await jira.findIssue(ticketNumber);
       const description = issue.fields.description;
-      console.log(issue);
-      return `\n\nHere are the contents of the Jira ticket, please use it to gain more context on the changes: \n${description}`;
+      return `\n
+Below are the contents of the Jira ticket, please use it to gain more context on the changes and include a link to the card in the PR description. 
+Also, please include the Jira ticket number ${ticketNumber} at the start of the PR title in square brackets (eg [${ticketNumber}]). 
+      
+  \`\`\`
+  ${description}
+  \`\`\``;
     } catch (err) {
       console.error(err);
       return "";
