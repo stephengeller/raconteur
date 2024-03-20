@@ -1,8 +1,8 @@
 {
-  "name": "hypedoc",
+  "name": "raconteur",
   "version": "1.0.0",
   "main": "src/index.ts",
-  "repository": "git@github.com:stephengeller/pull-request-hypedoc.git",
+  "repository": "git@github.com:stephengeller/raconteur.git",
   "author": "Stephen Geller <sgeller@squareup.com>",
   "license": "MIT",
   "scripts": {

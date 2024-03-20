@@ -80,7 +80,7 @@ export async function getJiraTicketDescription(): Promise<string> {
 Below are the contents of the Jira ticket, please use it to gain more context on the changes and include a link to the card in the PR description. 
 Also, please include the Jira ticket number ${ticketNumber} at the start of the PR title in square brackets (eg [${ticketNumber}]). 
       
-  \`\`\`
+  \`\`\
   ${description}
   \`\`\``;
     } catch (err) {
