@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import prompts from "prompts";
 import { config } from "dotenv";
-import yargs from "yargs";
+import yargs, {exit} from "yargs";
 import { hideBin } from "yargs/helpers";
 import chalk from "chalk";
 import { copyToClipboard } from "./copyToClipboard";
@@ -14,18 +14,25 @@ import {
 import { getGitDiff } from "./git";
 
 const DEFAULT_BRANCH = "main";
+const RACONTEUR_PATH = process.cwd()
 
 // Parse arguments
 const argv = yargs(hideBin(process.argv))
-  .option("branch", {
-    alias: "b",
-    description: "Specify the branch to compare with",
-    type: "string",
-    default: "main",
-  })
-  .help()
-  .alias("help", "h")
-  .parseSync();
+    .option("branch", {
+      alias: "b",
+      description: "Specify the branch to compare with",
+      type: "string",
+      default: "main",
+    })
+    .option("dir", {
+      alias: "d",
+      description: "Specify the directory of the git repository",
+      type: "string",
+      default: process.cwd(),
+    })
+    .help()
+    .alias("help", "h")
+    .parseSync();
 
 if (argv?.branch != DEFAULT_BRANCH) {
   console.log(chalk.yellow(`Comparing with branch ${chalk.bold(argv.branch)}`));
@@ -39,7 +46,8 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-const DIR_PATH = process.env.CURRENT_DIR || process.cwd();
+const DIR_PATH = argv.dir
+
 export const CUSTOM_PROMPT_PATH = `./customPrDescriptionPrompt.txt`;
 
 async function findTemplate(): Promise<[string, string] | null> {
