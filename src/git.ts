@@ -3,7 +3,6 @@ import { promisify } from "util";
 import { exec } from "child_process";
 
 const execAsync = promisify(exec);
-const DIR_PATH = process.env.CURRENT_DIR || process.cwd();
 
 export async function getGitDiff(
   repoDir: string,
@@ -31,9 +30,10 @@ export async function getGitDiff(
   }
 }
 
-export async function getStagedGitDiff(): Promise<string> {
+export async function getStagedGitDiff(pathToRepo: string): Promise<string> {
+  console.log(chalk.blue("Obtaining staged git diff..."));
   try {
-    const { stdout } = await execAsync(`git -C ${DIR_PATH} diff --cached`);
+    const { stdout } = await execAsync(`git -C ${pathToRepo} diff --cached`);
     return stdout;
   } catch (error) {
     console.error(chalk.red("Error obtaining staged git diff:"), error);

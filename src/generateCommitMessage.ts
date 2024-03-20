@@ -4,10 +4,23 @@ import prompts from "prompts"; // Import prompts
 import { callChatGPTApi } from "./ChatGPTApi";
 import dotenv from "dotenv";
 import { getStagedGitDiff } from "./git";
+import yargs from "yargs";
+import {hideBin} from "yargs/helpers";
 
 dotenv.config();
 
-process.chdir(process.env.CURRENT_DIR || process.cwd());
+const argv = yargs(hideBin(process.argv))
+    .option("dir", {
+      alias: "d",
+      description: "Specify the directory of the git repository",
+      type: "string",
+      default: process.cwd(),
+    })
+    .help()
+    .alias("help", "h")
+    .parseSync();
+
+process.chdir(argv.dir);
 
 async function generateCommitMessage(diff: string): Promise<string> {
   if (!diff.trim()) {
@@ -56,7 +69,7 @@ async function commitChanges(commitMessage: string): Promise<void> {
 }
 
 async function main() {
-  const diff = await getStagedGitDiff();
+  const diff = await getStagedGitDiff(argv.dir);
   if (diff) {
     const commitMessage = await generateCommitMessage(diff);
     console.log(chalk.green("Suggested commit message:"));
