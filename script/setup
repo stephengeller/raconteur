@@ -61,13 +61,32 @@ confirm_continue
 echo -e "${BLUE}Installing dependencies...${NC}"
 yarn install
 
-echo -e "${BLUE}\nConfiguring alias for PR Description Generator...${NC}"
-ALIAS_COMMAND="alias prdesc='CURRENT_DIR=\$(pwd) yarn --cwd $(pwd) run prdesc'"
-echo -e "Add the following line to your ~/.bashrc or ~/.zshrc to set up the alias:\n${YELLOW}${ALIAS_COMMAND}${NC}"
-echo -e "${GREEN}Tip: Run the following command to add it automatically:${NC}"
-echo -e "echo \"${ALIAS_COMMAND}\" >> ~/.zshrc\n"
-confirm_continue "After updating your shell configuration, press Enter to continue..."
+# Print instructions for configuring aliases
+echo -e "${GREEN}To finalize the setup, please add the following function and aliases to your shell profile (~/.bashrc, ~/.zshrc or equivalent). This will enable you to use the Raconteur commands from any directory.${NC}\n"
+
+echo -e "${YELLOW}Copy and paste the following into your shell profile:${NC}"
+
+echo '```bash'
+echo '# Raconteur Command Setup'
+echo 'raconteur_cmd() {'
+echo '  local cmd=$1'
+echo '  local dir_arg=$2'
+echo '  local oldpwd=$(pwd)'
+echo ''
+echo '  pushd ~/raconteur >/dev/null'
+echo '  yarn --silent "$cmd" ${dir_arg:+"--dir"} "$oldpwd"'
+echo '  popd >/dev/null'
+echo '}'
+echo ''
+echo 'alias raconteur='"'"'raconteur_cmd start'"'"''
+echo 'alias prdesc='"'"'raconteur_cmd prdesc --dir'"'"''
+echo 'alias commit='"'"'raconteur_cmd commit --dir'"'"''
+echo '```'
+echo ''
+
+echo -e "${GREEN}After adding these to your shell profile, you may need to restart your terminal or source your profile file for the changes to take effect. For example:${NC}"
+echo -e "${YELLOW}source ~/.bashrc${NC} or ${YELLOW}source ~/.zshrc${NC}\n"
 
 # Completion message
-echo -e "${GREEN}\n\nSetup complete! 🎉${NC}"
-echo -e "You can run the summarizer by executing ${YELLOW}'yarn start'${NC}."
+echo -e "${GREEN}\nSetup complete! 🎉${NC}"
+echo -e "You can now run ${YELLOW}\`raconteur\`, \`prdesc\` and  \`commit\`${NC}."
