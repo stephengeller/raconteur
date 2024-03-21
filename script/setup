@@ -64,16 +64,47 @@ if ! check_env_var "JIRA_API_TOKEN"; then
     confirm_continue
 fi
 
-# Instructions for updating the .env file only if necessary
-echo -e "${BLUE}4. Ensure the .env file in the root of your project directory is up to date with your custom values.${NC}"
-
 # Install dependencies
-echo -e "${BLUE}Installing dependencies...${NC}"
-yarn install
+echo -e "${BLUE}\nInstalling dependencies with yarn...${NC}"
+yarn install --silent
+echo -e "${BLUE}...done${NC}"
 
-# Print instructions for configuring aliases
-echo -e "${GREEN}To finalize the setup, please add the following function and aliases to your shell profile (~/.bashrc, ~/.zshrc or equivalent). This will enable you to use the Raconteur commands from any directory.${NC}\n"
-# (Remainder of your alias instructions here...)
+# Instructions for updating the .env file
+echo -e "${YELLOW}\n4. Create or update the .env file in the root of your project directory.${NC}"
+echo -e "${YELLOW}The .env file should look exactly like this (with your custom values):${NC}"
+
+echo -e "${BLUE}GITHUB_TOKEN=<your_github_token_here>${NC}"
+echo -e "${BLUE}OPENAI_API_KEY=<your_openai_api_key_here>${NC}"
+echo -e "${BLUE}GITHUB_USERNAME=<your_github_username_here>${NC}"
+echo -e "${BLUE}JIRA_USERNAME=<your_squareup_email>${NC}"
+echo -e "${BLUE}JIRA_API_TOKEN=<generated_jira_api_token>${NC}"
+
+echo -e "${NC}\nPress enter to continue...${NC}"
+confirm_continue
+
+echo -e "${YELLOW}5. Copy and paste the following into your shell profile (~/.zshrc or ~/.bashrc):${NC}"
+
+echo '# Raconteur Command Setup'
+echo 'raconteur_cmd() {'
+echo '  local cmd=$1'
+echo '  local dir_arg=$2'
+echo '  local oldpwd=$(pwd)'
+echo ''
+echo '  pushd ~/raconteur >/dev/null'
+echo '  yarn --silent "$cmd" ${dir_arg:+"--dir"} "$oldpwd"'
+echo '  popd >/dev/null'
+echo '}'
+echo ''
+echo 'alias raconteur='"'"'raconteur_cmd start'"'"''
+echo 'alias prdesc='"'"'raconteur_cmd prdesc --dir'"'"''
+echo 'alias commit='"'"'raconteur_cmd commit --dir'"'"''
+echo ''
+
+echo -e "${YELLOW}After adding these to your shell profile, you may need to restart your terminal or source your profile file for the changes to take effect. For example:${NC}"
+echo -e "${BLUE}$ source ~/.bashrc${NC} or ${BLUE}$ source ~/.zshrc${NC}\n"
+
+echo -e "${NC}\nPress enter to continue...${NC}"
+confirm_continue
 
 # Completion message
 echo -e "${GREEN}\nSetup complete! 🎉${NC}"
