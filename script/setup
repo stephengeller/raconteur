@@ -76,7 +76,7 @@ echo -e "${YELLOW}The .env file should look exactly like this (with your custom 
 echo -e "${BLUE}GITHUB_TOKEN=<your_github_token_here>${NC}"
 echo -e "${BLUE}OPENAI_API_KEY=<your_openai_api_key_here>${NC}"
 echo -e "${BLUE}GITHUB_USERNAME=<your_github_username_here>${NC}"
-echo -e "${BLUE}JIRA_USERNAME=<your_squareup_email>${NC}"
+echo -e "${BLUE}SQUAREUP_EMAIL=<your_squareup_email>${NC}"
 echo -e "${BLUE}JIRA_API_TOKEN=<generated_jira_api_token>${NC}"
 
 echo -e "${NC}\nPress enter to continue...${NC}"
