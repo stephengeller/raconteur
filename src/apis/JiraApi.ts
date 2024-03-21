@@ -1,4 +1,4 @@
-import JiraApi from "jira-client";
+import JiraClient from "jira-client";
 
 type JiraIssue = {
   key: string;
@@ -28,12 +28,14 @@ const DEFAULT_OPTIONS: JiraApiOptions = {
   strictSSL: true,
 }
 
-export default class Jira {
-  private jiraApi: JiraApi
+/**
+ * A wrapper class around the Jira Client that provides a more user-friendly interface.
+ */
+export default class JiraApi {
+  private jiraClient: JiraClient
   
-
   constructor(username: string, apiKey: string, options: Partial<JiraApiOptions> = {}) {
-    this.jiraApi = new JiraApi({
+    this.jiraClient = new JiraClient({
       ...DEFAULT_OPTIONS,
       ...options,
       username,
@@ -42,8 +44,14 @@ export default class Jira {
     });
   }
 
+  /**
+   * Fetches the issue details for the given ticket number.
+   * 
+   * @param ticketNumber The ticket number to fetch.
+   * @returns The issue details or undefined if the issue is not found.
+   */
   async getIssue(ticketNumber: string): Promise<JiraIssue | undefined> {
-    const issue = await this.jiraApi.findIssue(ticketNumber);
+    const issue = await this.jiraClient.findIssue(ticketNumber);
 
     return issue ? toJiraIssue(issue) : undefined;
   }

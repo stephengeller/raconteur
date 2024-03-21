@@ -3,7 +3,7 @@ import chalk from "chalk";
 import prompts from "prompts";
 import { CUSTOM_PROMPT_PATH } from "./generatePrDescription";
 import { config } from "dotenv";
-import Jira from "./apis/Jira";
+import JiraApi from "./apis/JiraApi";
 
 config(); // Load .env file
 
@@ -62,7 +62,7 @@ export async function getJiraTicketDescription(): Promise<string> {
     return "";
   }
 
-  const jira = new Jira(jiraUsername, jiraApiToken);
+  const jira = new JiraApi(jiraUsername, jiraApiToken);
 
   // prompt user for ticket number
   const response = await prompts({
