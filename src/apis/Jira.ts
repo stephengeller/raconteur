@@ -17,17 +17,28 @@ function toJiraIssue(issueResponse: any): JiraIssue {
   };
 }
 
+type JiraApiOptions = {
+  protocol: string;
+  host: string;
+  strictSSL: boolean;
+}
+const DEFAULT_OPTIONS: JiraApiOptions = {
+  protocol: "https",
+  host: "block.atlassian.net",
+  strictSSL: true,
+}
+
 export default class Jira {
   private jiraApi: JiraApi
+  
 
-  constructor(username: string, apiKey: string) {
+  constructor(username: string, apiKey: string, options: Partial<JiraApiOptions> = {}) {
     this.jiraApi = new JiraApi({
-      protocol: "https",
-      host: "block.atlassian.net",
+      ...DEFAULT_OPTIONS,
+      ...options,
       username,
       password: apiKey,
       apiVersion: "2",
-      strictSSL: true,
     });
   }
 
