@@ -54,7 +54,7 @@ export async function extraContextPrompt(): Promise<string> {
 }
 
 export async function getJiraTicketDescription(): Promise<string> {
-  const jiraUsername = process.env.JIRA_USERNAME;
+  const jiraUsername = process.env.SQAUREUP_EMAIL;
   const jiraApiToken = process.env.JIRA_API_TOKEN;
 
   if (!jiraUsername || !jiraApiToken) {

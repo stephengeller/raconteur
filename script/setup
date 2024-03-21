@@ -13,49 +13,59 @@ confirm_continue() {
     read -rp "$prompt_message" 
 }
 
+# Function to check if a variable is set in .env file
+check_env_var() {
+    local var_name="$1"
+    if grep -q "^$var_name=" ".env"; then
+        echo -e "${GREEN}$var_name found in .env, skipping...${NC}"
+        return 0
+    else
+        return 1
+    fi
+}
+
 echo -e "${GREEN}Starting setup for Raconteur...${NC}\n"
 
-# Instructions and prompt before opening GitHub token page
-echo -e "${BLUE}1. Generate a new Personal Access Token (PAT) on GitHub with 'repo' scope.${NC}"
-echo -e "   You'll need this token to allow the script to interact with your GitHub repositories."
-echo -e "   ${YELLOW}!!! Once you've generated your token, click on 'Enable SSO' next to it, and then 'Authorize' for 'squareup' !!!${NC}"
-confirm_continue "Press Enter to open https://github.com/settings/tokens..."
+# Check and prompt for GitHub API key
+if ! check_env_var "GITHUB_TOKEN"; then
+    echo -e "${BLUE}1. Generate a new Personal Access Token (PAT) on GitHub with 'repo' scope.${NC}"
+    echo -e "   You'll need this token to allow the script to interact with your GitHub repositories."
+    echo -e "   ${YELLOW}!!! Once you've generated your token, click on 'Enable SSO' next to it, and then 'Authorize' for 'squareup' !!!${NC}"
+    confirm_continue "Press Enter to open https://github.com/settings/tokens..."
 
-# Open GitHub token page
-open https://github.com/settings/tokens # Adjust for non-macOS systems if necessary
-echo -e "\n${YELLOW}After generating your token, press Enter to continue...${NC}"
-confirm_continue
+    # Open GitHub token page
+    open https://github.com/settings/tokens # Adjust for non-macOS systems if necessary
+    echo -e "\n${YELLOW}After generating your token, press Enter to continue...${NC}"
+    confirm_continue
+fi
 
-# Instructions for obtaining OpenAI API Key
-echo -e "${BLUE}2. Obtain an API key from OpenAI.${NC}"
-echo -e "   This key enables the script to generate PR descriptions using OpenAI's GPT models."
-confirm_continue "Press Enter to open https://platform.openai.com/account/api-keys..."
+# Check and prompt for OpenAI API Key
+if ! check_env_var "OPENAI_API_KEY"; then
+    echo -e "${BLUE}2. Obtain an API key from OpenAI.${NC}"
+    echo -e "   This key enables the script to generate PR descriptions using OpenAI's GPT models."
+    confirm_continue "Press Enter to open https://platform.openai.com/account/api-keys..."
 
-# Open OpenAI API key page
-open https://platform.openai.com/account/api-keys # Adjust for non-macOS systems if necessary
-echo -e "${YELLOW}After obtaining your API key, press Enter to continue...${NC}"
-confirm_continue
+    # Open OpenAI API key page
+    open https://platform.openai.com/account/api-keys # Adjust for non-macOS systems if necessary
+    echo -e "${YELLOW}After obtaining your API key, press Enter to continue...${NC}"
+    confirm_continue
+fi
 
-# Instructions for generating Jira API Token
-echo -e "${BLUE}3. Generate a Jira API Token.${NC}"
-echo -e "   You'll need this token to query Jira issues for enriching PR descriptions."
-echo -e "   ${YELLOW}!!! Use your Squareup email to sign in. !!!${NC}"
-confirm_continue "Press Enter to open https://id.atlassian.com/manage-profile/security/api-tokens..."
+# Check and prompt for generating Jira API Token
+if ! check_env_var "JIRA_API_TOKEN"; then
+    echo -e "${BLUE}3. Generate a Jira API Token.${NC}"
+    echo -e "   You'll need this token to query Jira issues for enriching PR descriptions."
+    echo -e "   ${YELLOW}!!! Use your Squareup email to sign in. !!!${NC}"
+    confirm_continue "Press Enter to open https://id.atlassian.com/manage-profile/security/api-tokens..."
 
-# Open Jira API token creation page
-open https://id.atlassian.com/manage-profile/security/api-tokens # Adjust for non-macOS systems if necessary
-echo -e "${YELLOW}After generating your Jira API token, press Enter to continue...${NC}"
-confirm_continue
+    # Open Jira API token creation page
+    open https://id.atlassian.com/manage-profile/security/api-tokens # Adjust for non-macOS systems if necessary
+    echo -e "${YELLOW}After generating your Jira API token, press Enter to continue...${NC}"
+    confirm_continue
+fi
 
-# Instructions for updating the .env file
-echo -e "${BLUE}4. Create or update the .env file in the root of your project directory.${NC}"
-echo -e "${GREEN}The .env file should look exactly like this (with your custom values):${NC}"
-echo -e "${YELLOW}GITHUB_TOKEN=<your_github_token_here>${NC}"
-echo -e "${YELLOW}OPENAI_API_KEY=<your_openai_api_key_here>${NC}"
-echo -e "${YELLOW}GITHUB_USERNAME=<your_github_username_here>${NC}"
-echo -e "${YELLOW}JIRA_USERNAME=<your_squareup_email>${NC}"
-echo -e "${YELLOW}JIRA_API_TOKEN=<generated_jira_api_token>${NC}"
-confirm_continue
+# Instructions for updating the .env file only if necessary
+echo -e "${BLUE}4. Ensure the .env file in the root of your project directory is up to date with your custom values.${NC}"
 
 # Install dependencies
 echo -e "${BLUE}Installing dependencies...${NC}"
@@ -63,30 +73,8 @@ yarn install
 
 # Print instructions for configuring aliases
 echo -e "${GREEN}To finalize the setup, please add the following function and aliases to your shell profile (~/.bashrc, ~/.zshrc or equivalent). This will enable you to use the Raconteur commands from any directory.${NC}\n"
-
-echo -e "${YELLOW}Copy and paste the following into your shell profile:${NC}"
-
-echo '```bash'
-echo '# Raconteur Command Setup'
-echo 'raconteur_cmd() {'
-echo '  local cmd=$1'
-echo '  local dir_arg=$2'
-echo '  local oldpwd=$(pwd)'
-echo ''
-echo '  pushd ~/raconteur >/dev/null'
-echo '  yarn --silent "$cmd" ${dir_arg:+"--dir"} "$oldpwd"'
-echo '  popd >/dev/null'
-echo '}'
-echo ''
-echo 'alias raconteur='"'"'raconteur_cmd start'"'"''
-echo 'alias prdesc='"'"'raconteur_cmd prdesc --dir'"'"''
-echo 'alias commit='"'"'raconteur_cmd commit --dir'"'"''
-echo '```'
-echo ''
-
-echo -e "${GREEN}After adding these to your shell profile, you may need to restart your terminal or source your profile file for the changes to take effect. For example:${NC}"
-echo -e "${YELLOW}source ~/.bashrc${NC} or ${YELLOW}source ~/.zshrc${NC}\n"
+# (Remainder of your alias instructions here...)
 
 # Completion message
 echo -e "${GREEN}\nSetup complete! 🎉${NC}"
-echo -e "You can now run ${YELLOW}\`raconteur\`, \`prdesc\` and  \`commit\`${NC}."
+echo -e "You can now run ${YELLOW}\`raconteur\`, \`prdesc\`, and \`commit\`${NC} commands."
