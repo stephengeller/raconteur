@@ -189,7 +189,22 @@ class PRSummarizer {
       // prompt user to navigate to https://my.sqprod.co/chat and ask for a summary from Slack and other apps for sgeller
 
       // string variable containing a prompt for chatGPT to ask for a summary of my achievements over the past week
-      const chatPrompt = `You are a helpful assistant. Generate a clear, concise and structured summary of my achievements over the past week, sourcing from Slack and other apps. Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.`;
+      const chatPrompt = `You are a helpful assistant. Generate a clear, concise and structured summary of my achievements over the past week, sourcing from Slack and other apps. 
+      
+Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
+      
+Please follow the following example as a reference for desired format:
+  Feb 10, 2024:
+  - Successfully led the development of Project X's core module, improving system efficiency by 20%.
+  - Initiated and completed a code refactoring for the Legacy System, enhancing maintainability.
+  - Collaborated on the Integration Initiative, ensuring seamless connection between System A and B.
+  - Acted as the interim lead for the Deployment Team during critical release phases.
+  
+  Jan 25, 2024:
+  - Spearheaded the documentation overhaul for Project Y, setting a new standard for project clarity.
+  - Managed cross-departmental teams to kickstart the Beta Launch of the New Platform.
+  - Coordinated with the Design Team to implement a new UI/UX for the Customer Portal.
+      `;
       console.log(
         "Here is a prompt to paste into Square's chatGPT: ",
         chalk.green(chatPrompt),
