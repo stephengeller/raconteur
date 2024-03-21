@@ -1,9 +1,9 @@
 import fs from "fs";
 import chalk from "chalk";
 import prompts from "prompts";
-import JiraApi from "jira-client";
 import { CUSTOM_PROMPT_PATH } from "./generatePrDescription";
 import { config } from "dotenv";
+import Jira from "./apis/Jira";
 
 config(); // Load .env file
 
@@ -54,42 +54,41 @@ export async function extraContextPrompt(): Promise<string> {
 }
 
 export async function getJiraTicketDescription(): Promise<string> {
-  const jira = new JiraApi({
-    protocol: "https",
-    host: "block.atlassian.net",
-    username: process.env.JIRA_USERNAME,
-    password: process.env.JIRA_API_TOKEN,
-    apiVersion: "2",
-    strictSSL: true,
-  });
+  const jiraUsername = process.env.JIRA_USERNAME;
+  const jiraApiToken = process.env.JIRA_API_TOKEN;
+
+  if (!jiraUsername || !jiraApiToken) {
+    console.log(chalk.red("JIra username or API token not found, skipping Jira ticket description."));
+    return "";
+  }
+
+  const jira = new Jira(jiraUsername, jiraApiToken);
 
   // prompt user for ticket number
   const response = await prompts({
     type: "text",
-    name: "value",
+    name: "ticketNumber",
     message: chalk.yellow("Enter the Jira ticket number:"),
+    format: (value) => value.toUpperCase(),
   });
 
-  if (response.value) {
-    const ticketNumber = response.value.toUpperCase();
-    // ES7
+  if (response.ticketNumber) {
     try {
-      const issue = await jira.findIssue(ticketNumber);
-      const description = issue.fields.description;
-      return `\n
+      const issue = await jira.getIssue(response.ticketNumber);
+      if(issue) {
+        return `\n
 Below are the contents of the Jira ticket, please use it to gain more context on the changes and include a link to the card in the PR description. 
-Also, please include the Jira ticket number ${ticketNumber} at the start of the PR title in square brackets (eg [${ticketNumber}]). 
+Also, please include the Jira ticket number ${issue.key} at the start of the PR title in square brackets (eg [${issue.key}]). 
       
   \`\`\`
-  ${description}
+  ${issue.description}
   \`\`\``;
+      }
     } catch (err) {
       console.error(err);
-      return "";
     }
-  } else {
-    return "";
   }
+  return "";
 }
 
 function saveCustomPrompt(prompt: string): void {
