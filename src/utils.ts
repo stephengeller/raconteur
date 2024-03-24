@@ -73,7 +73,7 @@ async function getJiraPrompts(jiraApi: JiraApi):  Promise<JiraIssue | undefined>
     }));
 
     const { selectedIssue } = await prompts({
-      type: "select",
+      type: "autocomplete",
       name: "selectedIssue",
       message: chalk.yellow("Select the Jira ticket to include in the PR description:"),
       choices: [
@@ -81,6 +81,15 @@ async function getJiraPrompts(jiraApi: JiraApi):  Promise<JiraIssue | undefined>
         { title: "None", value: "none" },
         { title: "Enter Manually", value: "enter" },
       ],
+      suggest: async (input, choices) => {
+        const lowercaseInput = input.toLowerCase();
+        // Always show the "None" and "Enter Manually" options, all others should be filtered by title.
+        return choices.filter(({ value, title }) => 
+          value === "none" 
+          || value === "enter" 
+          || title.toLowerCase().includes(lowercaseInput)
+        );
+      }
     });
 
     if (selectedIssue === "none" || selectedIssue === "enter") {
