@@ -1,6 +1,6 @@
 import JiraClient from "jira-client";
 
-type JiraIssue = {
+export type JiraIssue = {
   key: string;
   summary: string;
   description: string;
@@ -22,6 +22,7 @@ type JiraApiOptions = {
   host: string;
   strictSSL: boolean;
 }
+
 const DEFAULT_OPTIONS: JiraApiOptions = {
   protocol: "https",
   host: "block.atlassian.net",
@@ -53,8 +54,9 @@ export default class JiraApi {
    * @returns A list of issues assigned to the user.
    */
   getUserIssues(open: boolean = true): Promise<JiraIssue[]> {
-    return this.jiraClient.getUsersIssues(this.username, open)
-      .then(issues => issues.map(toJiraIssue));
+    return this.jiraClient
+      .getUsersIssues(this.username, open)
+      .then(response => response.issues?.map(toJiraIssue));
   }
 
   /**
