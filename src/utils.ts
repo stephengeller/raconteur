@@ -127,15 +127,15 @@ export async function getJiraTicketDescription(): Promise<string> {
 
     if(issue) {
       return `
-      Below are the contents of the Jira ticket, please use it to gain more context on the changes and include a link to the card in the PR description.
-      Also, please include the Jira ticket number ${issue.key} at the start of the PR title in square brackets (eg [${issue.key}]).
+Below are the contents of the Jira ticket, please use it to gain more context on the changes and include a link to the card in the PR description.
+Also, please include the Jira ticket number ${issue.key} at the start of the PR title in square brackets (eg [${issue.key}]).
 
-      \`\`\`
-      ${issue.summary}
+\`\`\`
+${issue.summary}
 
-      ${issue.description}
-      \`\`\`
-      `;
+${issue.description}
+\`\`\`
+`;
     }
   } catch (error) {
     console.error(chalk.red(`Error fetching Jira ticket: ${error}`));
