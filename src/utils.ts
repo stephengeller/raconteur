@@ -112,7 +112,7 @@ async function getJiraPrompts(jiraApi: JiraApi):  Promise<JiraIssue | undefined>
 
 
 export async function getJiraTicketDescription(): Promise<string> {
-  const jiraUsername = process.env.SQAUREUP_EMAIL;
+  const jiraUsername = process.env.SQUAREUP_EMAIL;
   const jiraApiToken = process.env.JIRA_API_TOKEN;
 
   if (!jiraUsername || !jiraApiToken) {
