@@ -1,6 +1,6 @@
 import JiraClient from "jira-client";
 
-type JiraIssue = {
+export type JiraIssue = {
   key: string;
   summary: string;
   description: string;
@@ -22,6 +22,7 @@ type JiraApiOptions = {
   host: string;
   strictSSL: boolean;
 }
+
 const DEFAULT_OPTIONS: JiraApiOptions = {
   protocol: "https",
   host: "block.atlassian.net",
@@ -33,8 +34,10 @@ const DEFAULT_OPTIONS: JiraApiOptions = {
  */
 export default class JiraApi {
   private jiraClient: JiraClient
+  private username: string;
   
   constructor(username: string, apiKey: string, options: Partial<JiraApiOptions> = {}) {
+    this.username = username;
     this.jiraClient = new JiraClient({
       ...DEFAULT_OPTIONS,
       ...options,
@@ -42,6 +45,18 @@ export default class JiraApi {
       password: apiKey,
       apiVersion: "2",
     });
+  }
+
+  /**
+   * Fetures all the issues assigned to the user.
+   * 
+   * @param {boolean} [open=true] Whether to fetch only open issues.
+   * @returns A list of issues assigned to the user.
+   */
+  getUserIssues(open: boolean = true): Promise<JiraIssue[]> {
+    return this.jiraClient
+      .getUsersIssues(this.username, open)
+      .then(response => response.issues?.map(toJiraIssue));
   }
 
   /**
