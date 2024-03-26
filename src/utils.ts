@@ -92,6 +92,10 @@ async function getJiraPrompts(jiraApi: JiraApi):  Promise<JiraIssue | undefined>
       }
     });
 
+    if (selectedIssue?.key) {
+      return jiraApi.getIssue(selectedIssue.key);
+    }
+
     if (selectedIssue === "none" || selectedIssue === "enter") {
       command = selectedIssue;
     }
