@@ -39,20 +39,36 @@ const headers = {
     'Content-Type': 'application/json',
 };
 
+// Process command line arguments
+const args = process.argv.slice(2);
+if (args.length !== 5) {
+    console.error('Usage: ts-node update-pagerduty.ts "<Full Name>" <Start Time> <End Time> "<Start Date>" "<End Date>"');
+    process.exit(1);
+}
+
+const [fullName, startTime, endTime, startDate, endDate] = args;
+const [firstName, lastName] = fullName.split(' ');
+
+// Convert the start and end times into UTC format
+function convert_time_to_utc(date: string, time: number): string {
+    const dateTime = moment.tz(`${date} ${time}:00`, 'YYYY-MM-DD H:mm', 'Etc/UTC');
+    return dateTime.format();
+}
+
 // Map the initials to full names
 const initials_to_fullname: Record<string, string> = {
     'MM': 'FirstName LastName', // Will be replaced with actual first and last names
 };
 
 // Function to get PagerDuty user ID by full name
-async function get_user_id_by_name(first_name: string, last_name: string): Promise<string> {
+async function get_user_id_by_name(firstName: string, lastName: string): Promise<string> {
     const response: AxiosResponse<{ users: { id: string }[] }> = await axios.get(
-        `${pd_api_url}/users?query=${encodeURIComponent(first_name)}+${encodeURIComponent(last_name)}`,
+        `${pd_api_url}/users?query=${encodeURIComponent(firstName)}+${encodeURIComponent(lastName)}`,
         { headers }
     );
     const users = response.data.users;
     if (users.length !== 1) {
-        throw new Error(`Expected 1 user, found ${users.length} for name ${first_name} ${last_name}`);
+        throw new Error(`Expected 1 user, found ${users.length} for name ${firstName} ${lastName}`);
     }
     return users[0].id;
 }
@@ -142,13 +158,26 @@ function prompt(query: string): Promise<string> {
     }));
 }
 
+// Create an override object
+async function create_override(): Promise<Override> {
+    const userId = await get_user_id_by_name(firstName, lastName);
+    return {
+        start: convert_time_to_utc(startDate, parseInt(startTime)),
+        end: convert_time_to_utc(endDate, parseInt(endTime)),
+        user: {
+            id: userId,
+            type: 'user_reference',
+            full_name: fullName
+        }
+    };
+}
+
 // Main execution
 (async () => {
     try {
-        // Replace '/path/to/your/csvfile.csv' with the actual file path
-        const overrides = await create_overrides('/path/to/your/csvfile.csv');
-        console.log(overrides);
-        await post_overrides(overrides);
+        const override = await create_override();
+        console.log(override);
+        // await post_overrides([override]);
     } catch (error) {
         console.error(error);
     }
