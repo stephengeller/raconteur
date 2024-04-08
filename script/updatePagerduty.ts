@@ -112,17 +112,24 @@ function prompt(query: string): Promise<string> {
 
 // Function to send override data to PagerDuty
 async function post_overrides(overrides: Override[]): Promise<void> {
+    let confirmAll = false
     for (const override of overrides) {
         const user_id = override.user.id;
         const full_name = override.user.full_name;
         const start_time_pretty = moment(override.start).tz('America/Vancouver').format('DD MMM YYYY, hh:mm A');
         const end_time_pretty = moment(override.end).tz('America/Vancouver').format('DD MMM YYYY, hh:mm A');
-
-        const confirm = await prompt(`About to add override for ${full_name} (ID: ${user_id}) for date ${start_time_pretty} to ${end_time_pretty}, confirm? y/n: `);
-        if (confirm.toLowerCase() !== 'y') {
-            console.log("Override cancelled by user.");
-            continue;
+        
+        if (!confirmAll) {
+            const confirm = await prompt(`About to add override for ${full_name} (ID: ${user_id}) for date ${start_time_pretty} to ${end_time_pretty}, confirm? y/n: `);
+            if (confirm.toLowerCase() == 'yy') {
+                confirmAll = true;
+            } else if (confirm.toLowerCase() !== 'y') {
+                console.log("Override cancelled by user.");
+                continue;
+            }
         }
+
+        
 
         try {
             const response = await axios.post(
