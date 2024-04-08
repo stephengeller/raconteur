@@ -67,8 +67,17 @@ async function create_overrides(fullName: string, startTime: number, endTime: nu
     const overrides: Override[] = [];
 
     while (currentDay.isSameOrBefore(endDay)) {
-        const start = convert_to_utc(currentDay.format('YYYY-MM-DD'), startTime, timeZone);
-        const end = convert_to_utc(currentDay.format('YYYY-MM-DD'), endTime, timeZone);
+        const startDateTime = currentDay.clone().hours(startTime);
+        const endDateTime = currentDay.clone().hours(endTime);
+
+        // If the end time is earlier than the start time, roll over to the next date
+        if (endTime < startTime) {
+            endDateTime.add(1, 'day');
+        }
+
+        // Convert times to UTC
+        const start = startDateTime.utc().format();
+        const end = endDateTime.utc().format();
 
         overrides.push({
             start,
@@ -86,6 +95,7 @@ async function create_overrides(fullName: string, startTime: number, endTime: nu
 
     return overrides;
 }
+
 
 // Function to prompt user input in the console
 function prompt(query: string): Promise<string> {
@@ -141,7 +151,6 @@ async function post_overrides(overrides: Override[]): Promise<void> {
 
         // Create overrides for each day
         const overrides = await create_overrides(fullName, startTimeNumber, endTimeNumber, startDate, endDate);
-        console.log(overrides);
 
         // Prompt user for confirmation and post overrides to PagerDuty
         await post_overrides(overrides);
