@@ -7,12 +7,6 @@ import { getStagedGitDiff } from "./git";
 import yargs from "yargs";
 import {hideBin} from "yargs/helpers";
 import ora from 'ora'
-import readline from 'readline';
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 
 dotenv.config();
 
@@ -81,32 +75,12 @@ async function commitChanges(commitMessage: string): Promise<void> {
 async function main() {
   const diff = await getStagedGitDiff(argv.dir);
   if (diff) {
-    let commitMessage = await generateCommitMessage(diff);
+    const commitMessage = await generateCommitMessage(diff);
     console.log(chalk.green("Suggested commit message:"));
     console.log(chalk.yellow(commitMessage));
 
-    // Prompt whether to edit the commit message
-    const editResponse = await prompts({
-      type: "toggle",
-      name: "value",
-      message: "Do you want to edit the commit message?",
-      initial: false,
-      active: "yes",
-      inactive: "no",
-    });
-
-    if (editResponse.value) {
-      // Get the new commit message from the user
-      const newMessage = await new Promise((resolve) => {
-        rl.question('Enter the new commit message: ', (input) => {
-          resolve(input);
-        });
-      });
-      commitMessage = newMessage as string;
-    }
-
     // Prompt whether to commit with the suggested message
-    const commitResponse = await prompts({
+    const response = await prompts({
       type: "toggle",
       name: "value",
       message: "Do you want to commit with the above message?",
@@ -115,7 +89,7 @@ async function main() {
       inactive: "no",
     });
 
-    if (commitResponse.value) {
+    if (response.value) {
       await commitChanges(commitMessage);
     } else {
       console.log(chalk.yellow("Commit aborted by user."));
