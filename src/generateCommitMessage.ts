@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { getStagedGitDiff } from "./git";
 import yargs from "yargs";
 import {hideBin} from "yargs/helpers";
+import ora from 'ora'
 
 dotenv.config();
 
@@ -28,13 +29,16 @@ async function generateCommitMessage(diff: string): Promise<string> {
     return "No changes to commit.";
   }
 
-  console.log(chalk.blue("Generating commit message..."));
+  const spinner = ora(chalk.blue('Generating commit message...')).start();
 
   const prompt =
-    "Please generate a concise commit message based on the following changes, following the Conventional Commits specification";
+      "Please generate a concise commit message based on the following changes, following the Conventional Commits specification";
   try {
-    return await callChatGPTApi(prompt, diff);
+    const commitMessage = await callChatGPTApi(prompt, diff);
+    spinner.succeed(chalk.blue('Commit message generated'));
+    return commitMessage;
   } catch (error) {
+    spinner.fail('Failed to generate commit message.');
     console.error(chalk.red("Failed to generate commit message:"), error);
     process.exit(1);
   }

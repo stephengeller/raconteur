@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { promisify } from "util";
 import { exec } from "child_process";
+import ora from "ora";
 
 const execAsync = promisify(exec);
 
@@ -31,12 +32,14 @@ export async function getGitDiff(
 }
 
 export async function getStagedGitDiff(pathToRepo: string): Promise<string> {
-  console.log(chalk.blue("Obtaining staged git diff..."));
+  const spinner = ora(chalk.blue('Obtaining staged git diff...')).start();
   try {
     const { stdout } = await execAsync(`git -C ${pathToRepo} diff --cached`);
+    spinner.succeed(chalk.blue('Staged git diff obtained'));
     return stdout;
   } catch (error) {
-    console.error(chalk.red("Error obtaining staged git diff:"), error);
+    spinner.fail(chalk.blue('Failed to obtain staged git diff'));
+    console.error(chalk.red(error));
     process.exit(1);
   }
 }
