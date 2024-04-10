@@ -7,6 +7,13 @@ import {getStagedFiles, getStagedGitDiff} from "./git";
 import yargs from "yargs";
 import {hideBin} from "yargs/helpers";
 import ora from 'ora'
+import {
+  
+  printBoxBody,
+  printBoxFooter,
+  printBoxHeader,
+  printCommitMessage
+} from "./utils";
 
 dotenv.config();
 
@@ -72,6 +79,25 @@ async function commitChanges(commitMessage: string): Promise<void> {
   });
 }
 
+// Function to handle the commit process
+export async function handleCommit(commitMessage: string) {
+  const response = await prompts({
+    type: "toggle",
+    name: "value",
+    message: "Do you want to commit with the above message?",
+    initial: true,
+    active: "yes",
+    inactive: "no",
+  });
+
+  if (response.value) {
+    await commitChanges(commitMessage);
+  } else {
+    console.log(chalk.yellow("Commit aborted by user."));
+  }
+}
+
+// Main function refactored with smaller functions
 async function main() {
   const diff = await getStagedGitDiff(argv.dir);
   const stagedFiles = await getStagedFiles(argv.dir);
@@ -83,58 +109,24 @@ async function main() {
       const borderWidth = 2; // For the left and right border characters "|"
       const contentWidth = totalWidth - borderWidth; // Width available for content
 
-      console.log(chalk.blueBright("┌" + "─".repeat(contentWidth) + "┐"));
-
-      // Calculate padding dynamically for the header
-      const paddingLength = (contentWidth - header.length) / 2;
-      const padding = " ".repeat(Math.floor(paddingLength));
-      const paddingExtra = header.length % 2 !== 0 ? " " : ""; // For odd-length headers
-
-      console.log(chalk.blueBright("│") + padding + chalk.bold(header) + padding + paddingExtra + chalk.blueBright("│"));
-
-      console.log(chalk.blueBright("├" + "─".repeat(contentWidth) + "┤"));
-
-      // Print each staged file with appropriate padding
-      stagedFiles.forEach(file => {
-        const filePaddingLength = contentWidth - file.length - 1; // -1 for the space after the file name
-        const filePadding = " ".repeat(Math.max(0, filePaddingLength)); // Prevent negative padding values
-        console.log(chalk.blueBright("│ ") + chalk.yellowBright(file) + filePadding + chalk.blueBright("│"));
-      });
-
-      console.log(chalk.blueBright("└" + "─".repeat(contentWidth) + "┘"));
-      console.log(""); // Add an empty line for better readability
+      printBoxHeader(contentWidth, header);
+      printBoxBody(contentWidth, stagedFiles);
+      printBoxFooter(contentWidth);
     } else {
       console.log(chalk.yellow("No files are staged for commit."));
     }
 
     const commitMessage = await generateCommitMessage(diff);
-    console.log(chalk.greenBright("Suggested commit message:"));
-    console.log(chalk.cyanBright(commitMessage));
-  
-
-
-
-    // Prompt whether to commit with the suggested message
-    const response = await prompts({
-      type: "toggle",
-      name: "value",
-      message: "Do you want to commit with the above message?",
-      initial: true,
-      active: "yes",
-      inactive: "no",
-    });
-
-    if (response.value) {
-      await commitChanges(commitMessage);
-    } else {
-      console.log(chalk.yellow("Commit aborted by user."));
-    }
+    printCommitMessage(commitMessage);
+    await handleCommit(commitMessage);
   } else {
     console.log(chalk.red("No staged changes found."));
   }
 }
 
-main().catch((error) => {
-  console.error(chalk.red("Unexpected error:"), error);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(chalk.red("Unexpected error:"), error);
+    process.exit(1);
+  });
+}

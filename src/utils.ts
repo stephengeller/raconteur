@@ -156,3 +156,37 @@ function saveCustomPrompt(prompt: string): void {
     console.error(chalk.red(`Error saving custom prompt: ${error}`));
   }
 }
+
+
+// Function to print the header of the box
+export function printBoxHeader(contentWidth: number, header: string) {
+  console.log(chalk.blueBright("┌" + "─".repeat(contentWidth) + "┐"));
+  const paddingLength = (contentWidth - header.length) / 2;
+  const padding = " ".repeat(Math.floor(paddingLength));
+  const paddingExtra = header.length % 2 !== 0 ? " " : "";
+  console.log(chalk.blueBright("│") + padding + chalk.bold(header) + padding + paddingExtra + chalk.blueBright("│"));
+}
+
+// Function to print the middle part of the box with files
+export function printBoxBody(contentWidth: number, files: string[]) {
+  console.log(chalk.blueBright("├" + "─".repeat(contentWidth) + "┤"));
+  files.forEach(file => {
+    const filePaddingLength = contentWidth - file.length - 1; // -1 for the space after the file name
+    const filePadding = " ".repeat(Math.max(0, filePaddingLength)); // Prevent negative padding values
+    console.log(chalk.blueBright("│ ") + chalk.yellowBright(file) + filePadding + chalk.blueBright("│"));
+  });
+}
+
+// Function to print the footer of the box
+export function printBoxFooter(contentWidth: number) {
+  console.log(chalk.blueBright("└" + "─".repeat(contentWidth) + "┘"));
+  console.log(""); // Add an empty line for better readability
+}
+
+// Function to print the commit message
+export function printCommitMessage(commitMessage: string) {
+  console.log(chalk.greenBright("Suggested commit message:"));
+  console.log(chalk.cyanBright(commitMessage));
+}
+
+

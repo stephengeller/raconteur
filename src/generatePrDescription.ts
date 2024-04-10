@@ -177,8 +177,10 @@ Please also generate a PR title, following the Conventional Commit format.
   }
 }
 
-main().catch((error) => {
-  console.error("Error:", error.message);
-  console.error(error);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error("Error:", error.message);
+    console.error(error);
+    process.exit(1);
+  });
+}
