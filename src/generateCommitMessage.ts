@@ -77,13 +77,41 @@ async function main() {
   const stagedFiles = await getStagedFiles(argv.dir);
 
   if (diff) {
-    console.log(chalk.green("Staged files to be committed:"));
-    stagedFiles.forEach(file => console.log(chalk.yellow(file)));
-    console.log(""); // Add an empty line for better readability
+    if (stagedFiles.length > 0) {
+      const header = "Staged files to be committed:";
+      const totalWidth = 50; // Total width for the header/footer lines including border
+      const borderWidth = 2; // For the left and right border characters "|"
+      const contentWidth = totalWidth - borderWidth; // Width available for content
+
+      console.log(chalk.blueBright("┌" + "─".repeat(contentWidth) + "┐"));
+
+      // Calculate padding dynamically for the header
+      const paddingLength = (contentWidth - header.length) / 2;
+      const padding = " ".repeat(Math.floor(paddingLength));
+      const paddingExtra = header.length % 2 !== 0 ? " " : ""; // For odd-length headers
+
+      console.log(chalk.blueBright("│") + padding + chalk.bold(header) + padding + paddingExtra + chalk.blueBright("│"));
+
+      console.log(chalk.blueBright("├" + "─".repeat(contentWidth) + "┤"));
+
+      // Print each staged file with appropriate padding
+      stagedFiles.forEach(file => {
+        const filePaddingLength = contentWidth - file.length - 1; // -1 for the space after the file name
+        const filePadding = " ".repeat(Math.max(0, filePaddingLength)); // Prevent negative padding values
+        console.log(chalk.blueBright("│ ") + chalk.yellowBright(file) + filePadding + chalk.blueBright("│"));
+      });
+
+      console.log(chalk.blueBright("└" + "─".repeat(contentWidth) + "┘"));
+      console.log(""); // Add an empty line for better readability
+    } else {
+      console.log(chalk.yellow("No files are staged for commit."));
+    }
 
     const commitMessage = await generateCommitMessage(diff);
-    console.log(chalk.green("Suggested commit message:"));
-    console.log(chalk.yellow(commitMessage));
+    console.log(chalk.greenBright("Suggested commit message:"));
+    console.log(chalk.cyanBright(commitMessage));
+  
+
 
 
     // Prompt whether to commit with the suggested message
