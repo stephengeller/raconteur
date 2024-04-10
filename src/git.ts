@@ -43,3 +43,20 @@ export async function getStagedGitDiff(pathToRepo: string): Promise<string> {
     process.exit(1);
   }
 }
+
+
+export async function getStagedFiles(pathToRepo: string): Promise<string[]> {
+  const spinner = ora(chalk.blue('Obtaining staged files...')).start();
+  const execAsync = promisify(exec);
+
+  try {
+    const { stdout } = await execAsync(`git -C "${pathToRepo}" diff --cached --name-only`);
+    const files = stdout.trim().split('\n');
+    spinner.succeed(chalk.blue('Staged files obtained'));
+    return files;
+  } catch (error) {
+    spinner.fail(chalk.blue('Failed to obtain staged files'));
+    console.error(chalk.red(error));
+    process.exit(1);
+  }
+}

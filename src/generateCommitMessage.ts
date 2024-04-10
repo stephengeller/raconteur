@@ -3,7 +3,7 @@ import chalk from "chalk";
 import prompts from "prompts"; // Import prompts
 import { callChatGPTApi } from "./ChatGPTApi";
 import dotenv from "dotenv";
-import { getStagedGitDiff } from "./git";
+import {getStagedFiles, getStagedGitDiff} from "./git";
 import yargs from "yargs";
 import {hideBin} from "yargs/helpers";
 import ora from 'ora'
@@ -74,10 +74,17 @@ async function commitChanges(commitMessage: string): Promise<void> {
 
 async function main() {
   const diff = await getStagedGitDiff(argv.dir);
+  const stagedFiles = await getStagedFiles(argv.dir);
+
   if (diff) {
+    console.log(chalk.green("Staged files to be committed:"));
+    stagedFiles.forEach(file => console.log(chalk.yellow(file)));
+    console.log(""); // Add an empty line for better readability
+
     const commitMessage = await generateCommitMessage(diff);
     console.log(chalk.green("Suggested commit message:"));
     console.log(chalk.yellow(commitMessage));
+
 
     // Prompt whether to commit with the suggested message
     const response = await prompts({
