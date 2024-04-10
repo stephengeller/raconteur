@@ -97,24 +97,24 @@ export async function handleCommit(commitMessage: string) {
   }
 }
 
+function printStagedFiles(stagedFiles: string[]) {
+  const header = "Staged files to be committed:";
+  const totalWidth = 50; // Total width for the header/footer lines including border
+  const borderWidth = 2; // For the left and right border characters "|"
+  const contentWidth = totalWidth - borderWidth; // Width available for content
+
+  printBoxHeader(contentWidth, header);
+  printBoxBody(contentWidth, stagedFiles);
+  printBoxFooter(contentWidth);
+}
+
 // Main function refactored with smaller functions
 async function main() {
   const diff = await getStagedGitDiff(argv.dir);
   const stagedFiles = await getStagedFiles(argv.dir);
 
   if (diff) {
-    if (stagedFiles.length > 0) {
-      const header = "Staged files to be committed:";
-      const totalWidth = 50; // Total width for the header/footer lines including border
-      const borderWidth = 2; // For the left and right border characters "|"
-      const contentWidth = totalWidth - borderWidth; // Width available for content
-
-      printBoxHeader(contentWidth, header);
-      printBoxBody(contentWidth, stagedFiles);
-      printBoxFooter(contentWidth);
-    } else {
-      console.log(chalk.yellow("No files are staged for commit."));
-    }
+    printStagedFiles(stagedFiles);
 
     const commitMessage = await generateCommitMessage(diff);
     printCommitMessage(commitMessage);
