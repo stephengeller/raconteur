@@ -91,42 +91,45 @@ export async function handleCommit(commitMessage: string) {
   }
 }
 
-function visibleLength(str: string) {
-  // This will remove any styling characters inserted by chalk
-  // eslint-disable-next-line no-control-regex
-  return str.replace(/\u001b\[\d+m/g, "").length;
+function truncatePath(path: string, maxLength: number) {
+  if (path.length <= maxLength) {
+    return path;
+  }
+  return "..." + path.slice(-maxLength + 3); // +3 for the length of '...'
 }
 
 function printStagedFiles(
   stagedFiles: { file: string; additions: number; deletions: number }[],
 ) {
-  // Calculate the visible length of the longest file information
-  const longestFileLength = Math.max(
+  const maxFilePathLength = 40;
+  const header = "Staged files to be committed:";
+  const headerLength = header.length;
+  const maxLineLength = Math.max(
     ...stagedFiles.map(
       ({ file, additions, deletions }) =>
-        visibleLength(
-          chalk.yellowBright(file) +
-            chalk.greenBright(`(+${additions})`) + // Removed space after parentheses
-            chalk.redBright(`(-${deletions})`),
-        ), // Removed space after parentheses
+        `${truncatePath(file, maxFilePathLength)} (+${additions}) (-${deletions})`
+          .length,
     ),
+    headerLength,
   );
 
-  // Calculate total width for the box. Add 4 for padding: 2 spaces on each side.
-  const totalWidth = Math.max(50, longestFileLength + 4); // Adjusted for the padding
-  const contentWidth = totalWidth - 2; // Subtract 2 for the borders
+  const totalWidth = Math.max(50, maxLineLength + 4); // Add some padding
+  const contentWidth = totalWidth - 2; // Account for the borders
 
-  printBoxHeader(contentWidth, "Staged files to be committed:");
+  printBoxHeader(contentWidth, header);
 
   stagedFiles.forEach(({ file, additions, deletions }) => {
-    const fileInfo =
-      chalk.yellowBright(file) +
-      chalk.greenBright(`(+${additions})`) + // Removed space after parentheses
-      chalk.redBright(`(-${deletions})`); // Removed space after parentheses
-    const filePaddingLength = contentWidth - visibleLength(fileInfo); // Use visibleLength here
-    const filePadding = " ".repeat(Math.max(0, filePaddingLength)); // Prevent negative padding values
+    const truncatedFile = truncatePath(file, maxFilePathLength);
+    const fileInfo = `${truncatedFile} (+${additions}) (-${deletions})`;
+    const filePaddingLength = contentWidth - fileInfo.length;
+    const filePadding = " ".repeat(Math.max(0, filePaddingLength));
     console.log(
-      chalk.blueBright("│ ") + fileInfo + filePadding + chalk.blueBright("│"),
+      chalk.blueBright("│ ") +
+        chalk.yellowBright(truncatedFile) +
+        chalk.greenBright(` (+${additions})`) +
+        chalk.redBright(` (-${deletions})`) +
+        filePadding +
+        chalk.blueBright("│"),
     );
   });
 
