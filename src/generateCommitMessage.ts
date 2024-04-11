@@ -3,30 +3,24 @@ import chalk from "chalk";
 import prompts from "prompts"; // Import prompts
 import { callChatGPTApi } from "./ChatGPTApi";
 import dotenv from "dotenv";
-import {getStagedFiles, getStagedGitDiff} from "./git";
+import { getStagedFiles, getStagedGitDiff } from "./git";
 import yargs from "yargs";
-import {hideBin} from "yargs/helpers";
-import ora from 'ora'
-import {
-  
-  printBoxBody,
-  printBoxFooter,
-  printBoxHeader,
-  printCommitMessage
-} from "./utils";
+import { hideBin } from "yargs/helpers";
+import ora from "ora";
+import { printBoxFooter, printBoxHeader, printCommitMessage } from "./utils";
 
 dotenv.config();
 
 const argv = yargs(hideBin(process.argv))
-    .option("dir", {
-      alias: "d",
-      description: "Specify the directory of the git repository",
-      type: "string",
-      default: process.cwd(),
-    })
-    .help()
-    .alias("help", "h")
-    .parseSync();
+  .option("dir", {
+    alias: "d",
+    description: "Specify the directory of the git repository",
+    type: "string",
+    default: process.cwd(),
+  })
+  .help()
+  .alias("help", "h")
+  .parseSync();
 
 process.chdir(argv.dir);
 
@@ -36,16 +30,16 @@ async function generateCommitMessage(diff: string): Promise<string> {
     return "No changes to commit.";
   }
 
-  const spinner = ora(chalk.blue('Generating commit message...')).start();
+  const spinner = ora(chalk.blue("Generating commit message...")).start();
 
   const prompt =
-      "Please generate a concise commit message based on the following changes, following the Conventional Commits specification";
+    "Please generate a concise commit message based on the following changes, following the Conventional Commits specification";
   try {
     const commitMessage = await callChatGPTApi(prompt, diff);
-    spinner.succeed(chalk.blue('Commit message generated'));
+    spinner.succeed(chalk.blue("Commit message generated"));
     return commitMessage;
   } catch (error) {
-    spinner.fail('Failed to generate commit message.');
+    spinner.fail("Failed to generate commit message.");
     console.error(chalk.red("Failed to generate commit message:"), error);
     process.exit(1);
   }
@@ -97,14 +91,32 @@ export async function handleCommit(commitMessage: string) {
   }
 }
 
-function printStagedFiles(stagedFiles: string[]) {
-  const header = "Staged files to be committed:";
-  const totalWidth = 50; // Total width for the header/footer lines including border
-  const borderWidth = 2; // For the left and right border characters "|"
-  const contentWidth = totalWidth - borderWidth; // Width available for content
+function printStagedFiles(
+  stagedFiles: { file: string; additions: number; deletions: number }[],
+) {
+  const longestFileLength = Math.max(
+    ...stagedFiles.map(
+      ({ file, additions, deletions }) =>
+        `${file} (+${additions} -${deletions})`.length,
+    ),
+  );
+  const totalWidth = Math.max(50, longestFileLength + 3); // Add 3 for the left and right padding
+  const contentWidth = totalWidth - 2; // Subtract 2 for the left and right border characters "|"
 
-  printBoxHeader(contentWidth, header);
-  printBoxBody(contentWidth, stagedFiles);
+  printBoxHeader(contentWidth, "Staged files to be committed:");
+  stagedFiles.forEach(({ file, additions, deletions }) => {
+    const fileInfo = `${file} (+${additions} -${deletions})`;
+    const filePaddingLength = contentWidth - fileInfo.length; // Adjust for the length of the entire string
+    const filePadding = " ".repeat(Math.max(0, filePaddingLength)); // Prevent negative padding values
+    console.log(
+      chalk.blueBright("│ ") +
+        chalk.yellowBright(file) +
+        chalk.greenBright(` (+${additions})`) +
+        chalk.redBright(` (-${deletions})`) +
+        filePadding +
+        chalk.blueBright("│"),
+    );
+  });
   printBoxFooter(contentWidth);
 }
 
