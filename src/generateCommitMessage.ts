@@ -7,7 +7,7 @@ import { getStagedFiles, getStagedGitDiff } from "./git";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import ora from "ora";
-import { printBoxFooter, printBoxHeader, printCommitMessage } from "./utils";
+import { printCommitMessage } from "./utils";
 
 dotenv.config();
 
@@ -91,7 +91,7 @@ export async function handleCommit(commitMessage: string) {
   }
 }
 
-function truncatePath(path: string, maxLength: number) {
+function truncatePath(path: string, maxLength: number): string {
   if (path.length <= maxLength) {
     return path;
   }
@@ -99,41 +99,68 @@ function truncatePath(path: string, maxLength: number) {
 }
 
 function printStagedFiles(
-  stagedFiles: { file: string; additions: number; deletions: number }[],
-) {
-  const maxFilePathLength = 40;
+  stagedFiles: Array<{ file: string; additions: number; deletions: number }>,
+): void {
+  const maxFilePathLength = 15;
   const header = "Staged files to be committed:";
-  const headerLength = header.length;
   const maxLineLength = Math.max(
-    ...stagedFiles.map(
-      ({ file, additions, deletions }) =>
-        `${truncatePath(file, maxFilePathLength)} (+${additions}) (-${deletions})`
-          .length,
-    ),
-    headerLength,
+    ...stagedFiles.map(({ file, additions, deletions }) => {
+      const additionText = additions > 0 ? ` (+${additions})` : "";
+      const deletionText = deletions > 0 ? ` (-${deletions})` : "";
+      return `${truncatePath(file, maxFilePathLength)}${additionText}${deletionText}`
+        .length;
+    }),
+    header.length,
   );
 
-  const totalWidth = Math.max(50, maxLineLength + 4); // Add some padding
+  const totalWidth = Math.max(50, maxLineLength + 4); // Add some padding for aesthetics
   const contentWidth = totalWidth - 2; // Account for the borders
 
   printBoxHeader(contentWidth, header);
 
   stagedFiles.forEach(({ file, additions, deletions }) => {
     const truncatedFile = truncatePath(file, maxFilePathLength);
-    const fileInfo = `${truncatedFile} (+${additions}) (-${deletions})`;
-    const filePaddingLength = contentWidth - fileInfo.length;
+    const additionText =
+      additions > 0 ? chalk.greenBright(` (+${additions})`) : "";
+    const deletionText =
+      deletions > 0 ? chalk.redBright(` (-${deletions})`) : "";
+    const fileInfo = `${truncatedFile}${additionText}${deletionText}`;
+    const filePaddingLength = contentWidth - visibleLength(fileInfo); // Ensure we use visibleLength to account for chalk characters
     const filePadding = " ".repeat(Math.max(0, filePaddingLength));
     console.log(
       chalk.blueBright("│ ") +
         chalk.yellowBright(truncatedFile) +
-        chalk.greenBright(` (+${additions})`) +
-        chalk.redBright(` (-${deletions})`) +
+        additionText +
+        deletionText +
         filePadding +
         chalk.blueBright("│"),
     );
   });
 
   printBoxFooter(contentWidth);
+}
+
+function visibleLength(str: string): number {
+  // Remove ANSI escape codes to correctly calculate the visible length
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/\u001b\[\d+m/g, "").length;
+}
+
+function printBoxHeader(contentWidth: number, header: string): void {
+  console.log(chalk.blueBright("┌" + "─".repeat(contentWidth) + "┐"));
+  const paddingLength = (contentWidth - visibleLength(header)) / 2;
+  const padding = " ".repeat(Math.floor(paddingLength));
+  console.log(
+    chalk.blueBright("│") +
+      padding +
+      chalk.bold(header) +
+      padding +
+      chalk.blueBright("│"),
+  );
+}
+
+function printBoxFooter(contentWidth: number): void {
+  console.log(chalk.blueBright("└" + "─".repeat(contentWidth) + "┘"));
 }
 
 // Main function refactored with smaller functions
