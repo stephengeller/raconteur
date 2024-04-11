@@ -91,32 +91,45 @@ export async function handleCommit(commitMessage: string) {
   }
 }
 
+function visibleLength(str: string) {
+  // This will remove any styling characters inserted by chalk
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/\u001b\[\d+m/g, "").length;
+}
+
 function printStagedFiles(
   stagedFiles: { file: string; additions: number; deletions: number }[],
 ) {
+  // Calculate the visible length of the longest file information
   const longestFileLength = Math.max(
     ...stagedFiles.map(
       ({ file, additions, deletions }) =>
-        `${file} (+${additions} -${deletions})`.length,
+        visibleLength(
+          chalk.yellowBright(file) +
+            chalk.greenBright(`(+${additions})`) + // Removed space after parentheses
+            chalk.redBright(`(-${deletions})`),
+        ), // Removed space after parentheses
     ),
   );
-  const totalWidth = Math.max(50, longestFileLength + 3); // Add 3 for the left and right padding
-  const contentWidth = totalWidth - 2; // Subtract 2 for the left and right border characters "|"
+
+  // Calculate total width for the box. Add 4 for padding: 2 spaces on each side.
+  const totalWidth = Math.max(50, longestFileLength + 4); // Adjusted for the padding
+  const contentWidth = totalWidth - 2; // Subtract 2 for the borders
 
   printBoxHeader(contentWidth, "Staged files to be committed:");
+
   stagedFiles.forEach(({ file, additions, deletions }) => {
-    const fileInfo = `${file} (+${additions} -${deletions})`;
-    const filePaddingLength = contentWidth - fileInfo.length; // Adjust for the length of the entire string
+    const fileInfo =
+      chalk.yellowBright(file) +
+      chalk.greenBright(`(+${additions})`) + // Removed space after parentheses
+      chalk.redBright(`(-${deletions})`); // Removed space after parentheses
+    const filePaddingLength = contentWidth - visibleLength(fileInfo); // Use visibleLength here
     const filePadding = " ".repeat(Math.max(0, filePaddingLength)); // Prevent negative padding values
     console.log(
-      chalk.blueBright("│ ") +
-        chalk.yellowBright(file) +
-        chalk.greenBright(` (+${additions})`) +
-        chalk.redBright(` (-${deletions})`) +
-        filePadding +
-        chalk.blueBright("│"),
+      chalk.blueBright("│ ") + fileInfo + filePadding + chalk.blueBright("│"),
     );
   });
+
   printBoxFooter(contentWidth);
 }
 

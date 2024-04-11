@@ -165,9 +165,8 @@ function saveCustomPrompt(prompt: string): void {
   }
 }
 
-// Function to print the header of the box
 export function printBoxHeader(contentWidth: number, header: string) {
-  console.log(chalk.blueBright("┌" + "─".repeat(contentWidth) + "┐"));
+  console.log(chalk.blueBright("┌" + "─".repeat(contentWidth + 1) + "┐")); // Add extra space in the header
   const paddingLength = (contentWidth - header.length) / 2;
   const padding = " ".repeat(Math.floor(paddingLength));
   const paddingExtra = header.length % 2 !== 0 ? " " : "";
@@ -177,14 +176,13 @@ export function printBoxHeader(contentWidth: number, header: string) {
       chalk.bold(header) +
       padding +
       paddingExtra +
+      " " + // Add extra space after the header text
       chalk.blueBright("│"),
   );
 }
 
-// Function to print the footer of the box
 export function printBoxFooter(contentWidth: number) {
-  console.log(chalk.blueBright("└" + "─".repeat(contentWidth) + "┘"));
-  console.log(""); // Add an empty line for better readability
+  console.log(chalk.blueBright("└" + "─".repeat(contentWidth + 1) + "┘")); // Add extra space in the footer
 }
 
 // Function to print the commit message
