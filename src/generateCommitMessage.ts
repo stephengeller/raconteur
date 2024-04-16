@@ -149,13 +149,16 @@ function visibleLength(str: string): number {
 
 function printBoxHeader(contentWidth: number, header: string): void {
   console.log(chalk.blueBright("┌" + "─".repeat(contentWidth) + "┐"));
-  const paddingLength = (contentWidth - visibleLength(header)) / 2;
-  const padding = " ".repeat(Math.floor(paddingLength));
+  const paddingLength = Math.floor((contentWidth - visibleLength(header)) / 2);
+  const remainder = (contentWidth - visibleLength(header)) % 2;
+  const padding = " ".repeat(paddingLength);
+  const extraPadding = " ".repeat(remainder); // Extra padding to ensure total length is even
   console.log(
     chalk.blueBright("│") +
       padding +
       chalk.bold(header) +
       padding +
+      extraPadding +
       chalk.blueBright("│"),
   );
 }
