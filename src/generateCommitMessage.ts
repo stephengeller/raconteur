@@ -9,6 +9,8 @@ import { hideBin } from "yargs/helpers";
 import ora from "ora";
 import { printCommitMessage } from "./utils";
 
+const MAX_FILE_LENGTH = 30;
+
 dotenv.config();
 
 const argv = yargs(hideBin(process.argv))
@@ -101,13 +103,12 @@ function truncatePath(path: string, maxLength: number): string {
 function printStagedFiles(
   stagedFiles: Array<{ file: string; additions: number; deletions: number }>,
 ): void {
-  const maxFilePathLength = 15;
   const header = "Staged files to be committed:";
   const maxLineLength = Math.max(
     ...stagedFiles.map(({ file, additions, deletions }) => {
       const additionText = additions > 0 ? ` (+${additions})` : "";
       const deletionText = deletions > 0 ? ` (-${deletions})` : "";
-      return `${truncatePath(file, maxFilePathLength)}${additionText}${deletionText}`
+      return `${truncatePath(file, MAX_FILE_LENGTH)}${additionText}${deletionText}`
         .length;
     }),
     header.length,
@@ -119,7 +120,7 @@ function printStagedFiles(
   printBoxHeader(contentWidth, header);
 
   stagedFiles.forEach(({ file, additions, deletions }) => {
-    const truncatedFile = truncatePath(file, maxFilePathLength);
+    const truncatedFile = truncatePath(file, MAX_FILE_LENGTH);
     const additionText =
       additions > 0 ? chalk.greenBright(` (+${additions})`) : "";
     const deletionText =
