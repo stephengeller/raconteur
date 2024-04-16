@@ -19,6 +19,12 @@ const argv = yargs(hideBin(process.argv))
     type: "string",
     default: process.cwd(),
   })
+  .option("all", {
+    alias: "a",
+    description: "Add all changes before committing",
+    type: "boolean",
+    default: false,
+  })
   .help()
   .alias("help", "h")
   .parseSync();
@@ -177,8 +183,37 @@ function printBoxFooter(contentWidth: number): void {
   console.log(chalk.blueBright("└" + "─".repeat(contentWidth) + "┘"));
 }
 
+function addAllChanges(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const add = spawn("git", ["add", "--all"], {
+      stdio: "inherit",
+    });
+
+    add.on("close", (code) => {
+      if (code === 0) {
+        console.log(chalk.green("All changes added successfully."));
+        resolve();
+      } else {
+        console.error(
+          chalk.red(`Failed to add changes with exit code: ${code}`),
+        );
+        reject(new Error(`git add command failed with exit code ${code}`));
+      }
+    });
+
+    add.on("error", (error) => {
+      console.error(chalk.red("Failed to add changes:"), error);
+      reject(error);
+    });
+  });
+}
+
 // Main function refactored with smaller functions
 async function main() {
+  if (argv.all) {
+    await addAllChanges();
+  }
+
   const diff = await getStagedGitDiff(argv.dir);
   const stagedFiles = await getStagedFiles(argv.dir);
 
@@ -191,6 +226,9 @@ async function main() {
     await handleCommit(commitMessage);
   } else {
     console.log(chalk.red("No staged changes found."));
+    console.log(
+      chalk.red("Tip: Add `--all/-a` to stage all changes before committing."),
+    );
   }
 }
 
