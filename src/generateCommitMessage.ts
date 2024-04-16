@@ -100,9 +100,33 @@ function truncatePath(path: string, maxLength: number): string {
   return "..." + path.slice(-maxLength + 3); // +3 for the length of '...'
 }
 
-function printStagedFiles(
+function printFiles(
   stagedFiles: Array<{ file: string; additions: number; deletions: number }>,
-): void {
+  contentWidth: number,
+) {
+  stagedFiles.forEach(({ file, additions, deletions }) => {
+    const truncatedFile = truncatePath(file, MAX_FILE_LENGTH);
+    const additionText =
+      additions > 0 ? chalk.greenBright(` (+${additions})`) : "";
+    const deletionText =
+      deletions > 0 ? chalk.redBright(` (-${deletions})`) : "";
+    const fileInfo = `${truncatedFile}${additionText}${deletionText}`;
+    const filePaddingLength = contentWidth - visibleLength(fileInfo);
+    const filePadding = " ".repeat(Math.max(0, filePaddingLength - 1));
+    console.log(
+      chalk.blueBright("│ ") +
+        chalk.yellowBright(truncatedFile) +
+        additionText +
+        deletionText +
+        filePadding +
+        chalk.blueBright("│"),
+    );
+  });
+}
+
+function calculateBoxValues(
+  stagedFiles: Array<{ file: string; additions: number; deletions: number }>,
+) {
   const header = "Staged files to be committed:";
   const maxLineLength = Math.max(
     ...stagedFiles.map(({ file, additions, deletions }) => {
@@ -116,28 +140,15 @@ function printStagedFiles(
 
   const totalWidth = Math.max(50, maxLineLength + 4); // Add some padding for aesthetics
   const contentWidth = totalWidth - 2; // Account for the borders
+  return { header, contentWidth };
+}
 
+function printStagedFiles(
+  stagedFiles: Array<{ file: string; additions: number; deletions: number }>,
+): void {
+  const { header, contentWidth } = calculateBoxValues(stagedFiles);
   printBoxHeader(contentWidth, header);
-
-  stagedFiles.forEach(({ file, additions, deletions }) => {
-    const truncatedFile = truncatePath(file, MAX_FILE_LENGTH);
-    const additionText =
-      additions > 0 ? chalk.greenBright(` (+${additions})`) : "";
-    const deletionText =
-      deletions > 0 ? chalk.redBright(` (-${deletions})`) : "";
-    const fileInfo = `${truncatedFile}${additionText}${deletionText}`;
-    const filePaddingLength = contentWidth - visibleLength(fileInfo); // Ensure we use visibleLength to account for chalk characters
-    const filePadding = " ".repeat(Math.max(0, filePaddingLength));
-    console.log(
-      chalk.blueBright("│ ") +
-        chalk.yellowBright(truncatedFile) +
-        additionText +
-        deletionText +
-        filePadding +
-        chalk.blueBright("│"),
-    );
-  });
-
+  printFiles(stagedFiles, contentWidth);
   printBoxFooter(contentWidth);
 }
 
