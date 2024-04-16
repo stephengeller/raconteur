@@ -164,29 +164,3 @@ function saveCustomPrompt(prompt: string): void {
     console.error(chalk.red(`Error saving custom prompt: ${error}`));
   }
 }
-
-export function printBoxHeader(contentWidth: number, header: string) {
-  console.log(chalk.blueBright("┌" + "─".repeat(contentWidth + 1) + "┐")); // Add extra space in the header
-  const paddingLength = (contentWidth - header.length) / 2;
-  const padding = " ".repeat(Math.floor(paddingLength));
-  const paddingExtra = header.length % 2 !== 0 ? " " : "";
-  console.log(
-    chalk.blueBright("│") +
-      padding +
-      chalk.bold(header) +
-      padding +
-      paddingExtra +
-      " " + // Add extra space after the header text
-      chalk.blueBright("│"),
-  );
-}
-
-export function printBoxFooter(contentWidth: number) {
-  console.log(chalk.blueBright("└" + "─".repeat(contentWidth + 1) + "┘")); // Add extra space in the footer
-}
-
-// Function to print the commit message
-export function printCommitMessage(commitMessage: string) {
-  console.log(chalk.greenBright("Suggested commit message:"));
-  console.log(chalk.cyanBright(commitMessage));
-}

@@ -7,7 +7,6 @@ import { getStagedFiles, getStagedGitDiff } from "./git";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import ora from "ora";
-import { printCommitMessage } from "./utils";
 
 const MAX_FILE_LENGTH = 30;
 
@@ -187,7 +186,8 @@ async function main() {
     printStagedFiles(stagedFiles);
 
     const commitMessage = await generateCommitMessage(diff);
-    printCommitMessage(commitMessage);
+    console.log(chalk.greenBright("Suggested commit message:"));
+    console.log(chalk.yellowBright(commitMessage));
     await handleCommit(commitMessage);
   } else {
     console.log(chalk.red("No staged changes found."));
