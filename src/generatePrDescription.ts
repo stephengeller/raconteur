@@ -13,6 +13,7 @@ import {
 } from "./utils";
 import { getGitDiff } from "./git";
 import ora from "ora";
+import path from "path";
 
 const DEFAULT_BRANCH = "main";
 
@@ -48,7 +49,9 @@ process.on("SIGINT", () => {
 
 const DIR_PATH = argv.dir;
 
-export const CUSTOM_PROMPT_PATH = `./customPrDescriptionPrompt.txt`;
+export const CUSTOM_PROMPT_PATH = path.resolve(
+  `./customPrDescriptionPrompt.txt`,
+);
 
 async function findTemplate(): Promise<[string, string] | null> {
   const templatePaths = [
