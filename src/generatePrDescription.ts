@@ -146,7 +146,7 @@ Please also generate a PR title, following the Conventional Commit format.
     `;
 
   console.log(
-    chalk.blue(`Here's the prompt so far:\n\t${chalk.green(prompt)}`),
+    chalk.blue(`Here's the prompt so far:\n\n${chalk.green(prompt)}`),
   );
 
   prompt = await maybeRewritePrompt(prompt);
@@ -154,7 +154,7 @@ Please also generate a PR title, following the Conventional Commit format.
   prompt += await extraContextPrompt();
 
   console.log(
-    chalk.blue(`Here's the prompt so far:\n\t${chalk.green(prompt)}`),
+    chalk.blue(`Here's the prompt so far:\n\n${chalk.green(prompt)}`),
   );
 
   if (attachTemplate.value && template) {
