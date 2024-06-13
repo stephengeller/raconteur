@@ -15,6 +15,8 @@ import { getGitDiff } from "./git";
 import ora from "ora";
 import path from "path";
 import { exec } from "child_process";
+import { execSync } from "node:child_process";
+import { promisify } from "util";
 
 const DEFAULT_BRANCH = "main";
 
@@ -100,6 +102,28 @@ async function getPRDescription(
   }
 }
 
+async function createGitHubPr(prDescription: string) {
+  try {
+    execSync(`cd ${DIR_PATH}`);
+    // Extract PR title from prDescription
+    const titleMatch = prDescription.match(/### PR Title\n(.*)\n/);
+    const branchName = execSync("git rev-parse --abbrev-ref HEAD")
+      .toString()
+      .trim();
+
+    const title = titleMatch ? titleMatch[1] : branchName;
+    const command = `gh pr create --head --title ${title} --body ${JSON.stringify(prDescription)}`;
+
+    const execAsync = promisify(exec);
+    await execAsync(command);
+    execSync(`cd -`);
+  } catch (error) {
+    console.error("Error creating PR:", error);
+    execSync(`cd -`);
+    throw error; // Rethrow or handle as needed
+  }
+}
+
 async function main() {
   const diff = await getGitDiff(DIR_PATH, "origin/main");
 
@@ -174,29 +198,20 @@ Please also generate a PR title, following the Conventional Commit format.
   console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
   console.log(prDescription);
 
-  // Ask if the user wants to copy the response to the clipboard
-  const createPrPrompt = await prompts({
-    type: "toggle",
-    name: "value",
-    message: chalk.yellow("📋 Create the PR?"),
-    initial: true,
-    active: "yes",
-    inactive: "no",
-  });
-
-  if (createPrPrompt.value) {
-    exec(`gh pr create --body "${prDescription}"`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error executing command: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.error(`Error: ${stderr}`);
-        return;
-      }
-      console.log(`Command output: ${stdout}`);
-    });
-  }
+  // // Ask if the user wants to copy the response to the clipboard
+  // const createPrPrompt = await prompts({
+  //   type: "toggle",
+  //   name: "value",
+  //   message: chalk.yellow("📋 Create the PR?"),
+  //   initial: true,
+  //   active: "yes",
+  //   inactive: "no",
+  // });
+  //
+  // if (createPrPrompt.value) {
+  //   // TODO: fix this!
+  //   // await createGitHubPr(prDescription);
+  // }
 
   // Ask if the user wants to copy the response to the clipboard
   const copyToClipboardPrompt = await prompts({
