@@ -14,6 +14,7 @@ import {
 import { getGitDiff } from "./git";
 import ora from "ora";
 import path from "path";
+import { exec } from "child_process";
 
 const DEFAULT_BRANCH = "main";
 
@@ -172,6 +173,30 @@ Please also generate a PR title, following the Conventional Commit format.
   const prDescription = await getPRDescription(prompt, diff);
   console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
   console.log(prDescription);
+
+  // Ask if the user wants to copy the response to the clipboard
+  const createPrPrompt = await prompts({
+    type: "toggle",
+    name: "value",
+    message: chalk.yellow("📋 Create the PR?"),
+    initial: true,
+    active: "yes",
+    inactive: "no",
+  });
+
+  if (createPrPrompt.value) {
+    exec(`gh pr create --body "${prDescription}"`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing command: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Error: ${stderr}`);
+        return;
+      }
+      console.log(`Command output: ${stdout}`);
+    });
+  }
 
   // Ask if the user wants to copy the response to the clipboard
   const copyToClipboardPrompt = await prompts({
