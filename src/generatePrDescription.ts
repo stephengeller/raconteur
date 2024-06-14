@@ -91,7 +91,7 @@ async function getPRDescription(
 ): Promise<string> {
   const spinner = ora(chalk.blue("🤖 Generating PR description...")).start();
   try {
-    const prDescription = "await callChatGPTApi(prompt, diffContent);";
+    const prDescription = await callChatGPTApi(prompt, diffContent);
     spinner.succeed(chalk.blue("PR description generated"));
     return prDescription;
   } catch (error) {
@@ -101,7 +101,7 @@ async function getPRDescription(
   }
 }
 
-function extractConventionalCommitTitle(
+export function extractConventionalCommitTitle(
   prDescription: string,
   defaultTitle: string,
 ): string {
@@ -143,44 +143,39 @@ async function createGitHubPr(prDescription: string) {
 
   const octokit = new Octokit({ auth: TOKEN });
 
-  try {
-    // Extract PR title from prDescription
-    const branchName = execSync("git rev-parse --abbrev-ref HEAD", {
-      cwd: DIR_PATH,
-    })
-      .toString()
-      .trim();
+  // Extract PR title from prDescription
+  const branchName = execSync("git rev-parse --abbrev-ref HEAD", {
+    cwd: DIR_PATH,
+  })
+    .toString()
+    .trim();
 
-    const title = extractConventionalCommitTitle(prDescription, branchName);
+  const title = extractConventionalCommitTitle(prDescription, branchName);
 
-    const repoInfo = execSync("git config --get remote.origin.url", {
-      cwd: DIR_PATH,
-    })
-      .toString()
-      .trim()
-      .match(/github\.com[:/](.+)\/(.+)\gss.git$/);
+  const repoInfo = execSync("git config --get remote.origin.url", {
+    cwd: DIR_PATH,
+  })
+    .toString()
+    .trim()
+    .match(/github\.com[:/](.+)\/(.+)\.git$/);
 
-    if (!repoInfo) {
-      throw new Error("Could not determine repository owner and name");
-    }
-
-    const owner = repoInfo[1];
-    const repo = repoInfo[2];
-
-    const response = await octokit.pulls.create({
-      owner,
-      repo,
-      head: branchName,
-      base: "main",
-      title,
-      body: prDescription,
-    });
-
-    console.log("PR created:", response.data.html_url);
-  } catch (error) {
-    console.error("Error creating PR:", error);
-    throw error; // Rethrow or handle as needed
+  if (!repoInfo) {
+    throw new Error("Could not determine repository owner and name");
   }
+
+  const owner = repoInfo[1];
+  const repo = repoInfo[2];
+
+  const response = await octokit.pulls.create({
+    owner,
+    repo,
+    head: branchName,
+    base: "main",
+    title,
+    body: prDescription,
+  });
+
+  console.log("PR created:", response.data.html_url);
 }
 
 async function main() {
