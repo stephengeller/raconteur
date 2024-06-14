@@ -14,9 +14,8 @@ import {
 import { getGitDiff } from "./git";
 import ora from "ora";
 import path from "path";
-import { exec } from "child_process";
 import { execSync } from "node:child_process";
-import { promisify } from "util";
+import { Octokit } from "@octokit/rest";
 
 const DEFAULT_BRANCH = "main";
 
@@ -102,24 +101,85 @@ async function getPRDescription(
   }
 }
 
+function extractConventionalCommitTitle(
+  prDescription: string,
+  defaultTitle: string,
+): string {
+  const conventionalCommitTypes = [
+    "feat",
+    "fix",
+    "chore",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+  ];
+  let title = defaultTitle; // Default to branch name if no match is found
+
+  const lines = prDescription.split("\n");
+  for (const line of lines) {
+    for (const type of conventionalCommitTypes) {
+      if (line.startsWith(type)) {
+        title = line;
+        break;
+      }
+    }
+    if (title !== defaultTitle) {
+      break;
+    }
+  }
+
+  return title;
+}
+
+// Define the function to create a GitHub PR using Octokit
 async function createGitHubPr(prDescription: string) {
+  const TOKEN = process.env.GITHUB_TOKEN; // Make sure you have your GitHub token set in environment variables
+
+  if (!TOKEN) {
+    throw new Error("GitHub token is not set in the environment variables");
+  }
+
+  const octokit = new Octokit({ auth: TOKEN });
+
   try {
-    execSync(`cd ${DIR_PATH}`);
     // Extract PR title from prDescription
-    const titleMatch = prDescription.match(/### PR Title\n(.*)\n/);
-    const branchName = execSync("git rev-parse --abbrev-ref HEAD")
+    const branchName = execSync("git rev-parse --abbrev-ref HEAD", {
+      cwd: DIR_PATH,
+    })
       .toString()
       .trim();
 
-    const title = titleMatch ? titleMatch[1] : branchName;
-    const command = `gh pr create --head --title ${title} --body ${JSON.stringify(prDescription)}`;
+    const title = extractConventionalCommitTitle(prDescription, branchName);
 
-    const execAsync = promisify(exec);
-    await execAsync(command);
-    execSync(`cd -`);
+    const repoInfo = execSync("git config --get remote.origin.url", {
+      cwd: DIR_PATH,
+    })
+      .toString()
+      .trim()
+      .match(/github\.com[:/](.+)\/(.+)\.git$/);
+
+    if (!repoInfo) {
+      throw new Error("Could not determine repository owner and name");
+    }
+
+    const owner = repoInfo[1];
+    const repo = repoInfo[2];
+
+    // Create a pull request using Octokit
+    const response = await octokit.pulls.create({
+      owner,
+      repo,
+      head: branchName,
+      base: "main", // or your base branch
+      title,
+      body: prDescription,
+    });
+
+    console.log("PR created:", response.data.html_url);
   } catch (error) {
     console.error("Error creating PR:", error);
-    execSync(`cd -`);
     throw error; // Rethrow or handle as needed
   }
 }
@@ -198,20 +258,19 @@ Please also generate a PR title, following the Conventional Commit format.
   console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
   console.log(prDescription);
 
-  // // Ask if the user wants to copy the response to the clipboard
-  // const createPrPrompt = await prompts({
-  //   type: "toggle",
-  //   name: "value",
-  //   message: chalk.yellow("📋 Create the PR?"),
-  //   initial: true,
-  //   active: "yes",
-  //   inactive: "no",
-  // });
-  //
-  // if (createPrPrompt.value) {
-  //   // TODO: fix this!
-  //   // await createGitHubPr(prDescription);
-  // }
+  // Ask if the user wants to copy the response to the clipboard
+  const createPrPrompt = await prompts({
+    type: "toggle",
+    name: "value",
+    message: chalk.yellow("📋 Create the PR?"),
+    initial: true,
+    active: "yes",
+    inactive: "no",
+  });
+
+  if (createPrPrompt.value) {
+    await createGitHubPr(prDescription);
+  }
 
   // Ask if the user wants to copy the response to the clipboard
   const copyToClipboardPrompt = await prompts({
