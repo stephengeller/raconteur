@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import { getGitDiff } from "../../git/gitDiff";
+import { getGitDiff } from "../../../../prDescriptionGenerator/git/gitDiff";
 
 jest.mock("child_process", () => ({
   execSync: jest.fn(),
