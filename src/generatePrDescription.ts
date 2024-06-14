@@ -120,8 +120,10 @@ export function extractConventionalCommitTitle(
   const lines = prDescription.split("\n");
   for (const line of lines) {
     for (const type of conventionalCommitTypes) {
-      if (line.startsWith(type)) {
-        title = line;
+      const regex = new RegExp(`.*(${type}:.*)`);
+      const match = line.match(regex);
+      if (match && match[1]) {
+        title = match[1];
         break;
       }
     }
