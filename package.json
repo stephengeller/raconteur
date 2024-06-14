@@ -8,7 +8,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node src/index.ts",
-    "prdesc": "ts-node src/generatePrDescription.ts",
+    "prdesc": "ts-node src/prDescriptionGenerator/main.ts",
     "commit": "ts-node src/generateCommitMessage.ts"
   },
   "devDependencies": {
