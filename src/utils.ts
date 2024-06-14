@@ -1,9 +1,9 @@
 import fs from "fs";
 import chalk from "chalk";
 import prompts from "prompts";
-import { CUSTOM_PROMPT_PATH } from "./generatePrDescription";
 import { config } from "dotenv";
 import JiraApi, { JiraIssue } from "./apis/JiraApi";
+import { CUSTOM_PROMPT_PATH } from "./prDescriptionGenerator/prompts/customPrompt";
 
 config(); // Load .env file
 
