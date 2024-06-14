@@ -14,6 +14,6 @@ export async function getPRDescription(
   } catch (error) {
     console.error(chalk.red("Failed to generate PR description:"), error);
     spinner.fail("Failed to generate PR description.");
-    process.exit(1);
+    throw error;
   }
 }
