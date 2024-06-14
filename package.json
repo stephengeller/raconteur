@@ -6,7 +6,7 @@
   "author": "Stephen Geller <sgeller@squareup.com>",
   "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "ts-node src/index.ts",
     "prdesc": "ts-node src/prDescriptionGenerator/main.ts",
     "commit": "ts-node src/generateCommitMessage.ts"
