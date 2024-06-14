@@ -5,6 +5,8 @@ import {
   findTemplate,
 } from "../../../../prDescriptionGenerator/prompts/templatePrompt";
 
+jest.spyOn(process, "exit").mockImplementation();
+
 jest.mock("fs", () => ({
   existsSync: jest.fn(),
   readFileSync: jest.fn(),

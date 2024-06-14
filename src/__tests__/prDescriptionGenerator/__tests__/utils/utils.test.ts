@@ -5,6 +5,8 @@ jest.mock("../../../../ChatGPTApi", () => ({
   callChatGPTApi: jest.fn(),
 }));
 
+jest.spyOn(process, "exit").mockImplementation();
+
 jest.mock("ora", () => {
   return jest.fn().mockImplementation(() => ({
     start: jest.fn().mockReturnThis(),

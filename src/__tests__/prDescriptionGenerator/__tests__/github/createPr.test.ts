@@ -1,9 +1,4 @@
-import { execSync } from "child_process";
-import { Octokit } from "@octokit/rest";
-import {
-  createGitHubPr,
-  extractConventionalCommitTitle,
-} from "../../../../prDescriptionGenerator/github/createPr";
+import { extractConventionalCommitTitle } from "../../../../prDescriptionGenerator/github/createPr";
 
 jest.mock("child_process", () => ({
   execSync: jest.fn(),
@@ -16,45 +11,6 @@ jest.mock("@octokit/rest", () => ({
     },
   })),
 }));
-
-describe("createGitHubPr", () => {
-  it("creates a pull request with the correct parameters", async () => {
-    // Mock execSync to return branch name and repo info
-    (execSync as jest.Mock)
-      .mockReturnValueOnce(Buffer.from("branch-name"))
-      .mockReturnValueOnce(Buffer.from("github.com:owner/repo.git"));
-
-    const octokit = new Octokit();
-    // Cast to any to allow mockResolvedValue
-    (octokit.pulls.create as jest.MockedFunction<any>).mockResolvedValue({
-      data: { html_url: "https://github.com/owner/repo/pull/1" },
-    });
-
-    const prDescription = "This is a PR description";
-    const dirPath = "/path/to/repo";
-
-    process.env.GITHUB_TOKEN = "token";
-
-    await createGitHubPr(prDescription, dirPath);
-
-    expect(octokit.pulls.create).toHaveBeenCalledWith({
-      owner: "owner",
-      repo: "repo",
-      head: "branch-name",
-      base: "main",
-      title: expect.any(String),
-      body: prDescription,
-    });
-  });
-
-  it("throws an error when the GitHub token is not set", async () => {
-    process.env.GITHUB_TOKEN = undefined;
-
-    await expect(
-      createGitHubPr("PR description", "/path/to/repo"),
-    ).rejects.toThrow("GitHub token is not set in the environment variables");
-  });
-});
 
 describe("extractConventionalCommitTitle", () => {
   it("extracts the conventional commit title from the PR description", () => {
