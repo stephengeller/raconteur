@@ -31,4 +31,24 @@ describe("extractConventionalCommitTitle", () => {
     const result = extractConventionalCommitTitle(prDescription, defaultTitle);
     expect(result).toBe("feat: Add new feature");
   });
+
+  it("removes trailing backticks from the title", () => {
+    const prDescription = `
+      ## PR Title: \`feat: Add new feature\`
+      This is a new feature that adds functionality.
+    `;
+    const defaultTitle = "default-title";
+    const result = extractConventionalCommitTitle(prDescription, defaultTitle);
+    expect(result).toBe("feat: Add new feature");
+  });
+
+  it("trims leading and trailing whitespace from the title", () => {
+    const prDescription = `
+      ## PR Title:    feat: Add new feature    
+      This is a new feature that adds functionality.
+    `;
+    const defaultTitle = "default-title";
+    const result = extractConventionalCommitTitle(prDescription, defaultTitle);
+    expect(result).toBe("feat: Add new feature");
+  });
 });
