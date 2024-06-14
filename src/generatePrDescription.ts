@@ -91,12 +91,12 @@ async function getPRDescription(
 ): Promise<string> {
   const spinner = ora(chalk.blue("🤖 Generating PR description...")).start();
   try {
-    const prDescription = await callChatGPTApi(prompt, diffContent);
+    const prDescription = "await callChatGPTApi(prompt, diffContent);";
     spinner.succeed(chalk.blue("PR description generated"));
     return prDescription;
   } catch (error) {
-    spinner.fail("Failed to generate PR description.");
     console.error(chalk.red("Failed to generate PR description:"), error);
+    spinner.fail("Failed to generate PR description.");
     process.exit(1);
   }
 }
@@ -158,7 +158,7 @@ async function createGitHubPr(prDescription: string) {
     })
       .toString()
       .trim()
-      .match(/github\.com[:/](.+)\/(.+)\.git$/);
+      .match(/github\.com[:/](.+)\/(.+)\gss.git$/);
 
     if (!repoInfo) {
       throw new Error("Could not determine repository owner and name");
@@ -167,12 +167,11 @@ async function createGitHubPr(prDescription: string) {
     const owner = repoInfo[1];
     const repo = repoInfo[2];
 
-    // Create a pull request using Octokit
     const response = await octokit.pulls.create({
       owner,
       repo,
       head: branchName,
-      base: "main", // or your base branch
+      base: "main",
       title,
       body: prDescription,
     });
