@@ -45,6 +45,7 @@ export async function createGitHubPr(prDescription: string, dirPath: string) {
       base: "main",
       title,
       body: prDescription,
+      draft: true,
     });
 
     spinner.succeed("PR created successfully");

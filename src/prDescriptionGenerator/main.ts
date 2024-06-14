@@ -43,7 +43,7 @@ loadEnv(); // Load .env file
 
 // Register SIGINT handler
 process.on("SIGINT", () => {
-  console.log(chalk.red("\\nExiting gracefully..."));
+  console.log(chalk.red("\nExiting gracefully..."));
   process.exit(0);
 });
 
@@ -88,7 +88,7 @@ Please also generate a PR title, following the Conventional Commit format.
     `;
 
   console.log(
-    chalk.blue(`Here's the prompt so far:\\n\\n\${chalk.green(prompt)}`),
+    chalk.blue(`Here's the prompt so far:\n\n${chalk.green(prompt)}`),
   );
 
   prompt = await maybeRewritePrompt(prompt);
@@ -96,13 +96,13 @@ Please also generate a PR title, following the Conventional Commit format.
   prompt += await extraContextPrompt();
 
   console.log(
-    chalk.blue(`Here's the prompt so far:\\n\\n\${chalk.green(prompt)}`),
+    chalk.blue(`Here's the prompt so far:\n\n${chalk.green(prompt)}`),
   );
 
   if (attachTemplate && template) {
     const pullRequestTemplatePrompt = `
     
-    Please make the PR description fit this pull request template format:\\n\${template}`;
+    Please make the PR description fit this pull request template format:\n${template}`;
     prompt += pullRequestTemplatePrompt;
   } else {
     prompt += `Unless you believe there's a better one, the description structure is as follows:
@@ -112,7 +112,7 @@ Please also generate a PR title, following the Conventional Commit format.
   }
 
   const prDescription = await getPRDescription(prompt, diff);
-  console.log(chalk.green(`\\n🚀 Generated PR Description:\\n`));
+  console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
   console.log(prDescription);
 
   // Ask if the user wants to copy the response to the clipboard
@@ -127,21 +127,21 @@ Please also generate a PR title, following the Conventional Commit format.
 
   if (createPrPrompt.value) {
     await createGitHubPr(prDescription, DIR_PATH);
-  }
+  } else {
+    // Ask if the user wants to copy the response to the clipboard
+    const copyToClipboardPrompt = await prompts({
+      type: "toggle",
+      name: "value",
+      message: chalk.yellow("📋 Copy the PR description to the clipboard?"),
+      initial: true,
+      active: "yes",
+      inactive: "no",
+    });
 
-  // Ask if the user wants to copy the response to the clipboard
-  const copyToClipboardPrompt = await prompts({
-    type: "toggle",
-    name: "value",
-    message: chalk.yellow("📋 Copy the PR description to the clipboard?"),
-    initial: true,
-    active: "yes",
-    inactive: "no",
-  });
-
-  if (copyToClipboardPrompt.value) {
-    await copyToClipboard(prDescription);
-    console.log(chalk.green("✅  PR description copied to clipboard!"));
+    if (copyToClipboardPrompt.value) {
+      await copyToClipboard(prDescription);
+      console.log(chalk.green("✅  PR description copied to clipboard!"));
+    }
   }
 }
 
