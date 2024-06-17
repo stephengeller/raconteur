@@ -7,6 +7,7 @@ import prompts from "prompts";
 import { callChatGPTApi } from "./ChatGPTApi";
 import { copyToClipboard } from "./copyToClipboard";
 import { exec } from "child_process";
+import { messages } from "./messages";
 
 dotenv.config();
 
@@ -124,7 +125,7 @@ class PRSummarizer {
     const extraContextPrompt = await prompts({
       type: "toggle",
       name: "value",
-      message: chalk.yellow("✏️ Do you want to add any context to the prompt?"),
+      message: messages.addContext,
       initial: false,
       active: "yes",
       inactive: "no",

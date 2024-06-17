@@ -14,6 +14,7 @@ import {
   maybeRewritePrompt,
 } from "../utils";
 import { copyToClipboard } from "../copyToClipboard";
+import { messages } from "../messages";
 
 const DEFAULT_BRANCH = "main";
 
@@ -119,7 +120,7 @@ Please also generate a PR title, following the Conventional Commit format.
   const createPrPrompt = await prompts({
     type: "toggle",
     name: "value",
-    message: chalk.yellow("📋 Create the PR?"),
+    message: messages.createPr,
     initial: true,
     active: "yes",
     inactive: "no",
@@ -132,7 +133,7 @@ Please also generate a PR title, following the Conventional Commit format.
     const copyToClipboardPrompt = await prompts({
       type: "toggle",
       name: "value",
-      message: chalk.yellow("📋 Copy the PR description to the clipboard?"),
+      message: messages.copyToClipboard,
       initial: true,
       active: "yes",
       inactive: "no",
