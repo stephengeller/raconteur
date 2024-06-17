@@ -4,6 +4,7 @@ import prompts from "prompts";
 import { config } from "dotenv";
 import JiraApi, { JiraIssue } from "./apis/JiraApi";
 import { CUSTOM_PROMPT_PATH } from "./prDescriptionGenerator/prompts/customPrompt";
+import { messages } from "./messages";
 
 config(); // Load .env file
 
@@ -12,7 +13,7 @@ export async function maybeRewritePrompt(inputPrompt: string): Promise<string> {
   const customPrompt = await prompts({
     type: "toggle",
     name: "value",
-    message: chalk.yellow("✏️ Do you want to re-write the prompt?"),
+    message: messages.rewritePrompt,
     initial: false,
     active: "yes",
     inactive: "no",
@@ -22,7 +23,7 @@ export async function maybeRewritePrompt(inputPrompt: string): Promise<string> {
     const response = await prompts({
       type: "text",
       name: "value",
-      message: chalk.cyan("📝 Enter your custom prompt:"),
+      message: messages.enterCustomPrompt,
     });
     finalPrompt = response.value;
     saveCustomPrompt(finalPrompt);
@@ -35,7 +36,7 @@ export async function extraContextPrompt(): Promise<string> {
   const extraContextPrompt = await prompts({
     type: "toggle",
     name: "value",
-    message: chalk.yellow("✏️ Do you want to add any context to the prompt?"),
+    message: messages.enterExtraContext,
     initial: false,
     active: "yes",
     inactive: "no",
@@ -59,7 +60,7 @@ async function getJiraPrompts(
   let { command } = await prompts({
     type: "select",
     name: "command",
-    message: chalk.yellow("✏️ Do you want to add a Jira ticket description?"),
+    message: messages.addJiraTicket,
     choices: [
       { title: "Fetch my open tickets", value: "fetch" },
       { title: "Enter manually", value: "enter" },
@@ -77,9 +78,7 @@ async function getJiraPrompts(
     const { selectedIssue } = await prompts({
       type: "autocomplete",
       name: "selectedIssue",
-      message: chalk.yellow(
-        "Select the Jira ticket to include in the PR description:",
-      ),
+      message: messages.selectJiraTicket,
       choices: [
         ...issueChoices,
         { title: "None", value: "none" },
@@ -110,7 +109,7 @@ async function getJiraPrompts(
     const { ticket } = await prompts({
       type: "text",
       name: "ticket",
-      message: chalk.cyan("Enter the Jira ticket number:"),
+      message: messages.enterJiraTicket,
     });
 
     return jiraApi.getIssue(ticket);
