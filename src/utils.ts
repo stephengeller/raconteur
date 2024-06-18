@@ -36,7 +36,7 @@ export async function extraContextPrompt(): Promise<string> {
   const extraContextPrompt = await prompts({
     type: "toggle",
     name: "value",
-    message: messages.enterExtraContext,
+    message: messages.addContext,
     initial: false,
     active: "yes",
     inactive: "no",
@@ -46,7 +46,7 @@ export async function extraContextPrompt(): Promise<string> {
     const response = await prompts({
       type: "text",
       name: "value",
-      message: chalk.cyan("📝 Enter your extra context:"),
+      message: messages.enterExtraContext,
     });
     return `\nHere's some extra context on this change, please use it to contextualise this change: "${response.value}"`;
   } else {
