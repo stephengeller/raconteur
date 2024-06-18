@@ -3,24 +3,15 @@ import { execSync } from "node:child_process";
 import chalk from "chalk";
 import ora from "ora";
 
-export async function createGitHubPr(prDescription: string, dirPath: string) {
-  const TOKEN = process.env.GITHUB_TOKEN; // Make sure you have your GitHub token set in environment variables
-
-  if (!TOKEN) {
-    throw new Error("GitHub token is not set in the environment variables");
-  }
-
-  const octokit = new Octokit({ auth: TOKEN });
-
-  // Extract PR title from prDescription
-  const branchName = execSync("git rev-parse --abbrev-ref HEAD", {
+function getBranchName(dirPath: string) {
+  return execSync("git rev-parse --abbrev-ref HEAD", {
     cwd: dirPath,
   })
     .toString()
     .trim();
+}
 
-  const title = extractConventionalCommitTitle(prDescription, branchName);
-
+function getOwnerAndRepo(dirPath: string) {
   const repoInfo = execSync("git config --get remote.origin.url", {
     cwd: dirPath,
   })
@@ -28,23 +19,43 @@ export async function createGitHubPr(prDescription: string, dirPath: string) {
     .trim()
     .match(/github\.com[:/](.+)\/(.+)\.git$/);
 
-  if (!repoInfo) {
+  const owner = repoInfo?.[1];
+  const repo = repoInfo?.[2];
+  return { owner, repo };
+}
+
+export async function createGitHubPr(prDescription: string, dirPath: string) {
+  const spinner = ora(chalk.blue("Creating GitHub PR...")).start();
+
+  // Make sure you have your GitHub token set in environment variables
+  if (!process.env.GITHUB_TOKEN) {
+    throw new Error("GitHub token is not set in the environment variables");
+  }
+
+  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+  // Extract PR title from prDescription
+  const title = extractConventionalCommitTitle(
+    prDescription,
+    getBranchName(dirPath),
+  );
+
+  const { owner, repo } = getOwnerAndRepo(dirPath);
+  if (!owner || !repo) {
     throw new Error("Could not determine repository owner and name");
   }
 
-  const owner = repoInfo[1];
-  const repo = repoInfo[2];
-
-  const spinner = ora(chalk.blue("Creating GitHub PR...")).start();
+  // remove the entire line that contains the title from the prDescription
+  const prDescriptionWithoutTitle = prDescription.replace(title, "").trim();
 
   try {
     const response = await octokit.pulls.create({
       owner,
       repo,
-      head: branchName,
+      head: getBranchName(dirPath),
       base: "main",
       title,
-      body: prDescription,
+      body: prDescriptionWithoutTitle,
       draft: true,
     });
 
