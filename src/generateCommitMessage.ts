@@ -25,6 +25,12 @@ const argv = yargs(hideBin(process.argv))
     type: "boolean",
     default: false,
   })
+  .option("yes", {
+    alias: "y",
+    description: "Automatically accept all prompts",
+    type: "boolean",
+    default: false,
+  })
   .help()
   .alias("help", "h")
   .parseSync();
@@ -82,6 +88,11 @@ async function commitChanges(commitMessage: string): Promise<void> {
 
 // Function to handle the commit process
 export async function handleCommit(commitMessage: string) {
+  if (argv.yes) {
+    await commitChanges(commitMessage);
+    return;
+  }
+
   const response = await prompts({
     type: "toggle",
     name: "value",
