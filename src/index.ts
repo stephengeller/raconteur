@@ -21,6 +21,7 @@ interface PullRequest {
   title: string;
   html_url: string;
   closed_at: string;
+  repository_url: string;
 }
 
 let PROMPT = `
@@ -59,12 +60,12 @@ class PRSummarizer {
   }
 
   private async setSinceDate(): Promise<void> {
-    const defaultWeeks = 2;
+    const defaultWeeks = 1;
     const response = await prompts({
       type: "number",
       name: "value",
       message: chalk.yellow("How many weeks ago should PRs be fetched from?"),
-      initial: 2,
+      initial: defaultWeeks,
       // validate: (value) =>
       // value < 1 ? `Please enter a positive number.` : true,
     });
@@ -93,11 +94,16 @@ class PRSummarizer {
 
   private async summarizePRs(prs: PullRequest[]): Promise<string | undefined> {
     // Convert PRs to a format suitable for prompts
-    const choices = prs.map((pr, index) => ({
-      title: `${pr.title} (merged ${moment(pr.closed_at).format("Do MMM YYYY")})`,
-      value: index,
-      selected: true,
-    }));
+    const choices = prs
+      .sort((a, b) => moment(b.closed_at).diff(moment(a.closed_at)))
+      .map((pr, index) => {
+        const repo = pr.repository_url.split("/").pop();
+        return {
+          title: `[${repo}] ${pr.title} (merged ${moment(pr.closed_at).format("Do MMM YYYY")})`,
+          value: index,
+          selected: true,
+        };
+      });
 
     const response = await prompts({
       type: "multiselect",
