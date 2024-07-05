@@ -22,6 +22,7 @@ interface PullRequest {
   html_url: string;
   closed_at: string;
   repository_url: string;
+  number: number;
 }
 
 let PROMPT = `
@@ -99,7 +100,7 @@ class PRSummarizer {
       .map((pr, index) => {
         const repo = pr.repository_url.split("/").pop();
         return {
-          title: `[${repo}] ${pr.title} (merged ${moment(pr.closed_at).format("Do MMM YYYY")})`,
+          title: `[${repo} #${pr.number}] ${pr.title} (merged ${moment(pr.closed_at).format("Do MMM YYYY")})`,
           value: index,
           selected: true,
         };
@@ -213,7 +214,7 @@ Please follow the following example as a reference for desired format:
   - Coordinated with the Design Team to implement a new UI/UX for the Customer Portal.
       `;
       console.log(
-        "Here is a prompt to paste into Square's chatGPT: ",
+        "Here is a prompt to paste into Square's chatGPT:\n",
         chalk.green(chatPrompt),
       );
       const openChatPrompt = await prompts({
