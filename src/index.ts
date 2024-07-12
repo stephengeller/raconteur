@@ -8,6 +8,8 @@ import { callChatGPTApi } from "./ChatGPTApi";
 import { copyToClipboard } from "./copyToClipboard";
 import { exec } from "child_process";
 import { messages } from "./messages";
+import { loadCustomPrompt } from "./prDescriptionGenerator/prompts/customPrompt";
+import path from "path";
 
 dotenv.config();
 
@@ -25,7 +27,7 @@ interface PullRequest {
   number: number;
 }
 
-let PROMPT = `
+const DEFAULT_PROMPT = `
 Please create a short, concise summary of each of the following PRs, so that I can put it in my hypedoc to reference in the future.
 
 It should:
@@ -127,7 +129,11 @@ class PRSummarizer {
     const tempFilePath: string = "./temp_prs_data.json";
     fs.writeFileSync(tempFilePath, prsData);
 
-    console.log(chalk.blue(`Here's the prompt so far:\n\n${PROMPT}`));
+    let prompt =
+      loadCustomPrompt(path.resolve(`./customRaconteurPrompt.txt`)) ||
+      DEFAULT_PROMPT;
+
+    console.log(chalk.blue(`Here's the prompt so far:\n\n${prompt}`));
 
     const extraContextPrompt = await prompts({
       type: "toggle",
@@ -147,11 +153,11 @@ class PRSummarizer {
         name: "value",
         message: chalk.cyan("📝 Enter your extra context:"),
       });
-      PROMPT += `Here is some extra context to be considered: ${response.value}`;
+      prompt += `Here is some extra context to be considered: ${response.value}`;
     }
 
     try {
-      const hypedocSummaries = await callChatGPTApi(PROMPT, prsData);
+      const hypedocSummaries = await callChatGPTApi(prompt, prsData);
       console.log(chalk.green("🚀 Hypedoc summaries generated:\n\n"));
       console.log(hypedocSummaries);
       fs.unlinkSync(tempFilePath);
@@ -197,7 +203,9 @@ class PRSummarizer {
       // prompt user to navigate to https://my.sqprod.co/chat and ask for a summary from Slack and other apps for sgeller
 
       // string variable containing a prompt for chatGPT to ask for a summary of my achievements over the past week
-      const chatPrompt = `You are a helpful assistant. Generate a clear, concise and structured summary of my achievements over the past week, sourcing from Slack and other apps. 
+      const chatPrompt = `
+You are a helpful assistant. Generate a clear, concise and structured summary of my achievements over the past week, sourcing from Slack and other apps. 
+Focus only on what appear to be significant or important work achievements.
       
 Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
       

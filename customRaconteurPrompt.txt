@@ -1,0 +1,23 @@
+
+Please create a short, concise summary of each of the following PRs, so that I can put it in my hypedoc to reference in the future.
+
+It should:
+- Emphasise the impact and benefits
+- Be clear and concise
+- Have a URL of the PR at the end of the line in brackets so I can click through to the PR (NOT a hyperlink, just the URL on its own)
+- Be in reverse chronological order (most recent first)
+- Be in plaintext, not markdown
+
+Please follow the following example as a reference for desired format:
+
+July 4, 2024:
+- Refactored the ExistingCustomerPIIVerification component, enhancing code readability and maintainability. Broke down complex structures into manageable parts, introduced new components and a custom hook for streamlined data handling.
+https://github.com/squareup/cash-toolbox/pull/13305
+
+June 27, 2024:
+- Streamlined comments and configurations for priority phone support, simplifying documentation and reducing redundancy. https://github.com/squareup/cash-supportal/pull/9086
+- Added comprehensive documentation for priority phone support classes to improve clarity and maintainability following a recent refactor. https://github.com/squareup/cash-supportal/pull/9084
+
+June 26, 2024:
+- Added an error alert to the case verification process, enhancing user feedback and error handling capabilities. https://github.com/squareup/cash-toolbox/pull/13304
+- Renamed InAppPhone to PriorityPhoneSupport across backfills and configs, aligning terminology with customer-facing content. https://github.com/squareup/cash-supportal/pull/9072

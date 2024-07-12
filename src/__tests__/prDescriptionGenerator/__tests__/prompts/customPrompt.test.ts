@@ -21,6 +21,16 @@ describe("loadCustomPrompt", () => {
     expect(result).toBe("custom prompt content");
   });
 
+  it("accepts a custom path", () => {
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
+    (fs.readFileSync as jest.Mock).mockReturnValue("custom prompt content");
+
+    const result = loadCustomPrompt("foo");
+
+    expect(result).toBe("custom prompt content");
+    expect(fs.existsSync).toHaveBeenCalledWith("foo");
+  });
+
   it("returns null when the custom prompt file does not exist", () => {
     (fs.existsSync as jest.Mock).mockReturnValue(false);
 
