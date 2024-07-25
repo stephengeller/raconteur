@@ -148,8 +148,7 @@ Please also generate a PR title, following the Conventional Commit format.
 
 if (require.main === module) {
   main().catch((error) => {
-    console.error("Error:", error.message);
-    console.error(error);
+    console.error(chalk.red("Error:", error.message));
     process.exit(1);
   });
 }

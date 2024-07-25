@@ -61,9 +61,8 @@ export async function createGitHubPr(prDescription: string, dirPath: string) {
 
     spinner.succeed("PR created successfully");
     console.log("PR created:", response.data.html_url);
-  } catch (error) {
+  } catch (error: any) {
     spinner.fail("Failed to create PR");
-    console.error(chalk.red("Failed to create PR:"), error);
     throw error;
   }
 }
