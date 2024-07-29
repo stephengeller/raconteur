@@ -31,13 +31,21 @@ const argv = yargs(hideBin(process.argv))
     type: "boolean",
     default: false,
   })
+  .positional("context", {
+    describe: "Additional context for the commit message",
+    type: "string",
+    default: "",
+  })
   .help()
   .alias("help", "h")
   .parseSync();
 
 process.chdir(argv.dir);
 
-async function generateCommitMessage(diff: string): Promise<string> {
+async function generateCommitMessage(
+  diff: string,
+  context: string | undefined = undefined,
+): Promise<string> {
   if (!diff.trim()) {
     console.log(chalk.yellow("No changes detected in staged files."));
     return "No changes to commit.";
@@ -45,8 +53,10 @@ async function generateCommitMessage(diff: string): Promise<string> {
 
   const spinner = ora(chalk.blue("Generating commit message...")).start();
 
-  const prompt =
-    "Please generate a concise commit message based on the following changes, following the Conventional Commits specification";
+  let prompt = `Please generate a concise commit message based on the following changes, following the Conventional Commits specification.`;
+  if (context) {
+    prompt += ` Some extra context for this diff: "${context}"`;
+  }
   try {
     const commitMessage = await callChatGPTApi(prompt, diff);
     spinner.succeed(chalk.blue("Commit message generated"));
@@ -227,11 +237,10 @@ async function main() {
 
   const diff = await getStagedGitDiff(argv.dir);
   const stagedFiles = await getStagedFiles(argv.dir);
-
+  const context = argv._[0] as string | undefined;
   if (diff) {
     printStagedFiles(stagedFiles);
-
-    const commitMessage = await generateCommitMessage(diff);
+    const commitMessage = await generateCommitMessage(diff, context);
     console.log(chalk.greenBright("Suggested commit message:"));
     console.log(chalk.yellowBright(commitMessage));
     await handleCommit(commitMessage);
