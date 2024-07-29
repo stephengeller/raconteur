@@ -1,12 +1,12 @@
 import { spawn } from "child_process";
 import chalk from "chalk";
 import prompts from "prompts"; // Import prompts
-import { callChatGPTApi } from "./ChatGPTApi";
 import dotenv from "dotenv";
-import { getStagedFiles, getStagedGitDiff } from "./git";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import ora from "ora";
+import { callChatGPTApi } from "../ChatGPTApi";
+import { getStagedFiles, getStagedGitDiff } from "../git";
 
 const MAX_FILE_LENGTH = 30;
 

@@ -9,7 +9,7 @@
     "test": "jest",
     "start": "ts-node src/index.ts",
     "prdesc": "ts-node src/prDescriptionGenerator/main.ts",
-    "commit": "ts-node src/generateCommitMessage.ts"
+    "commit": "ts-node  src/CommitMessageGenerator/main.ts"
   },
   "devDependencies": {
     "@octokit/rest": "^20.0.2",
