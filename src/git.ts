@@ -31,14 +31,17 @@ export async function getGitDiff(
   }
 }
 
-export async function getStagedGitDiff(pathToRepo: string): Promise<string> {
+export async function getStagedGitDiff(
+  pathToRepo: string,
+  silent: boolean = false,
+): Promise<string> {
   const spinner = ora(chalk.blue("Obtaining staged git diff...")).start();
   try {
     const { stdout } = await execAsync(`git -C ${pathToRepo} diff --cached`);
-    spinner.succeed(chalk.blue("Staged git diff obtained"));
+    if (!silent) spinner.succeed(chalk.blue("Staged git diff obtained"));
     return stdout;
   } catch (error) {
-    spinner.fail(chalk.blue("Failed to obtain staged git diff"));
+    if (!silent) spinner.fail(chalk.blue("Failed to obtain staged git diff"));
     console.error(chalk.red(error));
     process.exit(1);
   }

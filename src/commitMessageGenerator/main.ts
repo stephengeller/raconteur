@@ -248,7 +248,7 @@ async function main() {
     await addAllChanges();
   }
 
-  const diff = await getStagedGitDiff(argv.dir);
+  const diff = await getStagedGitDiff(argv.dir, argv.silent);
   const stagedFiles = await getStagedFiles(argv.dir);
   const context = argv._[0] as string | undefined;
   if (diff) {
