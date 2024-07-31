@@ -52,7 +52,8 @@ export async function getStagedFiles(
   pathToRepo: string,
   silent: boolean = false,
 ): Promise<{ file: string; additions: number; deletions: number }[]> {
-  const spinner = ora(chalk.blue("Obtaining staged files...")).start();
+  const spinner = ora(chalk.blue("Obtaining staged files..."));
+  if (!silent) spinner.start();
   const execAsync = promisify(exec);
 
   try {
