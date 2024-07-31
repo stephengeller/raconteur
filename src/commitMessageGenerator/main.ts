@@ -31,6 +31,12 @@ const argv = yargs(hideBin(process.argv))
     type: "boolean",
     default: false,
   })
+  .option("silent", {
+    alias: "s",
+    description: "Silence all output",
+    type: "boolean",
+    default: false,
+  })
   .positional("context", {
     describe: "Additional context for the commit message",
     type: "string",
@@ -42,16 +48,23 @@ const argv = yargs(hideBin(process.argv))
 
 process.chdir(argv.dir);
 
+function log(message: string) {
+  if (!argv.silent) {
+    console.log(message);
+  }
+}
+
 async function generateCommitMessage(
   diff: string,
   context: string | undefined = undefined,
 ): Promise<string> {
   if (!diff.trim()) {
-    console.log(chalk.yellow("No changes detected in staged files."));
+    log(chalk.yellow("No changes detected in staged files."));
     return "No changes to commit.";
   }
 
-  const spinner = ora(chalk.blue("Generating commit message...")).start();
+  const spinner = ora(chalk.blue("Generating commit message..."));
+  if (!argv.silent) spinner.start();
 
   let prompt = `Please generate a concise commit message based on the following changes, following the Conventional Commits specification.`;
   if (context) {
@@ -59,10 +72,10 @@ async function generateCommitMessage(
   }
   try {
     const commitMessage = await callChatGPTApi(prompt, diff);
-    spinner.succeed(chalk.blue("Commit message generated"));
+    if (!argv.silent) spinner.succeed(chalk.blue("Commit message generated"));
     return commitMessage;
   } catch (error) {
-    spinner.fail("Failed to generate commit message.");
+    if (!argv.silent) spinner.fail("Failed to generate commit message.");
     console.error(chalk.red("Failed to generate commit message:"), error);
     process.exit(1);
   }
@@ -79,7 +92,7 @@ async function commitChanges(commitMessage: string): Promise<void> {
 
     commit.on("close", (code) => {
       if (code === 0) {
-        console.log(chalk.green("Changes committed successfully."));
+        log(chalk.green("Changes committed successfully."));
         resolve();
       } else {
         console.error(
@@ -115,7 +128,7 @@ export async function handleCommit(commitMessage: string) {
   if (response.value) {
     await commitChanges(commitMessage);
   } else {
-    console.log(chalk.yellow("Commit aborted by user."));
+    log(chalk.yellow("Commit aborted by user."));
   }
 }
 
@@ -139,7 +152,7 @@ function printFiles(
     const fileInfo = `${truncatedFile}${additionText}${deletionText}`;
     const filePaddingLength = contentWidth - visibleLength(fileInfo);
     const filePadding = " ".repeat(Math.max(0, filePaddingLength - 1));
-    console.log(
+    log(
       chalk.blueBright("│ ") +
         chalk.yellowBright(truncatedFile) +
         additionText +
@@ -185,12 +198,12 @@ function visibleLength(str: string): number {
 }
 
 function printBoxHeader(contentWidth: number, header: string): void {
-  console.log(chalk.blueBright("┌" + "─".repeat(contentWidth) + "┐"));
+  log(chalk.blueBright("┌" + "─".repeat(contentWidth) + "┐"));
   const paddingLength = Math.floor((contentWidth - visibleLength(header)) / 2);
   const remainder = (contentWidth - visibleLength(header)) % 2;
   const padding = " ".repeat(paddingLength);
   const extraPadding = " ".repeat(remainder); // Extra padding to ensure total length is even
-  console.log(
+  log(
     chalk.blueBright("│") +
       padding +
       chalk.bold(header) +
@@ -201,7 +214,7 @@ function printBoxHeader(contentWidth: number, header: string): void {
 }
 
 function printBoxFooter(contentWidth: number): void {
-  console.log(chalk.blueBright("└" + "─".repeat(contentWidth) + "┘"));
+  log(chalk.blueBright("└" + "─".repeat(contentWidth) + "┘"));
 }
 
 function addAllChanges(): Promise<void> {
@@ -212,7 +225,7 @@ function addAllChanges(): Promise<void> {
 
     add.on("close", (code) => {
       if (code === 0) {
-        console.log(chalk.green("All changes added successfully."));
+        log(chalk.green("All changes added successfully."));
         resolve();
       } else {
         console.error(
@@ -239,14 +252,18 @@ async function main() {
   const stagedFiles = await getStagedFiles(argv.dir);
   const context = argv._[0] as string | undefined;
   if (diff) {
-    printStagedFiles(stagedFiles);
+    if (!argv.silent) {
+      printStagedFiles(stagedFiles);
+    }
     const commitMessage = await generateCommitMessage(diff, context);
-    console.log(chalk.greenBright("Suggested commit message:"));
-    console.log(chalk.yellowBright(commitMessage));
+    if (!argv.silent) {
+      log(chalk.greenBright("Suggested commit message:"));
+      log(chalk.yellowBright(commitMessage));
+    }
     await handleCommit(commitMessage);
   } else {
-    console.log(chalk.red("No staged changes found."));
-    console.log(
+    log(chalk.red("No staged changes found."));
+    log(
       chalk.red("Tip: Add `--all/-a` to stage all changes before committing."),
     );
   }
