@@ -35,7 +35,8 @@ export async function getStagedGitDiff(
   pathToRepo: string,
   silent: boolean = false,
 ): Promise<string> {
-  const spinner = ora(chalk.blue("Obtaining staged git diff...")).start();
+  const spinner = ora(chalk.blue("Obtaining staged git diff..."));
+  if (!silent) spinner.start();
   try {
     const { stdout } = await execAsync(`git -C ${pathToRepo} diff --cached`);
     if (!silent) spinner.succeed(chalk.blue("Staged git diff obtained"));
@@ -49,6 +50,7 @@ export async function getStagedGitDiff(
 
 export async function getStagedFiles(
   pathToRepo: string,
+  silent: boolean = false,
 ): Promise<{ file: string; additions: number; deletions: number }[]> {
   const spinner = ora(chalk.blue("Obtaining staged files...")).start();
   const execAsync = promisify(exec);
@@ -68,7 +70,7 @@ export async function getStagedFiles(
           deletions: parseInt(deletions),
         };
       });
-    spinner.succeed(chalk.blue("Staged files obtained"));
+    if (!silent) spinner.succeed(chalk.blue("Staged files obtained"));
     return files;
   } catch (error) {
     spinner.fail(chalk.blue("Failed to obtain staged files"));
