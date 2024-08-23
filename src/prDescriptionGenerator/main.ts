@@ -116,33 +116,24 @@ Please also generate a PR title, following the Conventional Commit format.
   console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
   console.log(prDescription);
 
-  // Ask if the user wants to copy the response to the clipboard
-  const createPrPrompt = await prompts({
-    type: "toggle",
-    name: "value",
-    message: messages.createPr,
-    initial: true,
-    active: "yes",
-    inactive: "no",
+  const { command } = await prompts({
+    type: "select",
+    name: "command",
+    message: messages.addJiraTicket,
+    choices: [
+      { title: messages.createPr, value: "createPr" },
+      { title: messages.copyToClipboard, value: "copyToClipboard" },
+      { title: "Continue", value: "⏭️Continue" },
+    ],
   });
 
-  if (createPrPrompt.value) {
+  if (command === "createPr") {
     await createGitHubPr(prDescription, DIR_PATH);
-  } else {
-    // Ask if the user wants to copy the response to the clipboard
-    const copyToClipboardPrompt = await prompts({
-      type: "toggle",
-      name: "value",
-      message: messages.copyToClipboard,
-      initial: true,
-      active: "yes",
-      inactive: "no",
-    });
+  }
 
-    if (copyToClipboardPrompt.value) {
-      await copyToClipboard(prDescription);
-      console.log(chalk.green("✅  PR description copied to clipboard!"));
-    }
+  if (command === "copyToClipboard") {
+    await copyToClipboard(prDescription);
+    console.log(chalk.green("✅  PR description copied to clipboard!"));
   }
 }
 
