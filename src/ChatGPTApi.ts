@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 export async function callChatGPTApi(
   systemContent: string,
@@ -26,8 +26,12 @@ export async function callChatGPTApi(
     // Assuming the API response structure matches the expected format.
     // You might need to adjust this based on the actual response format.
     return response.data.choices[0].message.content.trim();
-  } catch (error) {
-    console.error("Error calling ChatGPT API:", error);
-    throw error; // Rethrow or handle as needed
+  } catch (e: any) {
+    const error = e as AxiosError;
+    if (error?.response?.status.toString().startsWith("4")) {
+      throw new Error(`Client error: ${error.message}`);
+    } else {
+      throw new Error(`Error calling ChatGPT API: ${error.message}`);
+    }
   }
 }
