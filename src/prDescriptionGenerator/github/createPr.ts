@@ -59,8 +59,9 @@ export async function createGitHubPr(prDescription: string, dirPath: string) {
       draft: true,
     });
 
-    spinner.succeed("PR created successfully");
-    console.log("PR created:", response.data.html_url);
+    spinner.succeed(`PR created successfully: ${response.data.html_url}`);
+    // open the PR in the browser
+    execSync(`open ${response.data.html_url}`);
   } catch (error: any) {
     spinner.fail("Failed to create PR");
     throw error;
