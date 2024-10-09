@@ -85,12 +85,19 @@ export function extractConventionalCommitTitle(
   let title = defaultTitle; // Default to branch name if no match is found
 
   const lines = prDescription.split("\n");
+  const ticketPrefixRegex = /^\[(.*?)\]/;
+  let ticketPrefix = '';
+
   for (const line of lines) {
+    const ticketMatch = line.match(ticketPrefixRegex);
+    if (ticketMatch) {
+      ticketPrefix = ticketMatch[0];
+    }
     for (const type of conventionalCommitTypes) {
       const regex = new RegExp(`.*(${type}:.*)`);
       const match = line.match(regex);
       if (match && match[1]) {
-        title = match[1].trim().replace(/\W+$/, ""); // Remove trailing non-alphanumeric characters
+        title = `${ticketPrefix} ${match[1].trim().replace(/\W+$/, "")}`.trim(); // Include ticket prefix
         break;
       }
     }
