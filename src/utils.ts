@@ -33,22 +33,14 @@ export async function maybeRewritePrompt(inputPrompt: string): Promise<string> {
 }
 
 export async function extraContextPrompt(): Promise<string> {
-  const extraContextPrompt = await prompts({
-    type: "toggle",
+  const { value }: { value: string | undefined } = await prompts({
+    type: "text",
     name: "value",
     message: messages.addContext,
-    initial: false,
-    active: "yes",
-    inactive: "no",
   });
 
-  if (extraContextPrompt.value) {
-    const response = await prompts({
-      type: "text",
-      name: "value",
-      message: messages.enterExtraContext,
-    });
-    return `\nHere's some extra context on this change, please use it to contextualise this change: "${response.value}"`;
+  if (value?.trim()) {
+    return `\nHere's some extra context on this change, please use it to contextualise this change: "${value.trim()}"`;
   } else {
     return "";
   }
