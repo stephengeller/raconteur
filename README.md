@@ -1,10 +1,13 @@
 # Raconteur
 [Setup](#setup) | [Usage](#usage) | [Contributions](#contributions)
 
-Raconteur is a project comprised of a few tools:
-1. **PR Hypedocifier**, designed to summarize merged pull requests for a given GitHub user, emphasizing the impact and benefits of each PR. 
-2. **PR Description Generator**, a utility to create detailed descriptions for your pull requests using OpenAI's GPT models. Both tools leverage the GitHub and OpenAI APIs to fetch PR information and generate concise summaries or detailed descriptions.
-3. **Commit Message Generator**, a tool to generate commit messages based on the changes made in a commit.
+Raconteur is a dynamic project that empowers developers with three core tools:
+
+1. **Raconteur**: This tool is designed to summarize merged pull requests for a given GitHub user, emphasizing the impact and benefits of each PR. It utilizes prompts to structure these summaries effectively, ensuring they are both clear and concise for future reference in your documentation.
+
+2. **PR Description Generator**: Leveraging OpenAI's GPT models, this utility crafts comprehensive and detailed descriptions for pull requests. It taps into the power of the OpenAI and GitHub APIs to gather PR information and generate robust narratives that articulate the essence and necessity of the changes. 
+
+3. **Commit Message Generator**: This component automates the creation of commit messages, following the Conventional Commits specification. By analyzing the changes made in a commit, it formulates a message that succinctly captures the essence of the modifications, ensuring consistency and clarity in version control histories.
 
 ## Prerequisites
 
