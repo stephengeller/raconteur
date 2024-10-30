@@ -1,0 +1,62 @@
+# Personal Preferences
+
+# Project Structure
+This is a TypeScript project with three main tools:
+1. Raconteur (PR Summarizer)
+2. PR Description Generator
+3. Commit Message Generator
+
+# Development Workflows
+
+## Common Commands
+- `yarn install` - Install dependencies
+- `yarn start` - Run the PR Hypedocifier summarizer
+- `yarn prdesc` - Generate PR descriptions
+- `yarn commit` - Generate commit messages
+- `yarn test` - Run unit tests
+
+## Required Environment Variables
+Remind me to check these in .env:
+- GITHUB_TOKEN
+- OPENAI_API_KEY
+- GITHUB_USERNAME
+- SQUAREUP_EMAIL
+- JIRA_API_TOKEN
+
+## Important Directories
+- src/ - Main source code
+- src/prDescriptionGenerator/ - PR Description Generator code
+- src/CommitMessageGenerator/ - Commit Message Generator code
+
+# Testing Guidelines
+- Use Jest for testing
+- Test files should be co-located with source files
+- Follow the naming convention: `*.test.ts`
+
+# Commit Guidelines
+- Use `commit -yas` for codebase changes
+
+# PR Guidelines
+When creating PRs:
+1. Use the PR Description Generator (`yarn prdesc`)
+2. Ensure all tests pass
+3. Include relevant Jira ticket references
+4. Update documentation if needed
+
+# Deployment
+No specific deployment process - this is a local development tool.
+
+# Common Issues
+If authentication fails:
+1. For GitHub: Run `gh auth login`
+2. For Jira: Run `jira init` 
+
+# Dependencies
+Key dependencies:
+- Node.js (v12 or later)
+- yarn
+- jq (command-line JSON processor)
+- TypeScript
+- Jest for testing
+- Octokit for GitHub API
+- OpenAI API for GPT integration
