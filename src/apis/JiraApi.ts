@@ -9,7 +9,10 @@ export type JiraIssue = {
 /**
  * Converts the Jira API response to a JiraIssue object.
  */
-function toJiraIssue(issueResponse: any): JiraIssue {
+function toJiraIssue(issueResponse: any): JiraIssue | undefined {
+  if (!issueResponse || !issueResponse.fields) {
+    return undefined;
+  }
   return {
     key: issueResponse.key,
     summary: issueResponse.fields.summary,
@@ -56,7 +59,10 @@ export default class JiraApi {
   getUserIssues(open: boolean = true): Promise<JiraIssue[]> {
     return this.jiraClient
       .getUsersIssues(this.username, open)
-      .then(response => response.issues?.map(toJiraIssue));
+      .then(response => {
+        const issues = response.issues?.map(toJiraIssue).filter((issue: JiraIssue | undefined): issue is JiraIssue => issue !== undefined) ?? [];
+        return issues as JiraIssue[];
+      });
   }
 
   /**

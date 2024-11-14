@@ -1,11 +1,11 @@
 import fs from 'fs';
 import prompts from 'prompts';
-import { maybeRewritePrompt, extraContextPrompt, getJiraTicketDescription } from './utils';
-import JiraApi from './apis/JiraApi';
+import { maybeRewritePrompt, extraContextPrompt, getJiraTicketDescription } from '../../utils';
+import JiraApi from '../../apis/JiraApi';
 
 jest.mock('fs');
 jest.mock('prompts');
-jest.mock('./apis/JiraApi');
+jest.mock('../../apis/JiraApi');
 
 describe('utils', () => {
   beforeEach(() => {

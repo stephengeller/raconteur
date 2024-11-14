@@ -1,12 +1,34 @@
+import { spawn } from 'child_process';
+import prompts from 'prompts';
+import { callChatGPTApi } from '../../ChatGPTApi';
+import { mockConsoleImplementation, restoreConsoleImplementation, clearConsoleMocks } from '../__mocks__/console';
 import {
   cleanCommitMessage,
   visibleLength,
   truncatePath,
   calculateBoxValues,
-} from "./main";
+  handleCommit,
+} from '../../commitMessageGenerator/main';
 
-describe("generateCommitMessage", () => {
-  describe("cleanCommitMessage", () => {
+jest.mock('child_process', () => ({
+  spawn: jest.fn(),
+}));
+jest.mock('prompts');
+jest.mock('../../ChatGPTApi');
+
+describe('generateCommitMessage', () => {
+  beforeAll(() => {
+    mockConsoleImplementation();
+  });
+
+  afterAll(() => {
+    restoreConsoleImplementation();
+  });
+
+  beforeEach(() => {
+    clearConsoleMocks();
+  });
+  describe('cleanCommitMessage', () => {
     const testCases = [
       {
         name: "should handle plaintext language identifier",
@@ -58,7 +80,7 @@ describe("generateCommitMessage", () => {
     });
   });
 
-  describe("truncatePath", () => {
+  describe('truncatePath', () => {
     const testCases = [
       {
         name: "should return full path when shorter than max length",
@@ -94,7 +116,7 @@ describe("generateCommitMessage", () => {
     });
   });
 
-  describe("calculateBoxValues", () => {
+  describe('calculateBoxValues', () => {
     const testCases = [
       {
         name: "should handle empty files array",
@@ -133,7 +155,7 @@ describe("generateCommitMessage", () => {
     });
   });
 
-  describe("visibleLength", () => {
+  describe('visibleLength', () => {
     const testCases = [
       {
         name: "should handle plain text without ANSI codes",
@@ -162,6 +184,70 @@ describe("generateCommitMessage", () => {
         const result = visibleLength(input);
         expect(result).toBe(expected);
       });
+    });
+  });
+
+  describe('handleCommit', () => {
+    const mockCommitMessage = 'test: add new feature';
+    let mockSpawn: jest.Mock;
+
+    beforeEach(() => {
+      mockSpawn = spawn as unknown as jest.Mock;
+      mockSpawn.mockReturnValue({
+        on: jest.fn((event, callback) => {
+          if (event === 'close') {
+            callback(0);
+          }
+        }),
+      });
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should commit changes when user confirms', async () => {
+      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: true });
+
+      await handleCommit(mockCommitMessage);
+
+      expect(mockSpawn).toHaveBeenCalledWith('git', ['commit', '-m', mockCommitMessage], {
+        stdio: 'inherit',
+      });
+    });
+
+    it('should not commit changes when user declines', async () => {
+      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: false });
+
+      await handleCommit(mockCommitMessage);
+
+      expect(mockSpawn).not.toHaveBeenCalled();
+    });
+
+    it('should handle git commit errors', async () => {
+      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: true });
+      mockSpawn.mockReturnValue({
+        on: jest.fn((event, callback) => {
+          if (event === 'close') {
+            callback(1);
+          }
+        }),
+      });
+
+      await expect(handleCommit(mockCommitMessage)).rejects.toThrow();
+    });
+
+    it('should handle spawn errors', async () => {
+      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: true });
+      mockSpawn.mockReturnValue({
+        on: jest.fn((event, callback) => {
+          if (event === 'error') {
+            callback(new Error('Spawn error'));
+          }
+        }),
+      });
+
+      await expect(handleCommit(mockCommitMessage)).rejects.toThrow('Spawn error');
     });
   });
 });

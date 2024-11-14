@@ -1,19 +1,21 @@
-import { promisify } from "util";
-import { exec } from "child_process";
 import chalk from "chalk";
 import ora from "ora";
+import { GitCommandExecutor, SystemGitCommandExecutor } from "./gitCommandExecutor";
 
-const execAsync = promisify(exec);
+// Default executor that can be overridden for testing
+let gitExecutor: GitCommandExecutor = new SystemGitCommandExecutor();
+
+// For testing purposes
+export function setGitExecutor(executor: GitCommandExecutor) {
+  gitExecutor = executor;
+}
 
 export async function getGitDiff(
   repoDir: string,
   destBranch: string = "origin/main",
 ): Promise<string> {
   try {
-    // Use the -C flag to specify the directory for the git command
-    const { stdout } = await execAsync(
-      `git -C "${repoDir}" diff ${destBranch}`,
-    );
+    const stdout = await gitExecutor.execute(`diff ${destBranch}`, repoDir);
 
     if (!stdout) {
       throw new Error("No git diff found. Please ensure you have changes in your branch.");
@@ -33,7 +35,7 @@ export async function getStagedGitDiff(
   const spinner = ora(chalk.blue("Obtaining staged git diff..."));
   if (!silent) spinner.start();
   try {
-    const { stdout } = await execAsync(`git -C ${pathToRepo} diff --cached`);
+    const stdout = await gitExecutor.execute("diff --cached", pathToRepo);
     if (!silent) spinner.succeed(chalk.blue("Staged git diff obtained"));
     return stdout;
   } catch (error) {
@@ -43,29 +45,32 @@ export async function getStagedGitDiff(
   }
 }
 
+// Pure function to parse numstat output
+export function parseGitNumstat(numstatOutput: string): Array<{ file: string; additions: number; deletions: number }> {
+  return numstatOutput
+    .trim()
+    .split("\n")
+    .filter(line => line.trim())
+    .map((line) => {
+      const [additions, deletions, file] = line.split("\t");
+      return {
+        file,
+        additions: parseInt(additions),
+        deletions: parseInt(deletions),
+      };
+    });
+}
+
 export async function getStagedFiles(
   pathToRepo: string,
   silent: boolean = false,
-): Promise<{ file: string; additions: number; deletions: number }[]> {
+): Promise<Array<{ file: string; additions: number; deletions: number }>> {
   const spinner = ora(chalk.blue("Obtaining staged files..."));
   if (!silent) spinner.start();
 
   try {
-    const { stdout } = await execAsync(
-      `git -C "${pathToRepo}" diff --cached --numstat`,
-    );
-    const files = stdout
-      .trim()
-      .split("\n")
-      .filter(line => line.trim())
-      .map((line) => {
-        const [additions, deletions, file] = line.split("\t");
-        return {
-          file,
-          additions: parseInt(additions),
-          deletions: parseInt(deletions),
-        };
-      });
+    const stdout = await gitExecutor.execute("diff --cached --numstat", pathToRepo);
+    const files = parseGitNumstat(stdout);
     if (!silent) spinner.succeed(chalk.blue("Staged files obtained"));
     return files;
   } catch (error) {

@@ -1,7 +1,21 @@
+# Dependencies
 node_modules
-.env
-/.idea
 yarn-error.log
+
+# Environment and Secrets
+.env
+
+# IDE and Editor Files
+/.idea
+
+# Build and Output
+summarised_prs.json
+
+# Test Coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Custom Configuration
 customPrDescriptionPrompt.txt
 customRaconteurPrompt.txt.txt
-summarised_prs.json
