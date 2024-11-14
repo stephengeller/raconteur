@@ -143,11 +143,13 @@ export async function handleCommit(commitMessage: string) {
   }
 }
 
-function truncatePath(path: string, maxLength: number): string {
+export function truncatePath(path: string, maxLength: number): string {
   if (path.length <= maxLength) {
     return path;
   }
-  return "..." + path.slice(-maxLength + 3); // +3 for the length of '...'
+  const ellipsis = "...";
+  const remainingLength = maxLength - ellipsis.length;
+  return ellipsis + path.slice(-remainingLength);
 }
 
 function printFiles(
@@ -174,7 +176,7 @@ function printFiles(
   });
 }
 
-function calculateBoxValues(
+export function calculateBoxValues(
   stagedFiles: Array<{ file: string; additions: number; deletions: number }>,
 ) {
   const header = "Staged files to be committed:";
@@ -202,7 +204,7 @@ function printStagedFiles(
   printBoxFooter(contentWidth);
 }
 
-function visibleLength(str: string): number {
+export function visibleLength(str: string): number {
   // Remove ANSI escape codes to correctly calculate the visible length
   // eslint-disable-next-line no-control-regex
   return str.replace(/\u001b\[\d+m/g, "").length;
