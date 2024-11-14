@@ -81,10 +81,21 @@ async function generateCommitMessage(
   }
 }
 
+/**
+ * Cleans a commit message by removing language identifiers, backticks, and extra whitespace
+ * @param commitMessage - The raw commit message that may contain markdown formatting
+ * @returns The cleaned commit message
+ */
+export function cleanCommitMessage(commitMessage: string): string {
+  return commitMessage
+    .replace(/^`{1,3}(?:plaintext|text)?\n?/i, "") // Remove opening backticks with optional language identifier
+    .replace(/`{1,3}$/g, "") // Remove closing backticks
+    .trim(); // Clean up any remaining whitespace
+}
+
 async function commitChanges(commitMessage: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    // Remove starting and ending single or triple backticks from the commit message
-    const cleanedCommitMessage = commitMessage.replace(/^`{1,3}|`{1,3}$/g, "");
+    const cleanedCommitMessage = cleanCommitMessage(commitMessage);
 
     const commit = spawn("git", ["commit", "-m", cleanedCommitMessage], {
       stdio: "inherit",
