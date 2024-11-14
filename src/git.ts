@@ -1,6 +1,6 @@
-import chalk from "chalk";
 import { promisify } from "util";
 import { exec } from "child_process";
+import chalk from "chalk";
 import ora from "ora";
 
 const execAsync = promisify(exec);
@@ -16,18 +16,13 @@ export async function getGitDiff(
     );
 
     if (!stdout) {
-      console.error(
-        chalk.red(
-          "❌  No git diff found. Please ensure you have changes in your branch.",
-        ),
-      );
-      process.exit(1);
+      throw new Error("No git diff found. Please ensure you have changes in your branch.");
     }
 
     return stdout;
   } catch (error) {
     console.error("Error getting git diff:", error);
-    throw error; // Rethrow or handle as needed
+    throw error;
   }
 }
 
@@ -44,7 +39,7 @@ export async function getStagedGitDiff(
   } catch (error) {
     if (!silent) spinner.fail(chalk.blue("Failed to obtain staged git diff"));
     console.error(chalk.red(error));
-    process.exit(1);
+    throw new Error("Failed to obtain staged git diff");
   }
 }
 
@@ -54,7 +49,6 @@ export async function getStagedFiles(
 ): Promise<{ file: string; additions: number; deletions: number }[]> {
   const spinner = ora(chalk.blue("Obtaining staged files..."));
   if (!silent) spinner.start();
-  const execAsync = promisify(exec);
 
   try {
     const { stdout } = await execAsync(
@@ -63,6 +57,7 @@ export async function getStagedFiles(
     const files = stdout
       .trim()
       .split("\n")
+      .filter(line => line.trim())
       .map((line) => {
         const [additions, deletions, file] = line.split("\t");
         return {
@@ -74,8 +69,8 @@ export async function getStagedFiles(
     if (!silent) spinner.succeed(chalk.blue("Staged files obtained"));
     return files;
   } catch (error) {
-    spinner.fail(chalk.blue("Failed to obtain staged files"));
+    if (!silent) spinner.fail(chalk.blue("Failed to obtain staged files"));
     console.error(chalk.red(error));
-    process.exit(1);
+    throw new Error("Failed to obtain staged files");
   }
 }
