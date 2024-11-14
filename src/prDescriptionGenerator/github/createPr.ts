@@ -85,23 +85,30 @@ export function extractConventionalCommitTitle(
   let title = defaultTitle; // Default to branch name if no match is found
 
   const lines = prDescription.split("\n");
-  const ticketPrefixRegex = /^\[(.*?)\]/;
   let ticketPrefix = '';
+  let commitMessage = '';
 
   for (const line of lines) {
-    const ticketMatch = line.match(ticketPrefixRegex);
-    if (ticketMatch) {
-      ticketPrefix = ticketMatch[0];
+    // First collect all ticket references at the start of the line
+    const ticketMatches = Array.from(line.matchAll(/\[.*?\]/g));
+    if (ticketMatches.length > 0 && line.trim().startsWith('[')) {
+      ticketPrefix = ticketMatches.map(match => match[0]).join('');
+      continue; // Skip to next line after collecting ticket references
     }
+
+    // Then look for conventional commit message
     for (const type of conventionalCommitTypes) {
-      const regex = new RegExp(`.*(${type}:.*)`);
+      const regex = new RegExp(`.*?(${type}:.*)`);
       const match = line.match(regex);
       if (match && match[1]) {
-        title = `${ticketPrefix} ${match[1].trim().replace(/\W+$/, "")}`.trim(); // Include ticket prefix
+        commitMessage = match[1].trim().replace(/\W+$/, "");
         break;
       }
     }
-    if (title !== defaultTitle) {
+    
+    // If we found a commit message, construct the title and break
+    if (commitMessage) {
+      title = ticketPrefix ? `${ticketPrefix} ${commitMessage}` : commitMessage;
       break;
     }
   }

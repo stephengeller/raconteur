@@ -10,6 +10,8 @@ jest.mock('../../apis/JiraApi');
 describe('utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    delete process.env.SQUAREUP_EMAIL;
+    delete process.env.JIRA_API_TOKEN;
   });
 
   describe('maybeRewritePrompt', () => {
@@ -38,6 +40,23 @@ describe('utils', () => {
         newPrompt,
         'utf8'
       );
+    });
+
+    it('should handle file system errors when saving prompt', async () => {
+      const newPrompt = 'new custom prompt';
+      const mockError = new Error('File system error');
+      (prompts as unknown as jest.Mock)
+        .mockResolvedValueOnce({ value: true })
+        .mockResolvedValueOnce({ value: newPrompt });
+      (fs.writeFileSync as jest.Mock).mockImplementation(() => {
+        throw mockError;
+      });
+
+      const result = await maybeRewritePrompt(mockInputPrompt);
+
+      expect(result).toBe(newPrompt);
+      // Error should be logged but not thrown
+      expect(fs.writeFileSync).toHaveBeenCalled();
     });
   });
 
@@ -71,17 +90,20 @@ describe('utils', () => {
         '\nHere\'s some extra context on this change, please use it to contextualise this change: "Extra context"'
       );
     });
+
+    it('should handle undefined input', async () => {
+      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: undefined });
+
+      const result = await extraContextPrompt();
+
+      expect(result).toBe('');
+    });
   });
 
   describe('getJiraTicketDescription', () => {
-    const originalEnv = process.env;
-
     beforeEach(() => {
-      process.env = { ...originalEnv };
-    });
-
-    afterEach(() => {
-      process.env = originalEnv;
+      process.env.SQUAREUP_EMAIL = 'test@example.com';
+      process.env.JIRA_API_TOKEN = 'token123';
     });
 
     it('should return empty string when Jira credentials are missing', async () => {
@@ -93,10 +115,47 @@ describe('utils', () => {
       expect(result).toBe('');
     });
 
-    it('should return formatted ticket description when issue is found', async () => {
-      process.env.SQUAREUP_EMAIL = 'test@example.com';
-      process.env.JIRA_API_TOKEN = 'token123';
+    it('should handle "none" selection from fetch results', async () => {
+      (prompts as unknown as jest.Mock)
+        .mockResolvedValueOnce({ command: 'fetch' })
+        .mockResolvedValueOnce({ selectedIssue: 'none' });
 
+      const mockJiraApi = {
+        getUserIssues: jest.fn().mockResolvedValue([])
+      };
+
+      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
+
+      const result = await getJiraTicketDescription();
+      expect(result).toBe('');
+    });
+
+    it('should handle "enter" selection from fetch results', async () => {
+      const mockIssue = {
+        key: 'TEST-123',
+        summary: 'Test Summary',
+        description: 'Test Description'
+      };
+
+      (prompts as unknown as jest.Mock)
+        .mockResolvedValueOnce({ command: 'fetch' })
+        .mockResolvedValueOnce({ selectedIssue: 'enter' })
+        .mockResolvedValueOnce({ ticket: 'TEST-123' });
+
+      const mockJiraApi = {
+        getUserIssues: jest.fn().mockResolvedValue([]),
+        getIssue: jest.fn().mockResolvedValue(mockIssue)
+      };
+
+      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
+
+      const result = await getJiraTicketDescription();
+      expect(result).toContain(mockIssue.key);
+      expect(result).toContain(mockIssue.summary);
+      expect(result).toContain(mockIssue.description);
+    });
+
+    it('should return formatted ticket description when issue is found via fetch', async () => {
       const mockIssue = {
         key: 'TEST-123',
         summary: 'Test Summary',
@@ -122,9 +181,6 @@ describe('utils', () => {
     });
 
     it('should handle manual ticket entry', async () => {
-      process.env.SQUAREUP_EMAIL = 'test@example.com';
-      process.env.JIRA_API_TOKEN = 'token123';
-
       const mockIssue = {
         key: 'TEST-123',
         summary: 'Test Summary',
@@ -149,10 +205,39 @@ describe('utils', () => {
     });
 
     it('should handle when user chooses not to add ticket', async () => {
-      process.env.SQUAREUP_EMAIL = 'test@example.com';
-      process.env.JIRA_API_TOKEN = 'token123';
-
       (prompts as unknown as jest.Mock).mockResolvedValueOnce({ command: 'no' });
+
+      const result = await getJiraTicketDescription();
+
+      expect(result).toBe('');
+    });
+
+    it('should handle when user selects "none" from fetch results', async () => {
+      (prompts as unknown as jest.Mock)
+        .mockResolvedValueOnce({ command: 'fetch' })
+        .mockResolvedValueOnce({ selectedIssue: 'none' });
+
+      const mockJiraApi = {
+        getUserIssues: jest.fn().mockResolvedValue([])
+      };
+
+      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
+
+      const result = await getJiraTicketDescription();
+
+      expect(result).toBe('');
+    });
+
+    it('should handle Jira API errors', async () => {
+      const mockError = new Error('API Error');
+      (prompts as unknown as jest.Mock)
+        .mockResolvedValueOnce({ command: 'fetch' });
+
+      const mockJiraApi = {
+        getUserIssues: jest.fn().mockRejectedValue(mockError)
+      };
+
+      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
 
       const result = await getJiraTicketDescription();
 

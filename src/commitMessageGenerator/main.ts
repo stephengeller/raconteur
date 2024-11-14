@@ -1,12 +1,12 @@
 import { spawn } from "child_process";
 import chalk from "chalk";
-import prompts from "prompts"; // Import prompts
 import dotenv from "dotenv";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import ora from "ora";
 import { callChatGPTApi } from "../ChatGPTApi";
 import { getStagedFiles, getStagedGitDiff } from "../git";
+import { SystemPromptHandler, PromptHandler } from "../promptHandler";
 
 const MAX_FILE_LENGTH = 30;
 
@@ -121,22 +121,18 @@ async function commitChanges(commitMessage: string): Promise<void> {
 }
 
 // Function to handle the commit process
-export async function handleCommit(commitMessage: string) {
-  if (argv.yes) {
+export async function handleCommit(
+  commitMessage: string,
+  promptHandler: PromptHandler,
+  autoConfirm: boolean = false
+) {
+  if (autoConfirm) {
     await commitChanges(commitMessage);
     return;
   }
 
-  const response = await prompts({
-    type: "toggle",
-    name: "value",
-    message: "Do you want to commit with the above message?",
-    initial: true,
-    active: "yes",
-    inactive: "no",
-  });
-
-  if (response.value) {
+  const shouldCommit = await promptHandler.confirmCommit(commitMessage);
+  if (shouldCommit) {
     await commitChanges(commitMessage);
   } else {
     log(chalk.yellow("Commit aborted by user."));
@@ -257,6 +253,8 @@ function addAllChanges(): Promise<void> {
 
 // Main function refactored with smaller functions
 async function main() {
+  const promptHandler = new SystemPromptHandler();
+
   if (argv.all) {
     await addAllChanges();
   }
@@ -273,7 +271,7 @@ async function main() {
       log(chalk.greenBright("Suggested commit message:"));
       log(chalk.yellowBright(commitMessage));
     }
-    await handleCommit(commitMessage);
+    await handleCommit(commitMessage, promptHandler, argv.yes);
   } else {
     log(chalk.red("No staged changes found."));
     log(

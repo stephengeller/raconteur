@@ -2,6 +2,7 @@ import { spawn } from 'child_process';
 import prompts from 'prompts';
 import { callChatGPTApi } from '../../ChatGPTApi';
 import { mockConsoleImplementation, restoreConsoleImplementation, clearConsoleMocks } from '../__mocks__/console';
+import { MockGitCommandExecutor } from '../../gitCommandExecutor';
 import {
   cleanCommitMessage,
   visibleLength,
@@ -16,7 +17,9 @@ jest.mock('child_process', () => ({
 jest.mock('prompts');
 jest.mock('../../ChatGPTApi');
 
-describe('generateCommitMessage', () => {
+describe('git utilities', () => {
+  let mockExecutor: MockGitCommandExecutor;
+  
   beforeAll(() => {
     mockConsoleImplementation();
   });
@@ -28,6 +31,7 @@ describe('generateCommitMessage', () => {
   beforeEach(() => {
     clearConsoleMocks();
   });
+
   describe('cleanCommitMessage', () => {
     const testCases = [
       {
@@ -190,6 +194,7 @@ describe('generateCommitMessage', () => {
   describe('handleCommit', () => {
     const mockCommitMessage = 'test: add new feature';
     let mockSpawn: jest.Mock;
+    let mockPromptHandler: { confirmCommit: jest.Mock };
 
     beforeEach(() => {
       mockSpawn = spawn as unknown as jest.Mock;
@@ -200,32 +205,39 @@ describe('generateCommitMessage', () => {
           }
         }),
       });
+      mockPromptHandler = {
+        confirmCommit: jest.fn()
+      };
     });
 
     afterEach(() => {
       jest.clearAllMocks();
     });
 
+    it('should commit changes when auto-confirm is true', async () => {
+      await handleCommit(mockCommitMessage, mockPromptHandler as any, true);
+      expect(mockSpawn).toHaveBeenCalledWith('git', ['commit', '-m', mockCommitMessage], {
+        stdio: 'inherit',
+      });
+      expect(mockPromptHandler.confirmCommit).not.toHaveBeenCalled();
+    });
+
     it('should commit changes when user confirms', async () => {
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: true });
-
-      await handleCommit(mockCommitMessage);
-
+      mockPromptHandler.confirmCommit.mockResolvedValueOnce(true);
+      await handleCommit(mockCommitMessage, mockPromptHandler as any);
       expect(mockSpawn).toHaveBeenCalledWith('git', ['commit', '-m', mockCommitMessage], {
         stdio: 'inherit',
       });
     });
 
     it('should not commit changes when user declines', async () => {
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: false });
-
-      await handleCommit(mockCommitMessage);
-
+      mockPromptHandler.confirmCommit.mockResolvedValueOnce(false);
+      await handleCommit(mockCommitMessage, mockPromptHandler as any);
       expect(mockSpawn).not.toHaveBeenCalled();
     });
 
     it('should handle git commit errors', async () => {
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: true });
+      mockPromptHandler.confirmCommit.mockResolvedValueOnce(true);
       mockSpawn.mockReturnValue({
         on: jest.fn((event, callback) => {
           if (event === 'close') {
@@ -234,11 +246,11 @@ describe('generateCommitMessage', () => {
         }),
       });
 
-      await expect(handleCommit(mockCommitMessage)).rejects.toThrow();
+      await expect(handleCommit(mockCommitMessage, mockPromptHandler as any)).rejects.toThrow();
     });
 
     it('should handle spawn errors', async () => {
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: true });
+      mockPromptHandler.confirmCommit.mockResolvedValueOnce(true);
       mockSpawn.mockReturnValue({
         on: jest.fn((event, callback) => {
           if (event === 'error') {
@@ -247,7 +259,7 @@ describe('generateCommitMessage', () => {
         }),
       });
 
-      await expect(handleCommit(mockCommitMessage)).rejects.toThrow('Spawn error');
+      await expect(handleCommit(mockCommitMessage, mockPromptHandler as any)).rejects.toThrow('Spawn error');
     });
   });
 });
