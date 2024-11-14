@@ -22,7 +22,7 @@
     "@types/yargs": "^17.0.32",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
-    "axios": "^1.6.7",
+    "axios": "^1.7.4",
     "chalk": "4",
     "dotenv": "^16.4.3",
     "eslint": "^8.56.0",
