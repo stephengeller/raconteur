@@ -148,7 +148,7 @@ export function truncatePath(path: string, maxLength: number): string {
   return ellipsis + path.slice(-remainingLength);
 }
 
-function printFiles(
+export function printFiles(
   stagedFiles: Array<{ file: string; additions: number; deletions: number }>,
   contentWidth: number,
 ) {
@@ -206,7 +206,7 @@ export function visibleLength(str: string): number {
   return str.replace(/\u001b\[\d+m/g, "").length;
 }
 
-function printBoxHeader(contentWidth: number, header: string): void {
+export function printBoxHeader(contentWidth: number, header: string): void {
   log(chalk.blueBright("┌" + "─".repeat(contentWidth) + "┐"));
   const paddingLength = Math.floor((contentWidth - visibleLength(header)) / 2);
   const remainder = (contentWidth - visibleLength(header)) % 2;
@@ -222,7 +222,7 @@ function printBoxHeader(contentWidth: number, header: string): void {
   );
 }
 
-function printBoxFooter(contentWidth: number): void {
+export function printBoxFooter(contentWidth: number): void {
   log(chalk.blueBright("└" + "─".repeat(contentWidth) + "┘"));
 }
 

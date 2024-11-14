@@ -1,25 +1,30 @@
-import { spawn } from 'child_process';
-import prompts from 'prompts';
-import { callChatGPTApi } from '../../ChatGPTApi';
-import { mockConsoleImplementation, restoreConsoleImplementation, clearConsoleMocks } from '../__mocks__/console';
-import { MockGitCommandExecutor } from '../../gitCommandExecutor';
+import { spawn } from "child_process";
 import {
-  cleanCommitMessage,
-  visibleLength,
-  truncatePath,
+  clearConsoleMocks,
+  mockConsoleImplementation,
+  restoreConsoleImplementation,
+} from "../__mocks__/console";
+import { MockGitCommandExecutor } from "../../gitCommandExecutor";
+import {
   calculateBoxValues,
+  cleanCommitMessage,
   handleCommit,
-} from '../../commitMessageGenerator/main';
+  printBoxFooter,
+  printBoxHeader,
+  printFiles,
+  truncatePath,
+  visibleLength,
+} from "../../commitMessageGenerator/main";
 
-jest.mock('child_process', () => ({
+jest.mock("child_process", () => ({
   spawn: jest.fn(),
 }));
-jest.mock('prompts');
-jest.mock('../../ChatGPTApi');
+jest.mock("prompts");
+jest.mock("../../ChatGPTApi");
 
-describe('git utilities', () => {
+describe("git utilities", () => {
   let mockExecutor: MockGitCommandExecutor;
-  
+
   beforeAll(() => {
     mockConsoleImplementation();
   });
@@ -32,7 +37,7 @@ describe('git utilities', () => {
     clearConsoleMocks();
   });
 
-  describe('cleanCommitMessage', () => {
+  describe("cleanCommitMessage", () => {
     const testCases = [
       {
         name: "should handle plaintext language identifier",
@@ -84,7 +89,7 @@ describe('git utilities', () => {
     });
   });
 
-  describe('truncatePath', () => {
+  describe("truncatePath", () => {
     const testCases = [
       {
         name: "should return full path when shorter than max length",
@@ -120,7 +125,7 @@ describe('git utilities', () => {
     });
   });
 
-  describe('calculateBoxValues', () => {
+  describe("calculateBoxValues", () => {
     const testCases = [
       {
         name: "should handle empty files array",
@@ -159,7 +164,7 @@ describe('git utilities', () => {
     });
   });
 
-  describe('visibleLength', () => {
+  describe("visibleLength", () => {
     const testCases = [
       {
         name: "should handle plain text without ANSI codes",
@@ -191,8 +196,8 @@ describe('git utilities', () => {
     });
   });
 
-  describe('handleCommit', () => {
-    const mockCommitMessage = 'test: add new feature';
+  describe("handleCommit", () => {
+    const mockCommitMessage = "test: add new feature";
     let mockSpawn: jest.Mock;
     let mockPromptHandler: { confirmCommit: jest.Mock };
 
@@ -200,13 +205,13 @@ describe('git utilities', () => {
       mockSpawn = spawn as unknown as jest.Mock;
       mockSpawn.mockReturnValue({
         on: jest.fn((event, callback) => {
-          if (event === 'close') {
+          if (event === "close") {
             callback(0);
           }
         }),
       });
       mockPromptHandler = {
-        confirmCommit: jest.fn()
+        confirmCommit: jest.fn(),
       };
     });
 
@@ -214,52 +219,145 @@ describe('git utilities', () => {
       jest.clearAllMocks();
     });
 
-    it('should commit changes when auto-confirm is true', async () => {
+    it("should commit changes when auto-confirm is true", async () => {
       await handleCommit(mockCommitMessage, mockPromptHandler as any, true);
-      expect(mockSpawn).toHaveBeenCalledWith('git', ['commit', '-m', mockCommitMessage], {
-        stdio: 'inherit',
-      });
+      expect(mockSpawn).toHaveBeenCalledWith(
+        "git",
+        ["commit", "-m", mockCommitMessage],
+        {
+          stdio: "inherit",
+        },
+      );
       expect(mockPromptHandler.confirmCommit).not.toHaveBeenCalled();
     });
 
-    it('should commit changes when user confirms', async () => {
+    it("should commit changes when user confirms", async () => {
       mockPromptHandler.confirmCommit.mockResolvedValueOnce(true);
       await handleCommit(mockCommitMessage, mockPromptHandler as any);
-      expect(mockSpawn).toHaveBeenCalledWith('git', ['commit', '-m', mockCommitMessage], {
-        stdio: 'inherit',
-      });
+      expect(mockSpawn).toHaveBeenCalledWith(
+        "git",
+        ["commit", "-m", mockCommitMessage],
+        {
+          stdio: "inherit",
+        },
+      );
     });
 
-    it('should not commit changes when user declines', async () => {
+    it("should not commit changes when user declines", async () => {
       mockPromptHandler.confirmCommit.mockResolvedValueOnce(false);
       await handleCommit(mockCommitMessage, mockPromptHandler as any);
       expect(mockSpawn).not.toHaveBeenCalled();
     });
 
-    it('should handle git commit errors', async () => {
+    it("should handle git commit errors", async () => {
       mockPromptHandler.confirmCommit.mockResolvedValueOnce(true);
       mockSpawn.mockReturnValue({
         on: jest.fn((event, callback) => {
-          if (event === 'close') {
+          if (event === "close") {
             callback(1);
           }
         }),
       });
 
-      await expect(handleCommit(mockCommitMessage, mockPromptHandler as any)).rejects.toThrow();
+      await expect(
+        handleCommit(mockCommitMessage, mockPromptHandler as any),
+      ).rejects.toThrow();
     });
 
-    it('should handle spawn errors', async () => {
+    it("should handle spawn errors", async () => {
       mockPromptHandler.confirmCommit.mockResolvedValueOnce(true);
       mockSpawn.mockReturnValue({
         on: jest.fn((event, callback) => {
-          if (event === 'error') {
-            callback(new Error('Spawn error'));
+          if (event === "error") {
+            callback(new Error("Spawn error"));
           }
         }),
       });
 
-      await expect(handleCommit(mockCommitMessage, mockPromptHandler as any)).rejects.toThrow('Spawn error');
+      await expect(
+        handleCommit(mockCommitMessage, mockPromptHandler as any),
+      ).rejects.toThrow("Spawn error");
+    });
+  });
+
+  describe("printBoxHeader", () => {
+    it("should print header with even content width", () => {
+      const contentWidth = 20;
+      const header = "Test Header";
+      printBoxHeader(contentWidth, header);
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("┌────────────────────┐"),
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("Test Header"),
+      );
+    });
+
+    it("should print header with odd content width", () => {
+      const contentWidth = 21;
+      const header = "Test Header";
+      printBoxHeader(contentWidth, header);
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("┌─────────────────────┐"),
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("Test Header"),
+      );
+    });
+  });
+
+  describe("printBoxFooter", () => {
+    it("should print footer with correct width", () => {
+      const contentWidth = 20;
+      printBoxFooter(contentWidth);
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("└────────────────────┘"),
+      );
+    });
+  });
+
+  describe("printFiles", () => {
+    it("should print files with additions and deletions", () => {
+      const stagedFiles = [
+        { file: "test.ts", additions: 5, deletions: 2 },
+        { file: "long/path/to/file.ts", additions: 0, deletions: 3 },
+      ];
+      const contentWidth = 48;
+      printFiles(stagedFiles, contentWidth);
+
+      // Verify each file is printed with correct formatting
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("test.ts") &&
+          expect.stringContaining("(+5)") &&
+          expect.stringContaining("(-2)"),
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("...th/to/file.ts") &&
+          expect.stringContaining("(-3)"),
+      );
+    });
+
+    it("should handle files with no changes", () => {
+      const stagedFiles = [{ file: "test.ts", additions: 0, deletions: 0 }];
+      const contentWidth = 48;
+      printFiles(stagedFiles, contentWidth);
+
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("test.ts") &&
+          expect.not.stringContaining("(+") &&
+          expect.not.stringContaining("(-"),
+      );
+    });
+
+    it("should handle empty files array", () => {
+      const stagedFiles: Array<{
+        file: string;
+        additions: number;
+        deletions: number;
+      }> = [];
+      const contentWidth = 48;
+      printFiles(stagedFiles, contentWidth);
+      expect(console.log).not.toHaveBeenCalled();
     });
   });
 });
