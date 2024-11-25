@@ -122,7 +122,7 @@ Please also generate a PR title, following the Conventional Commit format.
       name: "command",
       message: chalk.yellow(messages.prDescription.createPr),
       choices: [
-        { title: "Create GitHub PR", value: "createPr" },
+        { title: "🆕 Create GitHub PR", value: "createPr" },
         {
           title: messages.prDescription.copyToClipboard,
           value: "copyToClipboard",

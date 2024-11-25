@@ -106,7 +106,87 @@ describe('utils', () => {
       process.env.JIRA_API_TOKEN = 'token123';
     });
 
-    it('should return empty string when Jira credentials are missing', async () => {
+    it('should automatically fetch and return ticket description', async () => {
+      const mockIssue = {
+        key: 'TEST-123',
+        summary: 'Test Summary',
+        description: 'Test Description'
+      };
+
+      // Mock the JiraApi class
+      const mockJiraApi = {
+        getUserIssues: jest.fn().mockResolvedValue([mockIssue]),
+        getIssue: jest.fn().mockResolvedValue(mockIssue)
+      };
+
+      (JiraApi as jest.Mock).mockImplementation(() => mockJiraApi);
+
+      // Mock user selecting issue from autocomplete
+      (prompts as unknown as jest.Mock)
+        .mockResolvedValueOnce({ selectedIssue: mockIssue });
+
+      const result = await getJiraTicketDescription();
+
+      expect(mockJiraApi.getUserIssues).toHaveBeenCalledWith();
+      expect(result).toContain(mockIssue.key);
+      expect(result).toContain(mockIssue.summary);
+      expect(result).toContain(mockIssue.description);
+    });
+
+    it('should handle manual ticket entry when "enter" is selected', async () => {
+      const mockIssue = {
+        key: 'TEST-123',
+        summary: 'Test Summary',
+        description: 'Test Description'
+      };
+
+      // Mock the JiraApi class
+      const mockJiraApi = {
+        getUserIssues: jest.fn().mockResolvedValue([mockIssue]),
+        getIssue: jest.fn().mockResolvedValue(mockIssue)
+      };
+
+      (JiraApi as jest.Mock).mockImplementation(() => mockJiraApi);
+
+      // Mock user selecting "enter" and providing ticket number
+      (prompts as unknown as jest.Mock)
+        .mockResolvedValueOnce({ selectedIssue: 'enter' })
+        .mockResolvedValueOnce({ ticket: 'TEST-123' });
+
+      const result = await getJiraTicketDescription();
+
+      expect(mockJiraApi.getUserIssues).toHaveBeenCalledWith();
+      expect(mockJiraApi.getIssue).toHaveBeenCalledWith('TEST-123');
+      expect(result).toContain(mockIssue.key);
+      expect(result).toContain(mockIssue.summary);
+      expect(result).toContain(mockIssue.description);
+    });
+
+    it('should handle when no ticket is selected', async () => {
+      const mockIssue = {
+        key: 'TEST-123',
+        summary: 'Test Summary',
+        description: 'Test Description'
+      };
+
+      // Mock the JiraApi class
+      const mockJiraApi = {
+        getUserIssues: jest.fn().mockResolvedValue([mockIssue])
+      };
+
+      (JiraApi as jest.Mock).mockImplementation(() => mockJiraApi);
+
+      // Mock user selecting "none"
+      (prompts as unknown as jest.Mock)
+        .mockResolvedValueOnce({ selectedIssue: 'none' });
+
+      const result = await getJiraTicketDescription();
+
+      expect(mockJiraApi.getUserIssues).toHaveBeenCalledWith();
+      expect(result).toBe('');
+    });
+
+    it('should handle missing environment variables', async () => {
       delete process.env.SQUAREUP_EMAIL;
       delete process.env.JIRA_API_TOKEN;
 
@@ -115,132 +195,17 @@ describe('utils', () => {
       expect(result).toBe('');
     });
 
-    it('should handle "none" selection from fetch results', async () => {
-      (prompts as unknown as jest.Mock)
-        .mockResolvedValueOnce({ command: 'fetch' })
-        .mockResolvedValueOnce({ selectedIssue: 'none' });
-
-      const mockJiraApi = {
-        getUserIssues: jest.fn().mockResolvedValue([])
-      };
-
-      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
-
-      const result = await getJiraTicketDescription();
-      expect(result).toBe('');
-    });
-
-    it('should handle "enter" selection from fetch results', async () => {
-      const mockIssue = {
-        key: 'TEST-123',
-        summary: 'Test Summary',
-        description: 'Test Description'
-      };
-
-      (prompts as unknown as jest.Mock)
-        .mockResolvedValueOnce({ command: 'fetch' })
-        .mockResolvedValueOnce({ selectedIssue: 'enter' })
-        .mockResolvedValueOnce({ ticket: 'TEST-123' });
-
-      const mockJiraApi = {
-        getUserIssues: jest.fn().mockResolvedValue([]),
-        getIssue: jest.fn().mockResolvedValue(mockIssue)
-      };
-
-      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
-
-      const result = await getJiraTicketDescription();
-      expect(result).toContain(mockIssue.key);
-      expect(result).toContain(mockIssue.summary);
-      expect(result).toContain(mockIssue.description);
-    });
-
-    it('should return formatted ticket description when issue is found via fetch', async () => {
-      const mockIssue = {
-        key: 'TEST-123',
-        summary: 'Test Summary',
-        description: 'Test Description'
-      };
-
-      (prompts as unknown as jest.Mock)
-        .mockResolvedValueOnce({ command: 'fetch' })
-        .mockResolvedValueOnce({ selectedIssue: mockIssue });
-
-      const mockJiraApi = {
-        getUserIssues: jest.fn().mockResolvedValue([mockIssue]),
-        getIssue: jest.fn().mockResolvedValue(mockIssue)
-      };
-
-      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
-
-      const result = await getJiraTicketDescription();
-
-      expect(result).toContain(mockIssue.key);
-      expect(result).toContain(mockIssue.summary);
-      expect(result).toContain(mockIssue.description);
-    });
-
-    it('should handle manual ticket entry', async () => {
-      const mockIssue = {
-        key: 'TEST-123',
-        summary: 'Test Summary',
-        description: 'Test Description'
-      };
-
-      (prompts as unknown as jest.Mock)
-        .mockResolvedValueOnce({ command: 'enter' })
-        .mockResolvedValueOnce({ ticket: 'TEST-123' });
-
-      const mockJiraApi = {
-        getIssue: jest.fn().mockResolvedValue(mockIssue)
-      };
-
-      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
-
-      const result = await getJiraTicketDescription();
-
-      expect(result).toContain(mockIssue.key);
-      expect(result).toContain(mockIssue.summary);
-      expect(result).toContain(mockIssue.description);
-    });
-
-    it('should handle when user chooses not to add ticket', async () => {
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ command: 'no' });
-
-      const result = await getJiraTicketDescription();
-
-      expect(result).toBe('');
-    });
-
-    it('should handle when user selects "none" from fetch results', async () => {
-      (prompts as unknown as jest.Mock)
-        .mockResolvedValueOnce({ command: 'fetch' })
-        .mockResolvedValueOnce({ selectedIssue: 'none' });
-
-      const mockJiraApi = {
-        getUserIssues: jest.fn().mockResolvedValue([])
-      };
-
-      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
-
-      const result = await getJiraTicketDescription();
-
-      expect(result).toBe('');
-    });
-
     it('should handle Jira API errors', async () => {
-      const mockError = new Error('API Error');
-      (prompts as unknown as jest.Mock)
-        .mockResolvedValueOnce({ command: 'fetch' });
-
+      // Mock the JiraApi class to throw an error
       const mockJiraApi = {
-        getUserIssues: jest.fn().mockRejectedValue(mockError)
+        getUserIssues: jest.fn().mockRejectedValue(new Error('API Error'))
       };
 
-      (JiraApi as unknown as jest.Mock).mockImplementation(() => mockJiraApi);
+      (JiraApi as jest.Mock).mockImplementation(() => mockJiraApi);
 
       const result = await getJiraTicketDescription();
 
+      expect(mockJiraApi.getUserIssues).toHaveBeenCalledWith();
       expect(result).toBe('');
     });
   });

@@ -10,6 +10,7 @@ describe('JiraApi', () => {
   let mockJiraClient: jest.Mocked<JiraClient>;
 
   beforeEach(() => {
+    // Create a fresh mock for each test
     mockJiraClient = {
       getUsersIssues: jest.fn(),
       findIssue: jest.fn(),
@@ -109,6 +110,13 @@ describe('JiraApi', () => {
       const result = await jiraApi.getUserIssues();
 
       expect(result).toEqual([]);
+    });
+
+    it('should handle API errors', async () => {
+      const error = new Error('API Error');
+      mockJiraClient.getUsersIssues.mockRejectedValueOnce(error);
+
+      await expect(jiraApi.getUserIssues()).rejects.toThrow('API Error');
     });
   });
 
