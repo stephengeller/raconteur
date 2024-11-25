@@ -19,6 +19,14 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
+// Handle Ctrl+C even when raw mode is used (for prompts)
+process.stdin.on("keypress", function (_chunk, key) {
+  if (key && key.name === "c" && key.ctrl) {
+    process.stdout.write("\x1B[?25h");
+    process.exit(130);
+  }
+});
+
 interface PullRequest {
   title: string;
   html_url: string;
@@ -62,6 +70,86 @@ class PRSummarizer {
     this.sinceDate = moment().format();
   }
 
+  public async run(): Promise<void> {
+    console.log(chalk.cyan("Fetching merged PRs..."));
+    await this.setSinceDate();
+    try {
+      const prs = await this.fetchMergedPRs();
+
+      if (!prs || prs.length === 0) {
+        console.log(
+          chalk.yellow(
+            "No PRs found for the specified duration. Have you authorized squareup for your personal access token?",
+          ),
+        );
+        return;
+      }
+
+      console.log(chalk.blue(`Found [${prs.length}] pull requests...`));
+      const summaries = await this.summarizePRs(prs);
+
+      // Ask if the user wants to copy the response to the clipboard
+      const copyToClipboardPrompt = await prompts({
+        type: "toggle",
+        name: "value",
+        message: chalk.yellow(messages.raconteur.copyToClipboard),
+        initial: true,
+        active: "yes",
+        inactive: "no",
+      });
+
+      if (copyToClipboardPrompt.value && summaries) {
+        await copyToClipboard(summaries);
+        console.log(chalk.green("✅  PR description copied to clipboard!"));
+      }
+
+      // prompt user to navigate to https://my.sqprod.co/chat and ask for a summary from
+      // Slack and other apps for sgeller
+
+      // string variable containing a prompt for chatGPT to ask for a summary of my
+      // achievements over the past week
+      const chatPrompt = `
+You are a helpful assistant. Generate a clear, concise and structured summary of my achievements over the past week, sourcing from Slack and other apps. 
+Focus only on what appear to be significant or important work achievements.
+      
+Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
+      
+Please follow the following example as a reference for desired format:
+  Feb 10, 2024:
+  - Successfully led the development of Project X's core module, improving system efficiency by 20%.
+  - Initiated and completed a code refactoring for the Legacy System, enhancing maintainability.
+  - Collaborated on the Integration Initiative, ensuring seamless connection between System A and B.
+  - Acted as the interim lead for the Deployment Team during critical release phases.
+  
+  Jan 25, 2024:
+  - Spearheaded the documentation overhaul for Project Y, setting a new standard for project clarity.
+  - Managed cross-departmental teams to kickstart the Beta Launch of the New Platform.
+  - Coordinated with the Design Team to implement a new UI/UX for the Customer Portal.
+      `;
+      console.log(
+        "Here is a prompt to paste into Square's chatGPT:\n",
+        chalk.green(chatPrompt),
+      );
+      const openChatPrompt = await prompts({
+        type: "toggle",
+        name: "value",
+        message: chalk.yellow(
+          "📋 Open https://my.sqprod.co/chat to ask for a summary?",
+        ),
+        initial: true,
+        active: "yes",
+        inactive: "no",
+      });
+
+      if (openChatPrompt.value) {
+        // open  https://my.sqprod.co/chat in a browser
+        exec("open https://my.sqprod.co/chat");
+      }
+    } catch (error) {
+      console.error(chalk.red(`Failed to process PRs: ${error}`));
+    }
+  }
+
   private async setSinceDate(): Promise<void> {
     const defaultWeeks = 1;
     const response = await prompts({
@@ -102,7 +190,9 @@ class PRSummarizer {
       .map((pr, index) => {
         const repo = pr.repository_url.split("/").pop();
         return {
-          title: `[${repo} #${pr.number}] ${pr.title} (merged ${moment(pr.closed_at).format("Do MMM YYYY")})`,
+          title: `[${repo} #${pr.number}] ${pr.title} (merged ${moment(
+            pr.closed_at,
+          ).format("Do MMM YYYY")})`,
           value: index,
           selected: true,
         };
@@ -164,84 +254,6 @@ class PRSummarizer {
       return hypedocSummaries;
     } catch (error) {
       console.error(chalk.red(`Error executing command: ${error}`));
-    }
-  }
-
-  public async run(): Promise<void> {
-    console.log(chalk.cyan("Fetching merged PRs..."));
-    await this.setSinceDate();
-    try {
-      const prs = await this.fetchMergedPRs();
-
-      if (!prs || prs.length === 0) {
-        console.log(
-          chalk.yellow(
-            "No PRs found for the specified duration. Have you authorized squareup for your personal access token?",
-          ),
-        );
-        return;
-      }
-
-      console.log(chalk.blue(`Found [${prs.length}] pull requests...`));
-      const summaries = await this.summarizePRs(prs);
-
-      // Ask if the user wants to copy the response to the clipboard
-      const copyToClipboardPrompt = await prompts({
-        type: "toggle",
-        name: "value",
-        message: chalk.yellow(messages.raconteur.copyToClipboard),
-        initial: true,
-        active: "yes",
-        inactive: "no",
-      });
-
-      if (copyToClipboardPrompt.value && summaries) {
-        await copyToClipboard(summaries);
-        console.log(chalk.green("✅  PR description copied to clipboard!"));
-      }
-
-      // prompt user to navigate to https://my.sqprod.co/chat and ask for a summary from Slack and other apps for sgeller
-
-      // string variable containing a prompt for chatGPT to ask for a summary of my achievements over the past week
-      const chatPrompt = `
-You are a helpful assistant. Generate a clear, concise and structured summary of my achievements over the past week, sourcing from Slack and other apps. 
-Focus only on what appear to be significant or important work achievements.
-      
-Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
-      
-Please follow the following example as a reference for desired format:
-  Feb 10, 2024:
-  - Successfully led the development of Project X's core module, improving system efficiency by 20%.
-  - Initiated and completed a code refactoring for the Legacy System, enhancing maintainability.
-  - Collaborated on the Integration Initiative, ensuring seamless connection between System A and B.
-  - Acted as the interim lead for the Deployment Team during critical release phases.
-  
-  Jan 25, 2024:
-  - Spearheaded the documentation overhaul for Project Y, setting a new standard for project clarity.
-  - Managed cross-departmental teams to kickstart the Beta Launch of the New Platform.
-  - Coordinated with the Design Team to implement a new UI/UX for the Customer Portal.
-      `;
-      console.log(
-        "Here is a prompt to paste into Square's chatGPT:\n",
-        chalk.green(chatPrompt),
-      );
-      const openChatPrompt = await prompts({
-        type: "toggle",
-        name: "value",
-        message: chalk.yellow(
-          "📋 Open https://my.sqprod.co/chat to ask for a summary?",
-        ),
-        initial: true,
-        active: "yes",
-        inactive: "no",
-      });
-
-      if (openChatPrompt.value) {
-        // open  https://my.sqprod.co/chat in a browser
-        exec("open https://my.sqprod.co/chat");
-      }
-    } catch (error) {
-      console.error(chalk.red(`Failed to process PRs: ${error}`));
     }
   }
 }

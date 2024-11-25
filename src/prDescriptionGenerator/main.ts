@@ -48,6 +48,14 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
+// Handle Ctrl+C even when raw mode is used (for prompts)
+process.stdin.on("keypress", function (_chunk, key) {
+  if (key && key.name === "c" && key.ctrl) {
+    process.stdout.write("\x1B[?25h");
+    process.exit(130);
+  }
+});
+
 const DIR_PATH = argv.dir;
 
 async function main() {
