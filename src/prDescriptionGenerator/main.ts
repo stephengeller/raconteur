@@ -120,10 +120,13 @@ Please also generate a PR title, following the Conventional Commit format.
     const { command } = await prompts({
       type: "select",
       name: "command",
-      message: chalk.yellow(messages.createPr),
+      message: chalk.yellow(messages.prDescription.createPr),
       choices: [
         { title: "Create GitHub PR", value: "createPr" },
-        { title: messages.copyToClipboard, value: "copyToClipboard" },
+        {
+          title: messages.prDescription.copyToClipboard,
+          value: "copyToClipboard",
+        },
         { title: "Exit", value: "exit" },
       ],
     });

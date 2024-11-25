@@ -13,7 +13,7 @@ export async function maybeRewritePrompt(inputPrompt: string): Promise<string> {
   const customPrompt = await prompts({
     type: "toggle",
     name: "value",
-    message: messages.rewritePrompt,
+    message: messages.prDescription.rewritePrompt,
     initial: false,
     active: "yes",
     inactive: "no",
@@ -23,7 +23,7 @@ export async function maybeRewritePrompt(inputPrompt: string): Promise<string> {
     const response = await prompts({
       type: "text",
       name: "value",
-      message: messages.enterCustomPrompt,
+      message: messages.prDescription.enterCustomPrompt,
     });
     finalPrompt = response.value;
     saveCustomPrompt(finalPrompt);
@@ -36,7 +36,7 @@ export async function extraContextPrompt(): Promise<string> {
   const { value }: { value: string | undefined } = await prompts({
     type: "text",
     name: "value",
-    message: messages.addContext,
+    message: messages.prDescription.addContext,
   });
 
   if (value?.trim()) {
@@ -61,7 +61,7 @@ async function getJiraPrompts(
     const { selectedIssue } = await prompts({
       type: "autocomplete",
       name: "selectedIssue",
-      message: messages.selectJiraTicket,
+      message: messages.prDescription.selectJiraTicket,
       choices: [
         ...issueChoices,
         { title: "None", value: "none" },
@@ -93,7 +93,7 @@ async function getJiraPrompts(
     const { ticket } = await prompts({
       type: "text",
       name: "ticket",
-      message: messages.enterJiraTicket,
+      message: messages.prDescription.enterJiraTicket,
     });
 
     return jiraApi.getIssue(ticket);

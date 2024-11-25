@@ -189,7 +189,7 @@ class PRSummarizer {
       const copyToClipboardPrompt = await prompts({
         type: "toggle",
         name: "value",
-        message: chalk.yellow("📋 Copy the PR description to the clipboard?"),
+        message: chalk.yellow(messages.raconteur.copyToClipboard),
         initial: true,
         active: "yes",
         inactive: "no",
