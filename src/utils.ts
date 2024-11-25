@@ -49,16 +49,7 @@ export async function extraContextPrompt(): Promise<string> {
 async function getJiraPrompts(
   jiraApi: JiraApi,
 ): Promise<JiraIssue | undefined> {
-  let { command } = await prompts({
-    type: "select",
-    name: "command",
-    message: messages.addJiraTicket,
-    choices: [
-      { title: "Fetch my open tickets", value: "fetch" },
-      { title: "Enter manually", value: "enter" },
-      { title: "No", value: "no" },
-    ],
-  });
+  let command = "fetch";
 
   if (command === "fetch") {
     const issues = await jiraApi.getUserIssues();
@@ -78,7 +69,8 @@ async function getJiraPrompts(
       ],
       suggest: async (input, choices) => {
         const lowercaseInput = input.toLowerCase();
-        // Always show the "None" and "Enter Manually" options, all others should be filtered by title.
+        // Always show the "None" and "Enter Manually" options, all others should be
+        // filtered by title.
         return choices.filter(
           ({ value, title }) =>
             value === "none" ||
