@@ -96,9 +96,9 @@ Please also generate a PR title, following the Conventional Commit format.
   prompt += await getJiraTicketDescription();
   prompt += await extraContextPrompt();
 
-  console.log(
-    chalk.blue(`Here's the prompt so far:\n\n${chalk.green(prompt)}`),
-  );
+  // console.log(
+  //   chalk.blue(`Here's the prompt so far:\n\n${chalk.green(prompt)}`),
+  // );
 
   if (attachTemplate && template) {
     const pullRequestTemplatePrompt = `
@@ -113,16 +113,16 @@ Please also generate a PR title, following the Conventional Commit format.
   }
 
   const prDescription = await getPRDescription(prompt, diff);
-  // console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
-  // console.log(prDescription);
+  console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
+  console.log(prDescription);
 
   async function showOptionsPrompt() {
     const { command } = await prompts({
       type: "select",
       name: "command",
-      message: messages.createPr,
+      message: chalk.yellow(messages.createPr),
       choices: [
-        { title: messages.createPr, value: "createPr" },
+        { title: "Create GitHub PR", value: "createPr" },
         { title: messages.copyToClipboard, value: "copyToClipboard" },
         { title: "Exit", value: "exit" },
       ],

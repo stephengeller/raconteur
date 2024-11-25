@@ -2,7 +2,7 @@ import chalk from "chalk";
 
 export const messages = {
   createPr: "📝 Create the PR?",
-  copyToClipboard: "📋 Copy to the clipboard?",
+  copyToClipboard: "Copy to clipboard",
   rewritePrompt: chalk.yellow("🔄 Do you want to re-write the prompt?"),
   addContext: chalk.yellow("📚 Do you want to add any context to the prompt?"),
   addJiraTicket: chalk.yellow(
