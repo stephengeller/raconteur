@@ -62,8 +62,9 @@ export async function createGitHubPr(prDescription: string, dirPath: string) {
     spinner.succeed(`PR created successfully: ${response.data.html_url}`);
     // open the PR in the browser
     execSync(`open ${response.data.html_url}`);
-  } catch (error: any) {
-    spinner.fail("Failed to create PR");
+  } catch (error: unknown) {
+    spinner.fail(chalk.red(`Failed to create PR.`));
+    console.error(chalk.red(error));
     throw error;
   }
 }
@@ -85,14 +86,14 @@ export function extractConventionalCommitTitle(
   let title = defaultTitle; // Default to branch name if no match is found
 
   const lines = prDescription.split("\n");
-  let ticketPrefix = '';
-  let commitMessage = '';
+  let ticketPrefix = "";
+  let commitMessage = "";
 
   for (const line of lines) {
     // First collect all ticket references at the start of the line
     const ticketMatches = Array.from(line.matchAll(/\[.*?\]/g));
-    if (ticketMatches.length > 0 && line.trim().startsWith('[')) {
-      ticketPrefix = ticketMatches.map(match => match[0]).join('');
+    if (ticketMatches.length > 0 && line.trim().startsWith("[")) {
+      ticketPrefix = ticketMatches.map((match) => match[0]).join("");
       continue; // Skip to next line after collecting ticket references
     }
 
@@ -105,7 +106,7 @@ export function extractConventionalCommitTitle(
         break;
       }
     }
-    
+
     // If we found a commit message, construct the title and break
     if (commitMessage) {
       title = ticketPrefix ? `${ticketPrefix} ${commitMessage}` : commitMessage;

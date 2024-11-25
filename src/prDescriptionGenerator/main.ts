@@ -6,7 +6,7 @@ import { loadEnv } from "./config/env";
 import { getGitDiff } from "./git/gitDiff";
 import { createGitHubPr } from "./github/createPr";
 import { loadCustomPrompt } from "./prompts/customPrompt";
-import { findTemplate, attachTemplatePrompt } from "./prompts/templatePrompt";
+import { attachTemplatePrompt, findTemplate } from "./prompts/templatePrompt";
 import { getPRDescription } from "./utils/utils";
 import {
   extraContextPrompt,
@@ -113,28 +113,37 @@ Please also generate a PR title, following the Conventional Commit format.
   }
 
   const prDescription = await getPRDescription(prompt, diff);
-  console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
-  console.log(prDescription);
+  // console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
+  // console.log(prDescription);
 
-  const { command } = await prompts({
-    type: "select",
-    name: "command",
-    message: messages.addJiraTicket,
-    choices: [
-      { title: messages.createPr, value: "createPr" },
-      { title: messages.copyToClipboard, value: "copyToClipboard" },
-      { title: "Continue", value: "⏭️Continue" },
-    ],
-  });
+  async function showOptionsPrompt() {
+    const { command } = await prompts({
+      type: "select",
+      name: "command",
+      message: messages.createPr,
+      choices: [
+        { title: messages.createPr, value: "createPr" },
+        { title: messages.copyToClipboard, value: "copyToClipboard" },
+        { title: "Exit", value: "exit" },
+      ],
+    });
 
-  if (command === "createPr") {
-    await createGitHubPr(prDescription, DIR_PATH);
+    if (command === "createPr") {
+      try {
+        await createGitHubPr(prDescription, DIR_PATH);
+      } catch (error) {
+        // Re-prompt the user after error
+        return showOptionsPrompt();
+      }
+    }
+
+    if (command === "copyToClipboard") {
+      await copyToClipboard(prDescription);
+      console.log(chalk.green("✅  PR description copied to clipboard!"));
+    }
   }
 
-  if (command === "copyToClipboard") {
-    await copyToClipboard(prDescription);
-    console.log(chalk.green("✅  PR description copied to clipboard!"));
-  }
+  await showOptionsPrompt();
 }
 
 if (require.main === module) {
