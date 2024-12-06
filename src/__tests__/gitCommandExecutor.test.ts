@@ -17,7 +17,7 @@ describe('GitCommandExecutor', () => {
 
     it('should execute git command successfully', async () => {
       const mockStdout = 'command output';
-      mockExec.mockImplementation((cmd: string, callback: Function) => {
+      mockExec.mockImplementation((cmd: string, callback: (error: Error | null, stdout: string, stderr: string) => void) => {
         callback(null, mockStdout, '');
       });
 
@@ -32,7 +32,7 @@ describe('GitCommandExecutor', () => {
 
     it('should handle command errors', async () => {
       const mockError = new Error('Command failed');
-      mockExec.mockImplementation((cmd: string, callback: Function) => {
+      mockExec.mockImplementation((cmd: string, callback: (error: Error | null, stdout: string, stderr: string) => void) => {
         callback(mockError, '', 'error output');
       });
 

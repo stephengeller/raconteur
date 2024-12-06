@@ -2,11 +2,12 @@ import prompts from "prompts";
 
 export interface PromptHandler {
   confirmCommit(message: string): Promise<boolean>;
+
   getExtraContext(): Promise<string>;
 }
 
 export class SystemPromptHandler implements PromptHandler {
-  async confirmCommit(message: string): Promise<boolean> {
+  async confirmCommit(): Promise<boolean> {
     const response = await prompts({
       type: "toggle",
       name: "value",
@@ -35,7 +36,7 @@ export class MockPromptHandler implements PromptHandler {
     this.mockResponses.set(prompt, response);
   }
 
-  async confirmCommit(message: string): Promise<boolean> {
+  async confirmCommit(): Promise<boolean> {
     const response = this.mockResponses.get("confirmCommit");
     if (typeof response !== "boolean") {
       throw new Error("No mock response set for confirmCommit");

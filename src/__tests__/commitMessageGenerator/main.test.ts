@@ -4,7 +4,7 @@ import {
   mockConsoleImplementation,
   restoreConsoleImplementation,
 } from "../__mocks__/console";
-import { MockGitCommandExecutor } from "../../gitCommandExecutor";
+
 import {
   calculateBoxValues,
   cleanCommitMessage,
@@ -23,7 +23,6 @@ jest.mock("prompts");
 jest.mock("../../ChatGPTApi");
 
 describe("git utilities", () => {
-  let mockExecutor: MockGitCommandExecutor;
 
   beforeAll(() => {
     mockConsoleImplementation();

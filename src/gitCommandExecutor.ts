@@ -7,7 +7,7 @@ export interface GitCommandExecutor {
 export class SystemGitCommandExecutor implements GitCommandExecutor {
   async execute(command: string, repoPath: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      exec(`git -C "${repoPath}" ${command}`, (error, stdout, stderr) => {
+      exec(`git -C "${repoPath}" ${command}`, (error, stdout) => {
         if (error) {
           reject(error);
         } else {
@@ -25,7 +25,7 @@ export class MockGitCommandExecutor implements GitCommandExecutor {
     this.mockResponses.set(command, response);
   }
 
-  async execute(command: string, repoPath: string): Promise<string> {
+  async execute(command: string): Promise<string> {
     const response = this.mockResponses.get(command);
     if (response === undefined) {
       throw new Error(`No mock response set for command: ${command}`);

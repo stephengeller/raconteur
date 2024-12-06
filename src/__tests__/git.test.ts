@@ -1,6 +1,5 @@
-import { spawn } from 'child_process';
-import prompts from 'prompts';
-import { callChatGPTApi } from '../ChatGPTApi';
+// These imports are mocked but not directly used in tests
+import '../ChatGPTApi';
 import { mockConsoleImplementation, restoreConsoleImplementation, clearConsoleMocks } from './__mocks__/console';
 import { MockGitCommandExecutor } from '../gitCommandExecutor';
 import {
