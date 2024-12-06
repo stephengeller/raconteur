@@ -12,6 +12,10 @@ const MAX_FILE_LENGTH = 30;
 
 dotenv.config();
 
+import { setupExitHandlers } from "../utils/exitHandler";
+
+setupExitHandlers();
+
 const argv = yargs(hideBin(process.argv))
   .option("dir", {
     alias: "d",
