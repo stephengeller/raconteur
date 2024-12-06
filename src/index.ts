@@ -228,7 +228,7 @@ Please follow the following example as a reference for desired format:
     const extraContextPrompt = await prompts({
       type: "toggle",
       name: "value",
-      message: messages.addContext,
+      message: messages.prDescription.addContext,
       initial: false,
       active: "yes",
       inactive: "no",
