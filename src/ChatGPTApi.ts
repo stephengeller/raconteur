@@ -8,7 +8,7 @@ export async function callChatGPTApi(
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-4-0125-preview", // Ensure this is the correct model identifier
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
