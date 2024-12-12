@@ -1,12 +1,12 @@
-import axios from 'axios';
-import { callChatGPTApi } from '../ChatGPTApi';
+import axios from "axios";
+import { callChatGPTApi } from "../ChatGPTApi";
 
-jest.mock('axios');
+jest.mock("axios");
 
-describe('ChatGPTApi', () => {
-  const mockSystemContent = 'system content';
-  const mockUserContent = 'user content';
-  const mockApiKey = 'test-api-key';
+describe("ChatGPTApi", () => {
+  const mockSystemContent = "system content";
+  const mockUserContent = "user content";
+  const mockApiKey = "test-api-key";
 
   beforeEach(() => {
     process.env.OPENAI_API_KEY = mockApiKey;
@@ -17,13 +17,13 @@ describe('ChatGPTApi', () => {
     delete process.env.OPENAI_API_KEY;
   });
 
-  it('should call OpenAI API with correct parameters', async () => {
+  it("should call OpenAI API with correct parameters", async () => {
     const mockResponse = {
       data: {
         choices: [
           {
             message: {
-              content: 'API response',
+              content: "API response",
             },
           },
         ],
@@ -35,59 +35,59 @@ describe('ChatGPTApi', () => {
     const result = await callChatGPTApi(mockSystemContent, mockUserContent);
 
     expect(axios.post).toHaveBeenCalledWith(
-      'https://api.openai.com/v1/chat/completions',
+      "https://api.openai.com/v1/chat/completions",
       {
-        model: 'gpt-4-0125-preview',
+        model: "gpt-4o",
         messages: [
           {
-            role: 'system',
+            role: "system",
             content: mockSystemContent,
           },
           {
-            role: 'user',
+            role: "user",
             content: mockUserContent,
           },
         ],
       },
       {
         headers: { Authorization: `Bearer ${mockApiKey}` },
-      }
+      },
     );
 
-    expect(result).toBe('API response');
+    expect(result).toBe("API response");
   });
 
-  it('should handle 4xx client errors', async () => {
+  it("should handle 4xx client errors", async () => {
     const error = {
       response: {
         status: 400,
       },
-      message: 'Bad Request',
+      message: "Bad Request",
     };
 
     (axios.post as jest.Mock).mockRejectedValueOnce(error);
 
-    await expect(callChatGPTApi(mockSystemContent, mockUserContent))
-      .rejects
-      .toThrow('Client error: Bad Request');
+    await expect(
+      callChatGPTApi(mockSystemContent, mockUserContent),
+    ).rejects.toThrow("Client error: Bad Request");
   });
 
-  it('should handle other errors', async () => {
-    const error = new Error('Network error');
+  it("should handle other errors", async () => {
+    const error = new Error("Network error");
     (axios.post as jest.Mock).mockRejectedValueOnce(error);
 
-    await expect(callChatGPTApi(mockSystemContent, mockUserContent))
-      .rejects
-      .toThrow('Error calling ChatGPT API: Network error');
+    await expect(
+      callChatGPTApi(mockSystemContent, mockUserContent),
+    ).rejects.toThrow("Error calling ChatGPT API: Network error");
   });
 
-  it('should trim response content', async () => {
+  it("should trim response content", async () => {
     const mockResponse = {
       data: {
         choices: [
           {
             message: {
-              content: '  trimmed response  ',
+              content: "  trimmed response  ",
             },
           },
         ],
@@ -97,6 +97,6 @@ describe('ChatGPTApi', () => {
     (axios.post as jest.Mock).mockResolvedValueOnce(mockResponse);
 
     const result = await callChatGPTApi(mockSystemContent, mockUserContent);
-    expect(result).toBe('trimmed response');
+    expect(result).toBe("trimmed response");
   });
 });

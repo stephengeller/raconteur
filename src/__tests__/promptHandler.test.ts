@@ -1,5 +1,5 @@
 import prompts from "prompts";
-import { SystemPromptHandler, MockPromptHandler } from "../promptHandler";
+import { MockPromptHandler, SystemPromptHandler } from "../promptHandler";
 
 jest.mock("prompts");
 
@@ -17,8 +17,10 @@ describe("PromptHandler", () => {
 
     describe("confirmCommit", () => {
       it("should return true when user confirms", async () => {
-        (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: true });
-        const result = await handler.confirmCommit("test commit message");
+        (prompts as unknown as jest.Mock).mockResolvedValueOnce({
+          value: true,
+        });
+        const result = await handler.confirmCommit();
         expect(result).toBe(true);
         expect(prompts).toHaveBeenCalledWith({
           type: "toggle",
@@ -31,8 +33,10 @@ describe("PromptHandler", () => {
       });
 
       it("should return false when user declines", async () => {
-        (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: false });
-        const result = await handler.confirmCommit("test commit message");
+        (prompts as unknown as jest.Mock).mockResolvedValueOnce({
+          value: false,
+        });
+        const result = await handler.confirmCommit();
         expect(result).toBe(false);
       });
     });
@@ -40,7 +44,9 @@ describe("PromptHandler", () => {
     describe("getExtraContext", () => {
       it("should return trimmed context when provided", async () => {
         const context = "  test context  ";
-        (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: context });
+        (prompts as unknown as jest.Mock).mockResolvedValueOnce({
+          value: context,
+        });
         const result = await handler.getExtraContext();
         expect(result).toBe("test context");
         expect(prompts).toHaveBeenCalledWith({
@@ -51,7 +57,9 @@ describe("PromptHandler", () => {
       });
 
       it("should return empty string when no context provided", async () => {
-        (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: undefined });
+        (prompts as unknown as jest.Mock).mockResolvedValueOnce({
+          value: undefined,
+        });
         const result = await handler.getExtraContext();
         expect(result).toBe("");
       });
@@ -68,20 +76,20 @@ describe("PromptHandler", () => {
     describe("confirmCommit", () => {
       it("should return mocked response when set", async () => {
         handler.setMockResponse("confirmCommit", true);
-        const result = await handler.confirmCommit("test commit message");
+        const result = await handler.confirmCommit();
         expect(result).toBe(true);
       });
 
       it("should throw error when no mock response set", async () => {
-        await expect(handler.confirmCommit("test commit message")).rejects.toThrow(
-          "No mock response set for confirmCommit"
+        await expect(handler.confirmCommit()).rejects.toThrow(
+          "No mock response set for confirmCommit",
         );
       });
 
       it("should throw error when wrong type of mock response set", async () => {
         handler.setMockResponse("confirmCommit", "wrong type" as any);
-        await expect(handler.confirmCommit("test commit message")).rejects.toThrow(
-          "No mock response set for confirmCommit"
+        await expect(handler.confirmCommit()).rejects.toThrow(
+          "No mock response set for confirmCommit",
         );
       });
     });
@@ -95,14 +103,14 @@ describe("PromptHandler", () => {
 
       it("should throw error when no mock response set", async () => {
         await expect(handler.getExtraContext()).rejects.toThrow(
-          "No mock response set for getExtraContext"
+          "No mock response set for getExtraContext",
         );
       });
 
       it("should throw error when wrong type of mock response set", async () => {
         handler.setMockResponse("getExtraContext", true as any);
         await expect(handler.getExtraContext()).rejects.toThrow(
-          "No mock response set for getExtraContext"
+          "No mock response set for getExtraContext",
         );
       });
     });

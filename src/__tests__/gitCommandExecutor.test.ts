@@ -1,12 +1,15 @@
-import { exec } from 'child_process';
-import { SystemGitCommandExecutor, MockGitCommandExecutor } from '../gitCommandExecutor';
+import { exec } from "child_process";
+import {
+  MockGitCommandExecutor,
+  SystemGitCommandExecutor,
+} from "../gitCommandExecutor";
 
-jest.mock('child_process', () => ({
-  exec: jest.fn()
+jest.mock("child_process", () => ({
+  exec: jest.fn(),
 }));
 
-describe('GitCommandExecutor', () => {
-  describe('SystemGitCommandExecutor', () => {
+describe("GitCommandExecutor", () => {
+  describe("SystemGitCommandExecutor", () => {
     let executor: SystemGitCommandExecutor;
     const mockExec = exec as unknown as jest.Mock;
 
@@ -15,49 +18,69 @@ describe('GitCommandExecutor', () => {
       jest.clearAllMocks();
     });
 
-    it('should execute git command successfully', async () => {
-      const mockStdout = 'command output';
-      mockExec.mockImplementation((cmd: string, callback: (error: Error | null, stdout: string, stderr: string) => void) => {
-        callback(null, mockStdout, '');
-      });
+    it("should execute git command successfully", async () => {
+      const mockStdout = "command output";
+      mockExec.mockImplementation(
+        (
+          cmd: string,
+          callback: (
+            error: Error | null,
+            stdout: string,
+            stderr: string,
+          ) => void,
+        ) => {
+          callback(null, mockStdout, "");
+        },
+      );
 
-      const result = await executor.execute('status', '/test/repo');
-      
+      const result = await executor.execute("status", "/test/repo");
+
       expect(result).toBe(mockStdout);
       expect(mockExec).toHaveBeenCalledWith(
         'git -C "/test/repo" status',
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
-    it('should handle command errors', async () => {
-      const mockError = new Error('Command failed');
-      mockExec.mockImplementation((cmd: string, callback: (error: Error | null, stdout: string, stderr: string) => void) => {
-        callback(mockError, '', 'error output');
-      });
+    it("should handle command errors", async () => {
+      const mockError = new Error("Command failed");
+      mockExec.mockImplementation(
+        (
+          cmd: string,
+          callback: (
+            error: Error | null,
+            stdout: string,
+            stderr: string,
+          ) => void,
+        ) => {
+          callback(mockError, "", "error output");
+        },
+      );
 
-      await expect(executor.execute('status', '/test/repo')).rejects.toThrow(mockError);
+      await expect(executor.execute("status", "/test/repo")).rejects.toThrow(
+        mockError,
+      );
     });
   });
 
-  describe('MockGitCommandExecutor', () => {
+  describe("MockGitCommandExecutor", () => {
     let executor: MockGitCommandExecutor;
 
     beforeEach(() => {
       executor = new MockGitCommandExecutor();
     });
 
-    it('should return mock response when set', async () => {
-      const mockResponse = 'mock output';
-      executor.setMockResponse('status', mockResponse);
+    it("should return mock response when set", async () => {
+      const mockResponse = "mock output";
+      executor.setMockResponse("status", mockResponse);
 
-      const result = await executor.execute('status', '/test/repo');
+      const result = await executor.execute("status");
       expect(result).toBe(mockResponse);
     });
 
-    it('should throw error when no mock response is set', async () => {
-      await expect(executor.execute('status', '/test/repo')).rejects.toThrow(
-        'No mock response set for command: status'
+    it("should throw error when no mock response is set", async () => {
+      await expect(executor.execute("status")).rejects.toThrow(
+        "No mock response set for command: status",
       );
     });
   });
