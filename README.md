@@ -1,106 +1,187 @@
 # Raconteur
-[Setup](#setup) | [Usage](#usage) | [Contributions](#contributions)
+
+[Setup](#setup) | [Usage](#usage) | [Development](#development) | [Testing](#testing) | [Troubleshooting](#troubleshooting) | [Contributions](#contributions)
 
 Raconteur is a dynamic project that empowers developers with three core tools:
 
-1. **Raconteur**: This tool is designed to summarize merged pull requests for a given GitHub user, emphasizing the impact and benefits of each PR. It utilizes prompts to structure these summaries effectively, ensuring they are both clear and concise for future reference in your documentation.
+1. **Raconteur**: This tool summarizes merged pull requests for a given GitHub user, emphasizing the
+   impact and benefits of each PR. It utilizes prompts to structure these summaries effectively,
+   ensuring they are both clear and concise for future reference in your documentation.
 
-2. **PR Description Generator**: Leveraging OpenAI's GPT models, this utility crafts comprehensive and detailed descriptions for pull requests. It taps into the power of the OpenAI and GitHub APIs to gather PR information and generate robust narratives that articulate the essence and necessity of the changes. 
+2. **PR Description Generator**: Leveraging OpenAI's GPT models, this utility crafts comprehensive
+   and detailed descriptions for pull requests. It taps into the power of the OpenAI and GitHub APIs
+   to gather PR information and generate robust narratives that articulate the essence and necessity
+   of the changes.
 
-3. **Commit Message Generator**: This component automates the creation of commit messages, following the Conventional Commits specification. By analyzing the changes made in a commit, it formulates a message that succinctly captures the essence of the modifications, ensuring consistency and clarity in version control histories.
+3. **Commit Message Generator**: This component automates the creation of commit messages, following
+   the Conventional Commits specification. By analyzing the changes made in a commit, it formulates
+   a message that succinctly captures the essence of the modifications, ensuring consistency and
+   clarity in version control histories.
 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
-- Node.js (v12 or later recommended)
-- yarn (usually comes with Node.js)
+
+- Node.js (v12 or later)
+- yarn (package manager)
 - jq (command-line JSON processor)
+- Git
 
 ## Setup
 
-### Automated Setup
+### Quick Setup (Recommended)
 
-To simplify the initial setup process, use the setup script that:
-1. Verifies and installs required dependencies (Node.js, yarn, jq, GitHub CLI)
-2. Guides you through generating necessary tokens
-3. Configures your `.env` file
-4. Sets up shell aliases for convenient usage
+The project includes an automated setup script that handles all necessary configurations:
 
-Just run:
 ```bash
+# Clone the repository
+git clone https://github.com/stephengeller/raconteur
+cd raconteur
+
+# Run the setup script
 ./script/setup
 ```
 
-The script will:
-- Check for required dependencies and install any missing ones
-- Guide you through setting up:
-  - GitHub Personal Access Token
-  - OpenAI API Key
-  - Jira API Token
-- Install project dependencies
-- Configure shell aliases for easy access
-- Verify your environment configuration
+The setup script will:
+
+1. Install all required dependencies
+2. Guide you through generating necessary API tokens
+3. Create and configure your `.env` file
+4. Verify your installation
 
 ### Manual Setup
 
-Follow the prompts and instructions in the terminal to complete your setup.
+If you prefer to set up manually:
 
-#### **Clone the repository and install dependencies**
+1. **Install Dependencies**
+
 ```bash
-git clone https://github.com/stephengeller/raconteur
-cd raconteur
 yarn install
 ```
 
-#### **Environment Configuration**
+2. **Configure Environment Variables**
+   Create a `.env` file in the project root with the following:
 
-Secure handling of sensitive information such as GitHub tokens and OpenAI API keys is managed through a .env file.
-
-- [Generate a new Personal Access Token (PAT) from GitHub with](https://github.com/settings/tokens) `repo` scope.
-- Obtain an API key from https://platform.openai.com/api-keys (SSO with your squareup account)
-- Create a .env file in the root of your project and open it in a text editor.
-- Add your GitHub token and OpenAI API key to the .env file in the following format:
 ```bash
-GITHUB_TOKEN=your_github_token_here
-OPENAI_API_KEY=your_openai_api_key_here
+GITHUB_TOKEN=your_github_token_here        # From https://github.com/settings/tokens (needs 'repo' scope)
+OPENAI_API_KEY=your_openai_api_key_here    # From https://platform.openai.com/api-keys
 GITHUB_USERNAME=your_github_username_here
 SQUAREUP_EMAIL=your_openai_email_here
 JIRA_API_TOKEN=your_jira_api_token_here
-````
-  Replace `your_github_token_here` and `your_openai_api_key_here` with your actual GitHub token and OpenAI API key.
+```
 
-## **Usage**
-### PR Hypedocifier
-To run the PR Hypedocifier summarizer:
+## Project Structure
+
+```
+raconteur/
+├── src/                          # Source code
+│   ├── prDescriptionGenerator/   # PR Description Generator implementation
+│   ├── CommitMessageGenerator/   # Commit Message Generator implementation
+│   └── index.ts                 # Main entry point
+├── script/                       # Setup and utility scripts
+├── test/                        # Test files
+└── package.json                 # Project configuration
+```
+
+## Development
+
+### Available Commands
+
 ```bash
+# Install dependencies
+yarn install
+
+# Run the PR Hypedocifier summarizer
 yarn start
+
+# Generate PR descriptions
+yarn prdesc
+
+# Generate commit messages
+yarn commit
+
+# Run tests
+yarn test
 ```
 
-This will fetch merged PRs, generate summaries, and copy the latest summary to your clipboard.
+## Testing
 
-#### Customizing the Detailed Prompt
+The project uses Jest for testing. Test files are co-located with their source files using the
+naming convention `*.test.ts`.
 
-When you run the PR Description Generator and choose to write a custom prompt, your prompt is saved automatically. The next time you use the generator, it will reuse your saved prompt, simplifying the process for consistent use.
+To run tests:
 
-## **PR Description Generator**
-The PR Description Generator allows you to create detailed PR descriptions from within any git repository.
-
-### Setting up the Alias
-For convenience, you can set up an alias to use the PR Description Generator from any directory:
 ```bash
-alias prdesc='CURRENT_DIR=$(pwd) yarn --cwd ~/path/to/raconteur run prdesc'
+# Run all tests
+yarn test
+
+# Run tests in watch mode
+yarn test --watch
+
+# Run tests with coverage
+yarn test --coverage
 ```
 
-Replace `~/path/to/raconteur` with the actual path to the raconteur repository on your system. Add this alias to your` ~/.bashrc`, `~/.zshrc`, or equivalent shell configuration file and source it.
+## Troubleshooting
 
-Running the PR Description Generator
-Navigate to the directory of the repository you wish to generate a PR description for, and run:
-```bash
-prdesc
-```
+### Common Issues
 
-Follow the interactive prompts to customize and generate your PR description.
+1. **GitHub Authentication Fails**
+   ```bash
+   # Run GitHub authentication
+   gh auth login
+   ```
+
+2. **Jira Integration Issues**
+   ```bash
+   # Initialize Jira CLI
+   jira init
+   ```
+
+3. **Missing Dependencies**
+   ```bash
+   # Reinstall dependencies
+   yarn install
+   ```
+
+4. **Environment Variables**
+    - Ensure all required environment variables are set in `.env`
+    - Check that API tokens have the correct permissions
+    - Verify there are no trailing spaces in `.env` values
+
+### Debug Tips
+
+1. Check your environment configuration:
+   ```bash
+   # Verify environment variables (excluding sensitive values)
+   grep -v '_KEY\|_TOKEN' .env
+   ```
+
+2. Verify GitHub authentication:
+   ```bash
+   gh auth status
+   ```
+
+3. Test Jira connection:
+   ```bash
+   jira issue list -l 1
+   ```
 
 ## Contributions
 
-Contributions are welcome! Please feel free to submit a pull request or create an issue if you have any suggestions or find any bugs.
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests (`yarn test`)
+5. Submit a pull request
+
+When creating PRs:
+
+1. Use the PR Description Generator (`yarn prdesc`)
+2. Ensure all tests pass
+3. Include relevant Jira ticket references
+4. Update documentation if needed
+
+For major changes, please open an issue first to discuss what you would like to change.
