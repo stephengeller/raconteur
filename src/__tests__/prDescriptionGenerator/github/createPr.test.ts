@@ -1,11 +1,21 @@
 import { extractConventionalCommitTitle } from '../../../prDescriptionGenerator/github/createPr';
 
+jest.mock("child_process", () => ({
+  execSync: jest.fn(),
+}));
+
+jest.mock("@octokit/rest", () => ({
+  Octokit: jest.fn().mockImplementation(() => ({
+    pulls: {
+      create: jest.fn(),
+    },
+  })),
+}));
+
 describe('createPr', () => {
   describe('extractConventionalCommitTitle', () => {
     it('should extract conventional commit title with Jira ticket', () => {
-      const prDescription = `[PROJ-123]
-feat: add new feature
-Some description here`;
+      const prDescription = `[PROJ-123]\nfeat: add new feature\nSome description here`;
       const result = extractConventionalCommitTitle(prDescription, 'default-branch');
       expect(result).toBe('[PROJ-123] feat: add new feature');
     });
@@ -17,10 +27,7 @@ Some description here`;
     });
 
     it('should handle multiple conventional commit types', () => {
-      const prDescription = `[PROJ-123]
-feat: first feature
-fix: bug fix
-chore: cleanup`;
+      const prDescription = `[PROJ-123]\nfeat: first feature\nfix: bug fix\nchore: cleanup`;
       const result = extractConventionalCommitTitle(prDescription, 'default-branch');
       expect(result).toBe('[PROJ-123] feat: first feature');
     });
@@ -61,10 +68,29 @@ chore: cleanup`;
     });
 
     it('should handle multiple Jira ticket references', () => {
-      const prDescription = `[PROJ-123][PROJ-456]
-feat: add feature`;
+      const prDescription = `[PROJ-123][PROJ-456]\nfeat: add feature`;
       const result = extractConventionalCommitTitle(prDescription, 'default');
       expect(result).toBe('[PROJ-123][PROJ-456] feat: add feature');
+    });
+
+    it('extracts the conventional commit title from PR description with title section', () => {
+      const prDescription = `
+        ## PR Title: feat: Add new feature
+        This is a new feature that adds functionality.
+      `;
+      const defaultTitle = "default-title";
+      const result = extractConventionalCommitTitle(prDescription, defaultTitle);
+      expect(result).toBe("feat: Add new feature");
+    });
+
+    it('returns the default title when PR description does not contain conventional commit title', () => {
+      const prDescription = `
+        ## PR Title: This is a PR title
+        This PR does not follow the conventional commit format.
+      `;
+      const defaultTitle = "default-title";
+      const result = extractConventionalCommitTitle(prDescription, defaultTitle);
+      expect(result).toBe(defaultTitle);
     });
   });
 });

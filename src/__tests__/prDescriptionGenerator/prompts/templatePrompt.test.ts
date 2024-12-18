@@ -3,7 +3,7 @@ import prompts from "prompts";
 import {
   attachTemplatePrompt,
   findTemplate,
-} from "../../../../prDescriptionGenerator/prompts/templatePrompt";
+} from "../../../prDescriptionGenerator/prompts/templatePrompt";
 
 jest.spyOn(process, "exit").mockImplementation();
 

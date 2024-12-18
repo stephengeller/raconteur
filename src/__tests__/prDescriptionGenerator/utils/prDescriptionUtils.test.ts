@@ -1,7 +1,7 @@
-import { getPRDescription } from "../../../../prDescriptionGenerator/utils/utils";
-import { callChatGPTApi } from "../../../../ChatGPTApi";
+import { getPRDescription } from "../../../prDescriptionGenerator/utils/utils";
+import { callChatGPTApi } from "../../../ChatGPTApi";
 
-jest.mock("../../../../ChatGPTApi", () => ({
+jest.mock("../../../ChatGPTApi", () => ({
   callChatGPTApi: jest.fn(),
 }));
 

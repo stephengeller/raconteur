@@ -2,7 +2,7 @@ import * as fs from "fs";
 import {
   CUSTOM_PROMPT_PATH,
   loadCustomPrompt,
-} from "../../../../prDescriptionGenerator/prompts/customPrompt";
+} from "../../../prDescriptionGenerator/prompts/customPrompt";
 
 jest.mock("fs", () => ({
   existsSync: jest.fn(),
