@@ -84,33 +84,44 @@ export function extractConventionalCommitTitle(
     "test",
   ];
   let title = defaultTitle; // Default to branch name if no match is found
+  let lastTicketPrefix = ""; // Keep track of the last seen ticket prefix
 
   const lines = prDescription.split("\n");
-  let ticketPrefix = "";
-  let commitMessage = "";
-
+  
   for (const line of lines) {
-    // First collect all ticket references at the start of the line
+    let ticketPrefix = "";
+    let commitMessage = "";
+    
+    // Look for ticket references anywhere in the line
     const ticketMatches = Array.from(line.matchAll(/\[.*?\]/g));
-    if (ticketMatches.length > 0 && line.trim().startsWith("[")) {
+    if (ticketMatches.length > 0) {
       ticketPrefix = ticketMatches.map((match) => match[0]).join("");
-      continue; // Skip to next line after collecting ticket references
+      lastTicketPrefix = ticketPrefix; // Update last seen ticket prefix
     }
-
-    // Then look for conventional commit message
+    
+    // Handle PR Title section
+    if (line.trim().startsWith("## PR Title:")) {
+      const titleContent = line.replace("## PR Title:", "").trim();
+      for (const type of conventionalCommitTypes) {
+        if (titleContent.startsWith(`${type}:`)) {
+          return titleContent;
+        }
+      }
+      continue;
+    }
+    
+    // Look for conventional commit message in the same line or after tickets
+    const lineWithoutTickets = line.replace(/\[.*?\]/g, "").trim();
     for (const type of conventionalCommitTypes) {
-      const regex = new RegExp(`.*?(${type}:.*)`);
-      const match = line.match(regex);
+      const regex = new RegExp(`^\\s*(${type}:.*)`);
+      const match = lineWithoutTickets.match(regex);
       if (match && match[1]) {
         commitMessage = match[1].trim().replace(/\W+$/, "");
-        break;
+        // Use ticket prefix from current line or last seen ticket prefix
+        const prefix = ticketPrefix || lastTicketPrefix;
+        title = prefix ? `${prefix} ${commitMessage}` : commitMessage;
+        return title; // Return immediately when we find a valid commit message
       }
-    }
-
-    // If we found a commit message, construct the title and break
-    if (commitMessage) {
-      title = ticketPrefix ? `${ticketPrefix} ${commitMessage}` : commitMessage;
-      break;
     }
   }
 

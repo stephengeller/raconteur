@@ -14,10 +14,22 @@ jest.mock("@octokit/rest", () => ({
 
 describe('createPr', () => {
   describe('extractConventionalCommitTitle', () => {
-    it('should extract conventional commit title with Jira ticket', () => {
+    it('should extract conventional commit title with Jira ticket on separate line', () => {
       const prDescription = `[PROJ-123]\nfeat: add new feature\nSome description here`;
       const result = extractConventionalCommitTitle(prDescription, 'default-branch');
       expect(result).toBe('[PROJ-123] feat: add new feature');
+    });
+
+    it('should extract conventional commit title with inline Jira ticket', () => {
+      const prDescription = '[EXPERIENCE-1212] refactor: Improve Match/No Match logic in Voice Support\nSome description here';
+      const result = extractConventionalCommitTitle(prDescription, 'default-branch');
+      expect(result).toBe('[EXPERIENCE-1212] refactor: Improve Match/No Match logic in Voice Support');
+    });
+
+    it('should extract conventional commit title with multiple inline Jira tickets', () => {
+      const prDescription = '[PROJ-123][PROJ-456] feat: add new feature\nSome description here';
+      const result = extractConventionalCommitTitle(prDescription, 'default-branch');
+      expect(result).toBe('[PROJ-123][PROJ-456] feat: add new feature');
     });
 
     it('should extract conventional commit title without Jira ticket', () => {
