@@ -20,11 +20,26 @@ Before you begin, ensure you have the following installed:
 
 ### Automated Setup
 
-To simplify the initial setup process, use the setup script that guides you through installing dependencies, generating necessary tokens, and configuring your `.env` file for both PR Hypedocifier and PR Description Generator.
+To simplify the initial setup process, use the setup script that:
+1. Verifies and installs required dependencies (Node.js, yarn, jq, GitHub CLI)
+2. Guides you through generating necessary tokens
+3. Configures your `.env` file
+4. Sets up shell aliases for convenient usage
 
+Just run:
 ```bash
 ./script/setup
 ```
+
+The script will:
+- Check for required dependencies and install any missing ones
+- Guide you through setting up:
+  - GitHub Personal Access Token
+  - OpenAI API Key
+  - Jira API Token
+- Install project dependencies
+- Configure shell aliases for easy access
+- Verify your environment configuration
 
 ### Manual Setup
 

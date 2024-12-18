@@ -1,5 +1,15 @@
 #!/bin/bash
 
+set -e  # Exit on error
+
+# First verify dependencies
+if [ -f "$(dirname "$0")/verify-deps.sh" ]; then
+    "$(dirname "$0")/verify-deps.sh"
+else
+    echo "Error: verify-deps.sh not found"
+    exit 1
+fi
+
 # ANSI color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
