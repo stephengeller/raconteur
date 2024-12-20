@@ -1,6 +1,6 @@
 import fs from 'fs';
 import prompts from 'prompts';
-import { maybeRewritePrompt, extraContextPrompt, getJiraTicketDescription } from '../../utils';
+import { maybeRewritePrompt, getJiraTicketDescription } from '../../utils';
 import JiraApi from '../../apis/JiraApi';
 
 jest.mock('fs');
@@ -60,45 +60,7 @@ describe('utils', () => {
     });
   });
 
-  describe('extraContextPrompt', () => {
-    it('should return empty string when no context provided', async () => {
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: '' });
 
-      const result = await extraContextPrompt();
-
-      expect(result).toBe('');
-    });
-
-    it('should return formatted context when provided', async () => {
-      const context = 'Additional context';
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: context });
-
-      const result = await extraContextPrompt();
-
-      expect(result).toBe(
-        '\nHere\'s some extra context on this change, please use it to contextualise this change: "Additional context"'
-      );
-    });
-
-    it('should trim whitespace from context', async () => {
-      const context = '  Extra context  ';
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: context });
-
-      const result = await extraContextPrompt();
-
-      expect(result).toBe(
-        '\nHere\'s some extra context on this change, please use it to contextualise this change: "Extra context"'
-      );
-    });
-
-    it('should handle undefined input', async () => {
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: undefined });
-
-      const result = await extraContextPrompt();
-
-      expect(result).toBe('');
-    });
-  });
 
   describe('getJiraTicketDescription', () => {
     beforeEach(() => {

@@ -10,10 +10,9 @@ import { exec } from "child_process";
 import { messages } from "./messages";
 import { loadCustomPrompt } from "./prDescriptionGenerator/prompts/customPrompt";
 import path from "path";
+import { setupExitHandlers } from "./utils/exitHandler";
 
 dotenv.config();
-
-import { setupExitHandlers } from "./utils/exitHandler";
 
 setupExitHandlers();
 
@@ -215,31 +214,14 @@ Please follow the following example as a reference for desired format:
     const tempFilePath: string = "./temp_prs_data.json";
     fs.writeFileSync(tempFilePath, prsData);
 
-    let prompt =
-      loadCustomPrompt(path.resolve(`./customRaconteurPrompt.txt`)) ||
-      DEFAULT_PROMPT;
+    const customPromptPath = path.resolve(`./customRaconteurPrompt.txt`);
+    const customPrompt = loadCustomPrompt(customPromptPath);
+    const prompt = customPrompt || DEFAULT_PROMPT;
 
-    console.log(chalk.blue(`Here's the prompt so far:\n\n${prompt}`));
-
-    const extraContextPrompt = await prompts({
-      type: "toggle",
-      name: "value",
-      message: messages.prDescription.addContext,
-      initial: false,
-      active: "yes",
-      inactive: "no",
-      hint: "What's the context of this PR?",
-      instructions:
-        "This could be a summary of the changes or any additional context.",
-    });
-
-    if (extraContextPrompt.value) {
-      const response = await prompts({
-        type: "text",
-        name: "value",
-        message: chalk.cyan("📝 Enter your extra context:"),
-      });
-      prompt += `Here is some extra context to be considered: ${response.value}`;
+    if (customPrompt) {
+      console.log(chalk.blue(`Using custom prompt from: ${customPromptPath}`));
+    } else {
+      console.log(chalk.blue(`Using default prompt`));
     }
 
     try {

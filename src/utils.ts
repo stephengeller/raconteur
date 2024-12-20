@@ -32,19 +32,6 @@ export async function maybeRewritePrompt(inputPrompt: string): Promise<string> {
   return finalPrompt ?? inputPrompt;
 }
 
-export async function extraContextPrompt(): Promise<string> {
-  const { value }: { value: string | undefined } = await prompts({
-    type: "text",
-    name: "value",
-    message: messages.prDescription.addContext,
-  });
-
-  if (value?.trim()) {
-    return `\nHere's some extra context on this change, please use it to contextualise this change: "${value.trim()}"`;
-  } else {
-    return "";
-  }
-}
 
 async function getJiraPrompts(
   jiraApi: JiraApi,

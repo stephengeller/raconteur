@@ -9,7 +9,7 @@ import { loadCustomPrompt } from "./prompts/customPrompt";
 import { attachTemplatePrompt, findTemplate } from "./prompts/templatePrompt";
 import { getPRDescription } from "./utils/utils";
 import {
-  extraContextPrompt,
+
   getJiraTicketDescription,
   maybeRewritePrompt,
 } from "../utils";
@@ -92,7 +92,7 @@ Please also generate a PR title, following the Conventional Commit format.
 
   prompt = await maybeRewritePrompt(prompt);
   prompt += await getJiraTicketDescription();
-  prompt += await extraContextPrompt();
+
 
   // console.log(
   //   chalk.blue(`Here's the prompt so far:\n\n${chalk.green(prompt)}`),
