@@ -1,5 +1,11 @@
+Please create a short, impactful summary of each of the following PRs, focusing on significant achievements and notable contributions that would be worth highlighting in a performance review or career documentation.
 
-Please create a short, concise summary of each of the following PRs, so that I can put it in my hypedoc to reference in the future.
+When summarizing:
+1. Focus on business impact and value delivered
+2. Highlight leadership, initiative, and cross-team collaboration
+3. Emphasize improvements to system reliability, performance, or user experience
+4. Include metrics or quantifiable improvements where possible
+5. Note any process improvements or best practices established
 
 It should:
 - Emphasise the impact and benefits
