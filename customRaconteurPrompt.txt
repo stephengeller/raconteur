@@ -1,29 +1,60 @@
-Please create a short, impactful summary of each of the following PRs, focusing on significant achievements and notable contributions that would be worth highlighting in a performance review or career documentation.
+You are a technical documentation expert focusing on impactful engineering achievements. Please create a meaningful summary of each PR that demonstrates significant technical or business value. These summaries will be used for performance reviews and career documentation, as well as future analysis by LLMs to understand career progression and impact.
 
-When summarizing:
-1. Focus on business impact and value delivered
-2. Highlight leadership, initiative, and cross-team collaboration
-3. Emphasize improvements to system reliability, performance, or user experience
-4. Include metrics or quantifiable improvements where possible
-5. Note any process improvements or best practices established
+Evaluation Criteria for Including a PR:
+1. Technical Impact:
+   - Significant architectural improvements
+   - Performance optimizations with measurable results
+   - Security enhancements
+   - Critical bug fixes affecting business operations
 
-It should:
-- Emphasise the impact and benefits
-- Be clear and concise
-- Have a URL of the PR at the end of the line in brackets so I can click through to the PR (NOT a hyperlink, just the URL on its own)
-- Be in reverse chronological order (most recent first)
-- Be in plaintext, not markdown
+2. Business Value:
+   - Direct impact on user experience
+   - Improved system reliability or maintainability
+   - Cost savings or efficiency gains
+   - Risk mitigation
 
-Please follow the following example as a reference for desired format:
+3. Leadership & Collaboration:
+   - Cross-team initiatives
+   - Mentorship or knowledge sharing
+   - Process improvements
+   - Technical leadership demonstrations
+
+Format Requirements:
+- Start each entry with a clear date (Month DD, YYYY)
+- Lead with the most impactful aspect of the change
+- Include specific metrics where available (e.g., "reduced latency by 25%")
+- Highlight cross-functional collaboration
+- End each line with the PR URL in parentheses
+- Order entries in reverse chronological order
+- Use plain text format (no markdown)
+- Keep entries concise but complete (1-2 lines per PR)
+
+Required Elements in Each Summary:
+1. Action: What was done (e.g., "Implemented", "Refactored", "Led")
+2. Impact: The business or technical value delivered
+3. Context: Why it matters or how it helps
+4. Metrics: Quantifiable results when available
+5. URL: Link to the PR for reference
+
+Example Format:
 
 July 4, 2024:
-- Refactored the ExistingCustomerPIIVerification component, enhancing code readability and maintainability. Broke down complex structures into manageable parts, introduced new components and a custom hook for streamlined data handling.
-https://github.com/squareup/cash-toolbox/pull/13305
+- Led cross-team initiative to refactor customer verification system, reducing verification time by 40% and improving success rate by 15% through enhanced error handling and user feedback (https://github.com/example/repo/pull/123)
+- Implemented automated deployment monitoring, reducing incident response time from 30 to 5 minutes and preventing 3 potential outages in first week (https://github.com/example/repo/pull/124)
 
 June 27, 2024:
-- Streamlined comments and configurations for priority phone support, simplifying documentation and reducing redundancy. https://github.com/squareup/cash-supportal/pull/9086
-- Added comprehensive documentation for priority phone support classes to improve clarity and maintainability following a recent refactor. https://github.com/squareup/cash-supportal/pull/9084
+- Architected and implemented new caching layer for customer data, reducing API calls by 60% and improving average response time from 200ms to 80ms (https://github.com/example/repo/pull/125)
 
-June 26, 2024:
-- Added an error alert to the case verification process, enhancing user feedback and error handling capabilities. https://github.com/squareup/cash-toolbox/pull/13304
-- Renamed InAppPhone to PriorityPhoneSupport across backfills and configs, aligning terminology with customer-facing content. https://github.com/squareup/cash-supportal/pull/9072
+Skip summarizing PRs that:
+- Only contain minor text changes
+- Are purely documentation updates without process improvements
+- Fix trivial bugs without business impact
+- Only modify configuration without system impact
+
+For each PR, analyze:
+1. What problem does it solve?
+2. How does it improve the system?
+3. What measurable impact does it have?
+4. How does it demonstrate technical excellence or leadership?
+
+This structured approach ensures that each summary provides meaningful insight into your technical contributions and career growth.
