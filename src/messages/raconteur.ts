@@ -19,6 +19,7 @@ Please consider:
 - Customer/user impact
 
 Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
+Ensure the format is markdown.
 
 Please follow the following example as a reference for desired format:
 Feb 10, 2024:

@@ -80,6 +80,10 @@ raconteur/
 │   └── index.ts                 # Main entry point
 ├── script/                       # Setup and utility scripts
 ├── test/                        # Test files
+├── hypedoc_processing/          # Performance review entry processing scripts
+│   ├── process_entries.py       # Main script for cleaning and organizing entries
+│   ├── generate_quarterly_narratives.py # Generate narrative summaries
+│   └── markdown_converter_fixed.py # Convert entries to markdown format
 └── package.json                 # Project configuration
 ```
 
