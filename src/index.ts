@@ -61,6 +61,12 @@ class PRSummarizer {
   }
 
   public async run(): Promise<void> {
+    // If HYPEDOC_URL is set, open it immediately
+    if (process.env.HYPEDOC_URL) {
+      exec(`open "${process.env.HYPEDOC_URL}"`);
+      console.log(chalk.green("🌐 Opening hypedoc in browser..."));
+    }
+
     console.log(chalk.cyan("Fetching merged PRs..."));
     await this.setSinceDate();
     try {
@@ -91,23 +97,6 @@ class PRSummarizer {
       if (copyToClipboardPrompt.value && summaries) {
         await copyToClipboard(summaries);
         console.log(chalk.green("✅  PR description copied to clipboard!"));
-        
-        // If HYPEDOC_URL is set, prompt to open it
-        if (process.env.HYPEDOC_URL) {
-          const openHypedocPrompt = await prompts({
-            type: "toggle",
-            name: "value",
-            message: chalk.yellow("📝 Open hypedoc in browser?"),
-            initial: true,
-            active: "yes",
-            inactive: "no",
-          });
-
-          if (openHypedocPrompt.value) {
-            exec(`open "${process.env.HYPEDOC_URL}"`);
-            console.log(chalk.green("🌐 Opening hypedoc in browser..."));
-          }
-        }
       }
 
       // prompt user to navigate to https://my.sqprod.co/chat and ask for a summary from
