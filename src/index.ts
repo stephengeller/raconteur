@@ -98,47 +98,43 @@ class PRSummarizer {
         console.log(chalk.green("✅  PR description copied to clipboard!"));
       }
 
-      // prompt user to navigate to https://my.sqprod.co/chat and ask for a summary from
-      // Slack and other apps for sgeller
-
-      // string variable containing a prompt for chatGPT to ask for a summary of my
-      // achievements over the past week
-      const chatPrompt = `
-You are a helpful assistant. Generate a clear, concise and structured summary of my achievements over the past week, sourcing from Slack and other apps. 
-Focus only on what appear to be significant or important work achievements.
-      
-Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
-      
-Please follow the following example as a reference for desired format:
-  Feb 10, 2024:
-  - Successfully led the development of Project X's core module, improving system efficiency by 20%.
-  - Initiated and completed a code refactoring for the Legacy System, enhancing maintainability.
-  - Collaborated on the Integration Initiative, ensuring seamless connection between System A and B.
-  - Acted as the interim lead for the Deployment Team during critical release phases.
-  
-  Jan 25, 2024:
-  - Spearheaded the documentation overhaul for Project Y, setting a new standard for project clarity.
-  - Managed cross-departmental teams to kickstart the Beta Launch of the New Platform.
-  - Coordinated with the Design Team to implement a new UI/UX for the Customer Portal.
-      `;
+      // Handle chat prompt for additional summary
       console.log(
-        "Here is a prompt to paste into Square's chatGPT:\n",
-        chalk.green(chatPrompt),
+        chalk.blue(
+          "\nWould you like to generate an additional summary from Slack and other apps?",
+        ),
       );
+
       const openChatPrompt = await prompts({
         type: "toggle",
         name: "value",
-        message: chalk.yellow(
-          "📋 Open https://my.sqprod.co/chat to ask for a summary?",
-        ),
+        message: chalk.yellow(messages.raconteur.openChatPrompt),
         initial: true,
         active: "yes",
         inactive: "no",
       });
 
       if (openChatPrompt.value) {
-        // open  https://my.sqprod.co/chat in a browser
+        // Prompt to copy the template to clipboard
+        const copyPrompt = await prompts({
+          type: "toggle",
+          name: "value",
+          message: chalk.yellow(messages.raconteur.copyChatPromptToClipboard),
+          initial: true,
+          active: "yes",
+          inactive: "no",
+        });
+
+        if (copyPrompt.value) {
+          await copyToClipboard(messages.raconteur.chatPromptTemplate);
+          console.log(
+            chalk.green("✅  Chat prompt template copied to clipboard!"),
+          );
+        }
+
+        // Open chat in browser
         exec("open https://my.sqprod.co/chat");
+        console.log(chalk.green("🌐  Opening Square ChatGPT in browser..."));
       }
     } catch (error) {
       console.error(chalk.red(`Failed to process PRs: ${error}`));
