@@ -8,29 +8,55 @@ export const raconteurMessages = {
   openChatPrompt: "📋 Open Square ChatGPT?",
   copyChatPromptToClipboard: "📋 Copy Square ChatGPT prompt to clipboard?",
   chatPromptTemplate: `
-You are a helpful assistant. Generate a clear, concise and structured summary of my achievements over the past week, sourcing from Slack and other apps. 
-Focus only on what appear to be significant or important work achievements.
+You are a technical writer helping to document engineering achievements for performance reviews. Generate a clear, impactful summary of work achievements that maps to three key performance areas: Betterment, Behavior, and Impact.
 
-Please consider:
-- Technical impact and improvements
-- Cross-team collaboration
-- Leadership and mentoring activities
-- Process improvements and documentation
-- Customer/user impact
+Performance Categories:
 
-Use bullet-points and numbered lists where necessary and appropriate, especially when detailing changes.
-Ensure the format is markdown.
+1. Betterment:
+   Definition: Work that wasn't explicitly asked for but improves systems, processes, or organization
+   Examples:
+   - Proactively updating documentation or templates
+   - Taking active roles in knowledge sharing
+   - Championing organizational changes
+   - Executing unowned work that enables efficiency
 
-Please follow the following example as a reference for desired format:
-Feb 10, 2024:
-- Successfully led the development of Project X's core module, improving system efficiency by 20% and reducing latency by 15ms.
-- Initiated and completed a code refactoring for the Legacy System, enhancing maintainability and reducing technical debt.
-- Collaborated with Design and Product teams to implement critical user-facing features, resulting in 25% improved user engagement.
-- Mentored junior developers through code reviews and pair programming sessions, improving team velocity.
+2. Behavior:
+   Definition: Observable actions, attitudes, and approaches in daily work
+   Examples:
+   - Leadership and initiative in project execution
+   - Cross-team collaboration and communication
+   - Maintaining team culture and psychological safety
+   - Mentoring and knowledge sharing
 
-Jan 25, 2024:
-- Spearheaded the documentation overhaul for Project Y, reducing onboarding time by 40%.
-- Led cross-team initiative to standardize deployment practices, reducing deployment issues by 60%.
-- Implemented automated testing improvements, increasing test coverage by 15% and reducing CI time by 5 minutes.
-`,
+3. Impact:
+   Definition: Concrete outcomes achieved and contributions to Cash's mission
+   Examples:
+   - Measurable improvements to systems or processes
+   - Customer-facing enhancements
+   - Strategic priority achievements
+   - Team and organizational enablement
+
+Format Requirements:
+- Use the exact date format "Month D, YYYY:" (e.g., "December 4, 2024:")
+- Each entry should start with "- " and include category tag: [Betterment], [Behavior], or [Impact]
+- Include PR/commit URLs at the end of relevant entries in parentheses
+- Group entries by date in reverse chronological order
+- Keep entries concise but impactful
+
+Example Format:
+December 4, 2024:
+- [Impact] Enhanced customer security with PIN verification, reducing support tickets by 30% and improving verification success rate (https://github.com/org/repo/pull/123)
+- [Behavior] Led cross-functional alignment meetings between design and engineering for PIN requirement implementation
+- [Betterment] Proactively improved toolbox documentation, reducing onboarding time for new team members (https://github.com/org/repo/pull/456)
+
+November 28, 2024:
+- [Impact] Streamlined PII verification flow, reducing handle time by 25% for support advocates (https://github.com/org/repo/pull/789)
+- [Betterment] Introduced automated development setup script, improving team efficiency (https://github.com/org/repo/pull/101)
+
+Remember: 
+- Tag each entry with its primary category
+- Focus on quantifiable metrics where possible
+- Emphasize both immediate and long-term value
+- Include cross-functional collaboration
+- Highlight proactive improvements`,
 };
