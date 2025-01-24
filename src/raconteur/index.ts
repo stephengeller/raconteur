@@ -12,7 +12,10 @@ import { loadCustomPrompt } from "../prDescriptionGenerator/prompts/customPrompt
 import path from "path";
 import { setupExitHandlers } from "../utils/exitHandler";
 import { PullRequest } from "./types";
-import { DEFAULT_PROMPT } from "./prompts";
+import {
+  GITHUB_ACHIEVEMENTS_PROMPT,
+  SOCIAL_ACHIEVEMENTS_PROMPT,
+} from "./prompts";
 
 dotenv.config();
 
@@ -97,7 +100,7 @@ export class Raconteur {
         });
 
         if (copyPrompt.value) {
-          await copyToClipboard(messages.raconteur.chatPromptTemplate);
+          await copyToClipboard(SOCIAL_ACHIEVEMENTS_PROMPT);
           console.log(
             chalk.green("✅  Chat prompt template copied to clipboard!"),
           );
@@ -183,7 +186,7 @@ export class Raconteur {
 
     const customPromptPath = path.resolve(`./customRaconteurPrompt.txt`);
     const customPrompt = loadCustomPrompt(customPromptPath);
-    const prompt = customPrompt || DEFAULT_PROMPT;
+    const prompt = customPrompt || GITHUB_ACHIEVEMENTS_PROMPT;
 
     if (customPrompt) {
       console.log(chalk.blue(`Using custom prompt from: ${customPromptPath}`));
