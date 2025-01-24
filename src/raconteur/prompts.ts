@@ -62,7 +62,7 @@ Format Requirements:
 - Keep entries concise but impactful
 
 Markdown Formatting Rules:
-    1. Use level 2 headings (##) for dates
+    1. Use level 6 headings (######) for dates
     2. Bold category tags with ** syntax
     3. Use proper Markdown link syntax for PRs: [#NUMBER](URL)
     4. Maintain consistent list item indentation
@@ -100,7 +100,7 @@ Contextual Enhancement Rules:
    
  Required Markdown Format:
 \`\`\`
-## Month D, YYYY
+###### Month D, YYYY
 - **[Category]** Achievement description [#PR-NUMBER](PR-URL)
 \`\`\`
 
