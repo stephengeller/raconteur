@@ -154,10 +154,12 @@ export class Raconteur {
       .sort((a, b) => moment(b.closed_at).diff(moment(a.closed_at)))
       .map((pr, index) => {
         const repo = pr.repository_url.split("/").pop();
+        const dateStr = chalk.gray(moment(pr.closed_at).format("DD MMM"));
+        const repoInfo = `${chalk.cyan(repo)} ${chalk.yellow('#' + pr.number)}`;
+        const title = chalk.white(pr.title);
+        
         return {
-          title: `[${repo} #${pr.number}] ${pr.title} (merged ${moment(
-            pr.closed_at,
-          ).format("Do MMM YYYY")})`,
+          title: `⬡ ${dateStr} | ${repoInfo} | ${title}`,
           value: index,
           selected: true,
         };
