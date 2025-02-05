@@ -8,13 +8,10 @@ import { createGitHubPr } from "./github/createPr";
 import { loadCustomPrompt } from "./prompts/customPrompt";
 import { attachTemplatePrompt, findTemplate } from "./prompts/templatePrompt";
 import { getPRDescription } from "./utils/utils";
-import {
-
-  getJiraTicketDescription,
-  maybeRewritePrompt,
-} from "../utils";
+import { getJiraTicketDescription, maybeRewritePrompt } from "../utils";
 import { copyToClipboard } from "../copyToClipboard";
 import { messages } from "../messages";
+import { setupExitHandlers } from "../utils/exitHandler";
 
 const DEFAULT_BRANCH = "main";
 
@@ -41,8 +38,6 @@ if (argv.branch !== DEFAULT_BRANCH) {
 }
 
 loadEnv(); // Load .env file
-
-import { setupExitHandlers } from "../utils/exitHandler";
 
 setupExitHandlers();
 
@@ -86,17 +81,8 @@ Unless the code change appears complex, please keep the PR length to an easily d
 Please also generate a PR title, following the Conventional Commit format.
     `;
 
-  console.log(
-    chalk.blue(`Here's the prompt so far:\n\n${chalk.green(prompt)}`),
-  );
-
   prompt = await maybeRewritePrompt(prompt);
   prompt += await getJiraTicketDescription();
-
-
-  // console.log(
-  //   chalk.blue(`Here's the prompt so far:\n\n${chalk.green(prompt)}`),
-  // );
 
   if (attachTemplate && template) {
     const pullRequestTemplatePrompt = `
