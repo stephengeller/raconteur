@@ -99,9 +99,10 @@ export function extractConventionalCommitTitle(
       lastTicketPrefix = ticketPrefix; // Update last seen ticket prefix
     }
     
-    // Handle PR Title section
-    if (line.trim().startsWith("## PR Title:")) {
-      const titleContent = line.replace("## PR Title:", "").trim();
+    // Handle PR Title section with any number of # prefixes
+    const titleMatch = line.trim().match(/^#+\s*PR Title:\s*(.*)/i);
+    if (titleMatch) {
+      const titleContent = titleMatch[1].trim();
       for (const type of conventionalCommitTypes) {
         if (titleContent.startsWith(`${type}:`)) {
           return titleContent;

@@ -95,6 +95,36 @@ describe('createPr', () => {
       expect(result).toBe("feat: Add new feature");
     });
 
+    it('extracts the conventional commit title from PR description with single # title section', () => {
+      const prDescription = `
+        # PR Title: feat: Add new feature
+        This is a new feature that adds functionality.
+      `;
+      const defaultTitle = "default-title";
+      const result = extractConventionalCommitTitle(prDescription, defaultTitle);
+      expect(result).toBe("feat: Add new feature");
+    });
+
+    it('extracts the conventional commit title from PR description with triple ### title section', () => {
+      const prDescription = `
+        ### PR Title: feat: Add new feature
+        This is a new feature that adds functionality.
+      `;
+      const defaultTitle = "default-title";
+      const result = extractConventionalCommitTitle(prDescription, defaultTitle);
+      expect(result).toBe("feat: Add new feature");
+    });
+
+    it('extracts the conventional commit title from PR description with many ##### title section', () => {
+      const prDescription = `
+        ##### PR Title: feat: Add new feature
+        This is a new feature that adds functionality.
+      `;
+      const defaultTitle = "default-title";
+      const result = extractConventionalCommitTitle(prDescription, defaultTitle);
+      expect(result).toBe("feat: Add new feature");
+    });
+
     it('returns the default title when PR description does not contain conventional commit title', () => {
       const prDescription = `
         ## PR Title: This is a PR title
