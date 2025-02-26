@@ -43,7 +43,7 @@ export class Raconteur {
     console.log(chalk.cyan("Fetching merged PRs..."));
     await this.setSinceDate();
     try {
-      const prs = await this.fetchMergedPRs();
+      let prs = await this.fetchMergedPRs();
 
       if (!prs || prs.length === 0) {
         console.log(
@@ -51,6 +51,59 @@ export class Raconteur {
             "No PRs found for the specified duration. Have you authorized squareup for your personal access token?",
           ),
         );
+        
+        // Ask if they want to continue anyway
+        const continuePrompt = await prompts({
+          type: "toggle",
+          name: "value",
+          message: chalk.yellow("Would you like to continue anyway to generate other summaries?"),
+          initial: true,
+          active: "yes",
+          inactive: "no",
+        });
+
+        if (!continuePrompt.value) {
+          return;
+        }
+        
+        // Skip directly to social achievements prompt
+        console.log(
+          chalk.blue(
+            "\nWould you like to generate an additional summary from Slack and other apps?",
+          ),
+        );
+
+        const openChatPrompt = await prompts({
+          type: "toggle",
+          name: "value",
+          message: chalk.yellow(messages.raconteur.openChatPrompt),
+          initial: true,
+          active: "yes",
+          inactive: "no",
+        });
+
+        if (openChatPrompt.value) {
+          // Prompt to copy the template to clipboard
+          const copyPrompt = await prompts({
+            type: "toggle",
+            name: "value",
+            message: chalk.yellow(messages.raconteur.copyChatPromptToClipboard),
+            initial: true,
+            active: "yes",
+            inactive: "no",
+          });
+
+          if (copyPrompt.value) {
+            await copyToClipboard(SOCIAL_ACHIEVEMENTS_PROMPT);
+            console.log(
+              chalk.green("✅  Chat prompt template copied to clipboard!"),
+            );
+          }
+
+          // Open chat in browser
+          exec("open https://my.sqprod.co/chat");
+          console.log(chalk.green("🌐  Opening Square ChatGPT in browser..."));
+        }
         return;
       }
 
@@ -149,39 +202,43 @@ export class Raconteur {
   }
 
   private async summarizePRs(prs: PullRequest[]): Promise<string | undefined> {
-    // Convert PRs to a format suitable for prompts
-    const choices = prs
-      .sort((a, b) => moment(b.closed_at).diff(moment(a.closed_at)))
-      .map((pr, index) => {
-        const repo = pr.repository_url.split("/").pop();
-        const dateStr = chalk.gray(moment(pr.closed_at).format("DD MMM"));
-        const repoInfo = `${chalk.cyan(repo)} ${chalk.yellow('#' + pr.number)}`;
-        const title = chalk.white(pr.title);
-        
-        return {
-          title: `⬡ ${dateStr} | ${repoInfo} | ${title}`,
-          value: index,
-          selected: true,
-        };
+    let selectedPRs: PullRequest[] = [];
+    
+    if (prs.length > 0) {
+      // Convert PRs to a format suitable for prompts
+      const choices = prs
+        .sort((a, b) => moment(b.closed_at).diff(moment(a.closed_at)))
+        .map((pr, index) => {
+          const repo = pr.repository_url.split("/").pop();
+          const dateStr = chalk.gray(moment(pr.closed_at).format("DD MMM"));
+          const repoInfo = `${chalk.cyan(repo)} ${chalk.yellow('#' + pr.number)}`;
+          const title = chalk.white(pr.title);
+          
+          return {
+            title: `⬡ ${dateStr} | ${repoInfo} | ${title}`,
+            value: index,
+            selected: true,
+          };
+        });
+
+      const response = await prompts({
+        type: "multiselect",
+        name: "selectedPRs",
+        message: chalk.yellow("Select PRs to fetch summaries for:"),
+        choices,
+        // hint: "- Space to select. Return to submit",
       });
+      
+      // Filter PRs based on selected indices
+      selectedPRs = response.selectedPRs.map((index: number) => prs[index]);
 
-    const response = await prompts({
-      type: "multiselect",
-      name: "selectedPRs",
-      message: chalk.yellow("Select PRs to fetch summaries for:"),
-      choices,
-      // hint: "- Space to select. Return to submit",
-    });
-
-    // Filter PRs based on selected indices
-    const selectedPRs = response.selectedPRs.map((index: number) => prs[index]);
-
-    if (selectedPRs.length === 0) {
-      console.log(chalk.yellow("No PRs selected for summarization."));
-      return;
+      if (selectedPRs.length === 0) {
+        console.log(chalk.yellow("No PRs selected for summarization."));
+        return;
+      }
     }
 
-    // Proceed with summarization for selected PRs
+    // Proceed with summarization for selected PRs (even if empty)
     const prsData: string = JSON.stringify(selectedPRs);
     const tempFilePath: string = "./temp_prs_data.json";
     fs.writeFileSync(tempFilePath, prsData);
