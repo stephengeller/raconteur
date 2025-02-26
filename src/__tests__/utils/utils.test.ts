@@ -1,6 +1,6 @@
 import fs from 'fs';
 import prompts from 'prompts';
-import { maybeRewritePrompt, getJiraTicketDescription } from '../../utils';
+import { getJiraTicketDescription } from '../../utils';
 import JiraApi from '../../apis/JiraApi';
 
 jest.mock('fs');
@@ -13,54 +13,6 @@ describe('utils', () => {
     delete process.env.SQUAREUP_EMAIL;
     delete process.env.JIRA_API_TOKEN;
   });
-
-  describe('maybeRewritePrompt', () => {
-    const mockInputPrompt = 'original prompt';
-
-    it('should return original prompt when user declines to rewrite', async () => {
-      (prompts as unknown as jest.Mock).mockResolvedValueOnce({ value: false });
-
-      const result = await maybeRewritePrompt(mockInputPrompt);
-
-      expect(result).toBe(mockInputPrompt);
-      expect(fs.writeFileSync).not.toHaveBeenCalled();
-    });
-
-    it('should return and save new prompt when user chooses to rewrite', async () => {
-      const newPrompt = 'new custom prompt';
-      (prompts as unknown as jest.Mock)
-        .mockResolvedValueOnce({ value: true })
-        .mockResolvedValueOnce({ value: newPrompt });
-
-      const result = await maybeRewritePrompt(mockInputPrompt);
-
-      expect(result).toBe(newPrompt);
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        expect.any(String),
-        newPrompt,
-        'utf8'
-      );
-    });
-
-    it('should handle file system errors when saving prompt', async () => {
-      const newPrompt = 'new custom prompt';
-      const mockError = new Error('File system error');
-      (prompts as unknown as jest.Mock)
-        .mockResolvedValueOnce({ value: true })
-        .mockResolvedValueOnce({ value: newPrompt });
-      (fs.writeFileSync as jest.Mock).mockImplementation(() => {
-        throw mockError;
-      });
-
-      const result = await maybeRewritePrompt(mockInputPrompt);
-
-      expect(result).toBe(newPrompt);
-      // Error should be logged but not thrown
-      expect(fs.writeFileSync).toHaveBeenCalled();
-    });
-  });
-
-
 
   describe('getJiraTicketDescription', () => {
     beforeEach(() => {

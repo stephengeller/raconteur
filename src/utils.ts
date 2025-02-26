@@ -8,29 +8,6 @@ import { messages } from "./messages";
 
 config(); // Load .env file
 
-export async function maybeRewritePrompt(inputPrompt: string): Promise<string> {
-  let finalPrompt = null;
-  const customPrompt = await prompts({
-    type: "toggle",
-    name: "value",
-    message: messages.prDescription.rewritePrompt,
-    initial: false,
-    active: "yes",
-    inactive: "no",
-  });
-
-  if (customPrompt.value) {
-    const response = await prompts({
-      type: "text",
-      name: "value",
-      message: messages.prDescription.enterCustomPrompt,
-    });
-    finalPrompt = response.value;
-    saveCustomPrompt(finalPrompt);
-  }
-
-  return finalPrompt ?? inputPrompt;
-}
 
 
 async function getJiraPrompts(

@@ -8,7 +8,7 @@ import { createGitHubPr } from "./github/createPr";
 import { loadCustomPrompt } from "./prompts/customPrompt";
 import { findTemplate } from "./prompts/templatePrompt";
 import { getPRDescription } from "./utils/utils";
-import { getJiraTicketDescription, maybeRewritePrompt } from "../utils";
+import { getJiraTicketDescription } from "../utils";
 import { copyToClipboard } from "../copyToClipboard";
 import { messages } from "../messages";
 import { setupExitHandlers } from "../utils/exitHandler";
@@ -62,7 +62,7 @@ async function main() {
 
   if (result !== null) {
     [template] = result;
-    console.log(chalk.green("📝 PR template found, using it"));
+    console.log(chalk.green("📝 PR template found, using it ✅ "));
   }
 
   let prompt =
@@ -75,7 +75,6 @@ Unless the code change appears complex, please keep the PR length to an easily d
 Please also generate a PR title, following the Conventional Commit format.
     `;
 
-  prompt = await maybeRewritePrompt(prompt);
   prompt += await getJiraTicketDescription();
 
   if (template) {
