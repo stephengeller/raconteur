@@ -6,7 +6,7 @@ import { loadEnv } from "./config/env";
 import { getGitDiff } from "./git/gitDiff";
 import { createGitHubPr } from "./github/createPr";
 import { loadCustomPrompt } from "./prompts/customPrompt";
-import { attachTemplatePrompt, findTemplate } from "./prompts/templatePrompt";
+import { findTemplate } from "./prompts/templatePrompt";
 import { getPRDescription } from "./utils/utils";
 import { getJiraTicketDescription, maybeRewritePrompt } from "../utils";
 import { copyToClipboard } from "../copyToClipboard";
@@ -59,16 +59,10 @@ async function main() {
 
   const result = await findTemplate(DIR_PATH);
   let template: string | undefined;
-  let templatePath: string | undefined;
 
   if (result !== null) {
-    [template, templatePath] = result;
-  }
-
-  let attachTemplate = false;
-
-  if (template && templatePath) {
-    attachTemplate = await attachTemplatePrompt(templatePath);
+    [template] = result;
+    console.log(chalk.green("📝 PR template found, using it"));
   }
 
   let prompt =
@@ -84,7 +78,7 @@ Please also generate a PR title, following the Conventional Commit format.
   prompt = await maybeRewritePrompt(prompt);
   prompt += await getJiraTicketDescription();
 
-  if (attachTemplate && template) {
+  if (template) {
     const pullRequestTemplatePrompt = `
     
     Please make the PR description fit this pull request template format:\n${template}`;
