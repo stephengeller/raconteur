@@ -90,9 +90,9 @@ Please also generate a PR title, following the Conventional Commit format.
   }
 
   const prDescription = await getPRDescription(prompt, diff);
-  console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
 
   // Logging out the description is noise and not needed
+  // console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
   // console.log(prDescription);
 
   async function showOptionsPrompt() {
