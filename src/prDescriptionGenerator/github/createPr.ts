@@ -1,5 +1,5 @@
+import { execSync } from "child_process";
 import { Octokit } from "@octokit/rest";
-import { execSync } from "node:child_process";
 import chalk from "chalk";
 import ora from "ora";
 
@@ -24,31 +24,83 @@ function getOwnerAndRepo(dirPath: string) {
   return { owner, repo };
 }
 
+function checkGitStatus(dirPath: string) {
+  // Check if we're on main branch
+  const currentBranch = getBranchName(dirPath);
+  if (currentBranch === "main") {
+    throw new Error("Cannot create PR from main branch. Please switch to a feature branch.");
+  }
+
+  // Check if there are uncommitted changes
+  try {
+    const status = execSync("git status --porcelain", {
+      cwd: dirPath,
+    }).toString();
+
+    if (status) {
+      throw new Error("You have uncommitted changes. Please commit or stash them first.");
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to check git status");
+  }
+
+  // Check if current branch exists on remote
+  try {
+    execSync(`git ls-remote --heads origin ${currentBranch}`, {
+      cwd: dirPath,
+    });
+  } catch (error) {
+    throw new Error(`Branch ${currentBranch} has not been pushed to remote. Please push it first with: git push -u origin ${currentBranch}`);
+  }
+
+  // Check if there are commits between current branch and main
+  try {
+    const commits = execSync(`git rev-list HEAD ^origin/main --count`, {
+      cwd: dirPath,
+    }).toString().trim();
+
+    if (commits === "0") {
+      throw new Error("No commits found between current branch and main. Make sure you have committed and pushed your changes.");
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to check commit differences");
+  }
+}
+
 export async function createGitHubPr(prDescription: string, dirPath: string) {
   const spinner = ora(chalk.blue("Creating GitHub PR...")).start();
 
-  // Make sure you have your GitHub token set in environment variables
-  if (!process.env.GITHUB_TOKEN) {
-    throw new Error("GitHub token is not set in the environment variables");
-  }
-
-  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
-  // Extract PR title from prDescription
-  const title = extractConventionalCommitTitle(
-    prDescription,
-    getBranchName(dirPath),
-  );
-
-  const { owner, repo } = getOwnerAndRepo(dirPath);
-  if (!owner || !repo) {
-    throw new Error("Could not determine repository owner and name");
-  }
-
-  // remove the entire line that contains the title from the prDescription
-  const prDescriptionWithoutTitle = prDescription.replace(title, "").trim();
-
   try {
+    // Make sure you have your GitHub token set in environment variables
+    if (!process.env.GITHUB_TOKEN) {
+      throw new Error("GitHub token is not set in the environment variables");
+    }
+
+    // Run all git status checks first
+    checkGitStatus(dirPath);
+
+    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+    // Extract PR title from prDescription
+    const title = extractConventionalCommitTitle(
+      prDescription,
+      getBranchName(dirPath),
+    );
+
+    const { owner, repo } = getOwnerAndRepo(dirPath);
+    if (!owner || !repo) {
+      throw new Error("Could not determine repository owner and name");
+    }
+
+    // remove the entire line that contains the title from the prDescription
+    const prDescriptionWithoutTitle = prDescription.replace(title, "").trim();
+
     const response = await octokit.pulls.create({
       owner,
       repo,
@@ -62,9 +114,8 @@ export async function createGitHubPr(prDescription: string, dirPath: string) {
     spinner.succeed(`PR created successfully: ${response.data.html_url}`);
     // open the PR in the browser
     execSync(`open ${response.data.html_url}`);
-  } catch (error: unknown) {
+  } catch (error) {
     spinner.fail(chalk.red(`Failed to create PR.`));
-    console.error(chalk.red(error));
     throw error;
   }
 }

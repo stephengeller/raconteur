@@ -99,13 +99,40 @@ yarn install
 yarn start
 
 # Generate PR descriptions
-yarn prdesc
+yarn prdesc [options]
 
 # Generate commit messages
 yarn commit
 
 # Run tests
 yarn test
+
+### PR Description Generator Options
+
+The PR Description Generator (`yarn prdesc`) supports several command-line flags:
+
+```bash
+yarn prdesc [options]
+
+Options:
+  --yes, -y      Skip Jira ticket lookup
+  --create, -c   Automatically create GitHub PR
+  --branch, -b   Specify the branch to compare with (default: "main")
+  --dir, -d      Specify the directory of the git repository (default: current directory)
+  --help, -h     Show help
+
+Examples:
+  # Skip Jira lookup and create PR automatically
+  yarn prdesc -yc
+
+  # Compare with different branch
+  yarn prdesc -b develop
+
+  # Skip Jira lookup only
+  yarn prdesc -y
+
+  # Create PR automatically only
+  yarn prdesc -c
 ```
 
 ## Testing

@@ -29,6 +29,18 @@ const argv = yargs(hideBin(process.argv))
     type: "string",
     default: process.cwd(),
   })
+  .option("yes", {
+    alias: "y",
+    description: "Skip Jira ticket lookup",
+    type: "boolean",
+    default: false,
+  })
+  .option("create", {
+    alias: "c",
+    description: "Automatically create GitHub PR",
+    type: "boolean",
+    default: false,
+  })
   .help()
   .alias("help", "h")
   .parseSync();
@@ -75,7 +87,10 @@ Unless the code change appears complex, please keep the PR length to an easily d
 Please also generate a PR title, following the Conventional Commit format.
     `;
 
-  prompt += await getJiraTicketDescription();
+  // Only add Jira ticket description if --yes flag is not set
+  if (!argv.yes) {
+    prompt += await getJiraTicketDescription();
+  }
 
   if (template) {
     const pullRequestTemplatePrompt = `
@@ -91,46 +106,72 @@ Please also generate a PR title, following the Conventional Commit format.
 
   const prDescription = await getPRDescription(prompt, diff);
 
-  // Logging out the description is noise and not needed
-  // console.log(chalk.green(`\n🚀 Generated PR Description:\n`));
-  // console.log(prDescription);
-
-  async function showOptionsPrompt() {
-    const { command } = await prompts({
-      type: "select",
-      name: "command",
-      message: chalk.yellow(messages.prDescription.createPr),
-      choices: [
-        { title: "🆕 Create GitHub PR", value: "createPr" },
-        {
-          title: messages.prDescription.copyToClipboard,
-          value: "copyToClipboard",
-        },
-        { title: "Exit", value: "exit" },
-      ],
-    });
-
-    if (command === "createPr") {
-      try {
-        await createGitHubPr(prDescription, DIR_PATH);
-      } catch (error) {
-        // Re-prompt the user after error
-        return showOptionsPrompt();
+  // If --create flag is set, automatically create PR
+  if (argv.create) {
+    try {
+      await createGitHubPr(prDescription, DIR_PATH);
+      return;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(chalk.red("Error creating PR:", error.message));
+      } else {
+        console.error(chalk.red("An unknown error occurred while creating the PR"));
       }
-    }
-
-    if (command === "copyToClipboard") {
-      await copyToClipboard(prDescription);
-      console.log(chalk.green("✅  PR description copied to clipboard!"));
+      
+      if (!argv.yes) {
+        // Only show options prompt if not in fully automated mode
+        await showOptionsPrompt(prDescription);
+      }
+      process.exit(1);
     }
   }
 
-  await showOptionsPrompt();
+  // If not creating automatically, show options
+  await showOptionsPrompt(prDescription);
+}
+
+async function showOptionsPrompt(prDescription: string) {
+  const { command } = await prompts({
+    type: "select",
+    name: "command",
+    message: chalk.yellow(messages.prDescription.createPr),
+    choices: [
+      { title: "🆕 Create GitHub PR", value: "createPr" },
+      {
+        title: messages.prDescription.copyToClipboard,
+        value: "copyToClipboard",
+      },
+      { title: "Exit", value: "exit" },
+    ],
+  });
+
+  if (command === "createPr") {
+    try {
+      await createGitHubPr(prDescription, DIR_PATH);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(chalk.red("Error creating PR:", error.message));
+      } else {
+        console.error(chalk.red("An unknown error occurred while creating the PR"));
+      }
+      // Re-prompt the user after error
+      return showOptionsPrompt(prDescription);
+    }
+  }
+
+  if (command === "copyToClipboard") {
+    await copyToClipboard(prDescription);
+    console.log(chalk.green("✅  PR description copied to clipboard!"));
+  }
 }
 
 if (require.main === module) {
   main().catch((error) => {
-    console.error(chalk.red("Error:", error.message));
+    if (error instanceof Error) {
+      console.error(chalk.red("Error:", error.message));
+    } else {
+      console.error(chalk.red("An unknown error occurred"));
+    }
     process.exit(1);
   });
 }

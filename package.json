@@ -11,6 +11,13 @@
     "prdesc": "ts-node src/prDescriptionGenerator/main.ts",
     "commit": "ts-node  src/CommitMessageGenerator/main.ts"
   },
+  "bin": {
+    "prdesc": "./src/prDescriptionGenerator/main.ts"
+  },
+  "description": "A suite of tools for generating PR descriptions and commit messages",
+  "scripts-info": {
+    "prdesc": "Generate PR description. Flags: --yes/-y (skip Jira lookup), --create/-c (auto-create PR), --branch/-b (compare branch), --dir/-d (git directory)"
+  },
   "devDependencies": {
     "@octokit/rest": "^20.0.2",
     "@octokit/types": "^12.4.0",
