@@ -12,13 +12,13 @@ Output Format Requirements:
 
 Example Markdown Format:
 ###### December 4, 2024
-- **[Impact]** Enhanced customer security with PIN verification, reducing support tickets by 30% and improving verification success rate [#123](https://github.com/org/repo/pull/123)
+- **[Impact]** Enhanced customer security with PIN verification, reducing support tickets by 30% and improving verification success rate [repo #123](https://github.com/org/repo/pull/123)
 - **[Behavior]** Led cross-functional alignment meetings between design and engineering for PIN requirement implementation, demonstrating strong technical leadership
-- **[Betterment]** Proactively improved toolbox documentation and introduced automated setup, reducing onboarding time by 40% [#456](https://github.com/org/repo/pull/456)
+- **[Betterment]** Proactively improved toolbox documentation and introduced automated setup, reducing onboarding time by 40% [repo #456](https://github.com/org/repo/pull/456)
 
 ###### November 28, 2024
-- **[Impact]** Streamlined PII verification flow, reducing handle time by 25% for support advocates [#789](https://github.com/org/repo/pull/789)
-- **[Betterment]** Championed new development practices through automated tooling, improving team velocity [#101](https://github.com/org/repo/pull/101)
+- **[Impact]** Streamlined PII verification flow, reducing handle time by 25% for support advocates [repo #789](https://github.com/org/repo/pull/789)
+- **[Betterment]** Championed new development practices through automated tooling, improving team velocity [repo #101](https://github.com/org/repo/pull/101)
 
 [Rest of existing GitHub prompt content...]`;
 
