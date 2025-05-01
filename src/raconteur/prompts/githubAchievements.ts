@@ -19,6 +19,7 @@ Output Format Requirements:
 - Use strict Markdown format
 - Each date should be a level 6 heading (######)
 - Each entry should be a Markdown list item starting with "- "
+- There should only be one entry per pull request - it can contain multiple categories and subcategories
 - Category and subcategory tags should be bold (**[Category > Subcategory]**) at start of each entry
 - URLs should be proper Markdown links at the end of entries
 - Must maintain exact date format "Month D, YYYY" in headings
