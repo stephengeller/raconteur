@@ -72,12 +72,6 @@ export class Raconteur {
         }
 
         // Skip directly to social achievements prompt
-        console.log(
-          chalk.blue(
-            "Would you like to generate an additional summary from Slack and other apps?",
-          ),
-        );
-
         const generateSocialSummary = await prompts({
           type: "toggle",
           name: "value",
@@ -109,7 +103,7 @@ export class Raconteur {
               stderr: string;
             }>((resolve) => {
               exec(
-                `goose run --instructions ${promptPath} --with-builtin slack`,
+                `goose run --instructions ${promptPath}`,
                 (error, stdout, stderr) => {
                   resolve({ stdout: stdout || "", stderr: stderr || "" });
                 },
@@ -222,7 +216,7 @@ export class Raconteur {
             stderr: string;
           }>((resolve) => {
             exec(
-              `goose run --instructions ${promptPath} --with-builtin slack`,
+              `goose run --instructions ${promptPath}`,
               (error, stdout, stderr) => {
                 resolve({ stdout: stdout || "", stderr: stderr || "" });
               },
