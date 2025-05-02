@@ -193,14 +193,6 @@ export class Raconteur {
       }
 
       // Handle additional summary from Slack and other apps
-      console.log(
-        chalk.blue(
-          process.env.GOOSE_SUMMARY === "true"
-            ? "\nWould you like to analyze your recent Slack activity?"
-            : "\nWould you like to generate an additional summary from Slack and other apps?",
-        ),
-      );
-
       const generateSocialSummary = await prompts({
         type: "toggle",
         name: "value",
