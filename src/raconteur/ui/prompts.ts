@@ -3,20 +3,22 @@ import chalk from "chalk";
 import moment from "moment";
 import { messages } from "../../messages";
 import { PullRequest } from "../types";
+import { PRChoice, UserPromptChoice } from "./types";
+import { DEFAULT_VALUES, PROMPT_MESSAGES } from "../constants";
+import { Logger } from "../services/logger";
 
 export class UserPrompts {
   static async getWeeksAgo(): Promise<number> {
-    const defaultWeeks = 1;
     const response = await prompts({
       type: "number",
       name: "value",
-      message: chalk.yellow("How many weeks ago should PRs be fetched from?"),
-      initial: defaultWeeks,
+      message: chalk.yellow(PROMPT_MESSAGES.WEEKS_AGO),
+      initial: DEFAULT_VALUES.WEEKS_AGO,
     });
-    return response.value || defaultWeeks;
+    return response.value || DEFAULT_VALUES.WEEKS_AGO;
   }
 
-  static async confirmCopyToClipboard(message: string = messages.raconteur.copyToClipboard): Promise<boolean> {
+  static async confirmCopyToClipboard(message: string = PROMPT_MESSAGES.COPY_TO_CLIPBOARD): Promise<boolean> {
     const response = await prompts({
       type: "toggle",
       name: "value",
@@ -30,8 +32,8 @@ export class UserPrompts {
 
   static async confirmSocialSummary(useGoose: boolean): Promise<boolean> {
     const message = useGoose
-      ? "Would you like to generate a Slack activity summary using Goose?"
-      : messages.raconteur.openChatPrompt;
+      ? PROMPT_MESSAGES.GENERATE_SOCIAL.GOOSE
+      : PROMPT_MESSAGES.GENERATE_SOCIAL.SQUARE;
 
     const response = await prompts({
       type: "toggle",
@@ -58,7 +60,7 @@ export class UserPrompts {
     const response = await prompts({
       type: "multiselect",
       name: "selectedPRs",
-      message: chalk.yellow("Select PRs to fetch summaries for:"),
+      message: chalk.yellow(PROMPT_MESSAGES.SELECT_PRS),
       choices,
     });
 
@@ -67,7 +69,7 @@ export class UserPrompts {
 
   private static formatPRChoice(pr: PullRequest): string {
     const repo = pr.repository_url.split("/").pop();
-    const dateStr = chalk.gray(moment(pr.closed_at).format("DD MMM"));
+    const dateStr = chalk.gray(moment(pr.closed_at).format(DEFAULT_VALUES.DATE_FORMAT));
     const repoInfo = `${chalk.cyan(repo)} ${chalk.yellow('#' + pr.number)}`;
     return `⬡ ${dateStr} | ${repoInfo} | ${chalk.white(pr.title)}`;
   }
