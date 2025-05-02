@@ -73,7 +73,7 @@ export class Raconteur {
           ),
         );
 
-        const openChatPrompt = await prompts({
+        const generateSocialSummary = await prompts({
           type: "toggle",
           name: "value",
           message: chalk.yellow(messages.raconteur.openChatPrompt),
@@ -82,27 +82,62 @@ export class Raconteur {
           inactive: "no",
         });
 
-        if (openChatPrompt.value) {
-          // Prompt to copy the template to clipboard
-          const copyPrompt = await prompts({
-            type: "toggle",
-            name: "value",
-            message: chalk.yellow(messages.raconteur.copyChatPromptToClipboard),
-            initial: true,
-            active: "yes",
-            inactive: "no",
-          });
+        if (generateSocialSummary.value) {
+          if (process.env.GOOSE_SUMMARY === 'true') {
+            // Use Goose CLI for generating summary
+            console.log(chalk.blue("Generating social achievements summary using Goose..."));
+            
+            const promptPath = path.resolve(__dirname, './prompts/social-achievements.md');
+            const { stdout, stderr } = await new Promise<{stdout: string, stderr: string}>((resolve) => {
+              exec(`goose run --instructions ${promptPath} --with-builtin slack`, (error, stdout, stderr) => {
+                resolve({ stdout: stdout || '', stderr: stderr || '' });
+              });
+            });
 
-          if (copyPrompt.value) {
-            await copyToClipboard(SOCIAL_ACHIEVEMENTS_PROMPT);
-            console.log(
-              chalk.green("✅  Chat prompt template copied to clipboard!"),
-            );
+            if (stderr) {
+              console.error(chalk.red(`Error generating summary: ${stderr}`));
+              return;
+            }
+
+            console.log(chalk.green("🚀 Social achievements summary generated:\n\n"));
+            console.log(stdout);
+
+            // Ask if the user wants to copy the response to the clipboard
+            const copySummaryPrompt = await prompts({
+              type: "toggle",
+              name: "value",
+              message: chalk.yellow(messages.raconteur.copyToClipboard),
+              initial: true,
+              active: "yes",
+              inactive: "no",
+            });
+
+            if (copySummaryPrompt.value) {
+              await copyToClipboard(stdout);
+              console.log(chalk.green("✅  Social achievements summary copied to clipboard!"));
+            }
+          } else {
+            // Use existing Square ChatGPT flow
+            const copyPrompt = await prompts({
+              type: "toggle",
+              name: "value",
+              message: chalk.yellow(messages.raconteur.copyChatPromptToClipboard),
+              initial: true,
+              active: "yes",
+              inactive: "no",
+            });
+
+            if (copyPrompt.value) {
+              await copyToClipboard(SOCIAL_ACHIEVEMENTS_PROMPT);
+              console.log(
+                chalk.green("✅  Chat prompt template copied to clipboard!"),
+              );
+            }
+
+            // Open chat in browser
+            exec("open https://my.sqprod.co/chat");
+            console.log(chalk.green("🌐  Opening Square ChatGPT in browser..."));
           }
-
-          // Open chat in browser
-          exec("open https://my.sqprod.co/chat");
-          console.log(chalk.green("🌐  Opening Square ChatGPT in browser..."));
         }
         return;
       }
@@ -125,14 +160,14 @@ export class Raconteur {
         console.log(chalk.green("✅  PR description copied to clipboard!"));
       }
 
-      // Handle chat prompt for additional summary
+      // Handle additional summary from Slack and other apps
       console.log(
         chalk.blue(
           "\nWould you like to generate an additional summary from Slack and other apps?",
         ),
       );
 
-      const openChatPrompt = await prompts({
+      const generateSocialSummary = await prompts({
         type: "toggle",
         name: "value",
         message: chalk.yellow(messages.raconteur.openChatPrompt),
@@ -141,27 +176,62 @@ export class Raconteur {
         inactive: "no",
       });
 
-      if (openChatPrompt.value) {
-        // Prompt to copy the template to clipboard
-        const copyPrompt = await prompts({
-          type: "toggle",
-          name: "value",
-          message: chalk.yellow(messages.raconteur.copyChatPromptToClipboard),
-          initial: true,
-          active: "yes",
-          inactive: "no",
-        });
+      if (generateSocialSummary.value) {
+        if (process.env.GOOSE_SUMMARY === 'true') {
+          // Use Goose CLI for generating summary
+          console.log(chalk.blue("Generating social achievements summary using Goose..."));
+          
+          const promptPath = path.resolve(__dirname, './prompts/social-achievements.md');
+          const { stdout, stderr } = await new Promise<{stdout: string, stderr: string}>((resolve) => {
+            exec(`goose run --instructions ${promptPath} --with-builtin slack`, (error, stdout, stderr) => {
+              resolve({ stdout: stdout || '', stderr: stderr || '' });
+            });
+          });
 
-        if (copyPrompt.value) {
-          await copyToClipboard(SOCIAL_ACHIEVEMENTS_PROMPT);
-          console.log(
-            chalk.green("✅  Chat prompt template copied to clipboard!"),
-          );
+          if (stderr) {
+            console.error(chalk.red(`Error generating summary: ${stderr}`));
+            return;
+          }
+
+          console.log(chalk.green("🚀 Social achievements summary generated:\n\n"));
+          console.log(stdout);
+
+          // Ask if the user wants to copy the response to the clipboard
+          const copySummaryPrompt = await prompts({
+            type: "toggle",
+            name: "value",
+            message: chalk.yellow(messages.raconteur.copyToClipboard),
+            initial: true,
+            active: "yes",
+            inactive: "no",
+          });
+
+          if (copySummaryPrompt.value) {
+            await copyToClipboard(stdout);
+            console.log(chalk.green("✅  Social achievements summary copied to clipboard!"));
+          }
+        } else {
+          // Use existing Square ChatGPT flow
+          const copyPrompt = await prompts({
+            type: "toggle",
+            name: "value",
+            message: chalk.yellow(messages.raconteur.copyChatPromptToClipboard),
+            initial: true,
+            active: "yes",
+            inactive: "no",
+          });
+
+          if (copyPrompt.value) {
+            await copyToClipboard(SOCIAL_ACHIEVEMENTS_PROMPT);
+            console.log(
+              chalk.green("✅  Chat prompt template copied to clipboard!"),
+            );
+          }
+
+          // Open chat in browser
+          exec("open https://my.sqprod.co/chat");
+          console.log(chalk.green("🌐  Opening Square ChatGPT in browser..."));
         }
-
-        // Open chat in browser
-        exec("open https://my.sqprod.co/chat");
-        console.log(chalk.green("🌐  Opening Square ChatGPT in browser..."));
       }
     } catch (error) {
       console.error(chalk.red(`Failed to process PRs: ${error}`));
