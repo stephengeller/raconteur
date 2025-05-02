@@ -1,12 +1,12 @@
 import { Octokit } from "@octokit/rest";
 import moment from "moment";
 import dotenv from "dotenv";
-import chalk from "chalk";
 import { exec } from "child_process";
 import { setupExitHandlers } from "../utils/exitHandler";
 import { Config, PullRequest } from "./types";
 import { promptForWeeks, selectPRs, confirmSocialSummary, copyToClipboardWithConfirmation } from "./prompts";
 import { generateGitHubSummary, generateSocialSummary } from "./summaries";
+import { Logger } from "./logger";
 
 dotenv.config();
 setupExitHandlers();
@@ -34,7 +34,7 @@ export class Raconteur {
     try {
       // Display hypedoc URL if available
       if (process.env.HYPEDOC_URL) {
-        console.log(chalk.blue(`Hypedoc URL: ${process.env.HYPEDOC_URL}`));
+        Logger.info(`Hypedoc URL: ${process.env.HYPEDOC_URL}`);
       }
 
       // Get PRs
@@ -44,22 +44,20 @@ export class Raconteur {
 
       // Handle PR summary
       if (prs.length > 0) {
-        console.log(chalk.blue(`Found [${prs.length}] pull requests...`));
+        Logger.info(`Found [${prs.length}] pull requests...`);
         const selectedPrs = await selectPRs(prs);
         
         if (selectedPrs.length > 0) {
           const summary = await generateGitHubSummary(selectedPrs);
-          console.log(chalk.green("\nPR Summary:"));
+          Logger.success("PR Summary:");
           console.log(summary);
           await copyToClipboardWithConfirmation(summary);
         } else {
-          console.log(chalk.yellow("No PRs selected for summarization."));
+          Logger.warning("No PRs selected for summarization.");
         }
       } else {
-        console.log(
-          chalk.yellow(
-            "No PRs found for the specified duration. Have you authorized squareup for your personal access token?",
-          ),
+        Logger.warning(
+          "No PRs found for the specified duration. Have you authorized squareup for your personal access token?",
         );
       }
 
@@ -68,7 +66,7 @@ export class Raconteur {
         const summary = await generateSocialSummary(this.config.goose.enabled);
         
         if (this.config.goose.enabled) {
-          console.log(chalk.green("\nSocial Summary:"));
+          Logger.success("Social Summary:");
           console.log(summary);
           await copyToClipboardWithConfirmation(summary);
         } else {
@@ -77,11 +75,11 @@ export class Raconteur {
             "Copy social achievements template to clipboard?"
           );
           exec("open https://my.sqprod.co/chat");
-          console.log(chalk.green("Opening Square ChatGPT in browser..."));
+          Logger.success("Opening Square ChatGPT in browser...");
         }
       }
     } catch (error) {
-      console.error(chalk.red(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`));
+      Logger.error(error instanceof Error ? error.message : 'Unknown error', error instanceof Error ? error : undefined);
       process.exit(1);
     }
   }

@@ -2,6 +2,7 @@ import prompts from "prompts";
 import chalk from "chalk";
 import moment from "moment";
 import { PullRequest } from "./types";
+import { Logger } from "./logger";
 
 export async function promptForWeeks(): Promise<number> {
   const response = await prompts({
@@ -59,9 +60,13 @@ export async function copyToClipboardWithConfirmation(content: string, message =
   });
 
   if (response.value) {
-    const { copyToClipboard } = await import("../copyToClipboard");
-    await copyToClipboard(content);
-    console.log(chalk.green("✅ Copied to clipboard!"));
+    try {
+      const { copyToClipboard } = await import("../copyToClipboard");
+      await copyToClipboard(content);
+      Logger.success("Copied to clipboard!");
+    } catch (error) {
+      Logger.error("Failed to copy to clipboard", error instanceof Error ? error : undefined);
+    }
   }
 }
 

@@ -4,6 +4,7 @@ import path from "path";
 import { PullRequest } from "./types";
 import { callChatGPTApi } from "../ChatGPTApi";
 import { loadCustomPrompt } from "../prDescriptionGenerator/prompts/customPrompt";
+import { Logger } from "./logger";
 
 const GITHUB_ACHIEVEMENTS_PROMPT = `You are helping to document GitHub achievements for an L5 IC engineer at Block. Focus on technical contributions, code quality, and architectural decisions. Generate clear, impactful summaries that map to Impact, Behavior, and Betterment (IBB) framework.
 
@@ -23,9 +24,17 @@ export async function generateGitHubSummary(prs: PullRequest[]): Promise<string>
   fs.writeFileSync(tempFilePath, prsData);
 
   try {
+    Logger.progress("Generating GitHub summary...");
+    
     const customPromptPath = path.resolve(`./customRaconteurPrompt.txt`);
     const customPrompt = loadCustomPrompt(customPromptPath);
     const prompt = customPrompt || GITHUB_ACHIEVEMENTS_PROMPT;
+
+    if (customPrompt) {
+      Logger.info(`Using custom prompt from: ${customPromptPath}`);
+    } else {
+      Logger.info(`Using default prompt`);
+    }
 
     const summary = await callChatGPTApi(prompt, prsData);
     fs.unlinkSync(tempFilePath);
@@ -40,6 +49,8 @@ export async function generateSocialSummary(useGoose: boolean): Promise<string> 
     return SOCIAL_ACHIEVEMENTS_PROMPT;
   }
 
+  Logger.progress("Generating social summary...");
+  
   const promptPath = path.resolve(__dirname, './prompts/social-achievements.md');
   const { stdout, stderr } = await new Promise<{stdout: string, stderr: string}>((resolve) => {
     exec(`goose run --instructions ${promptPath} --with-builtin slack`, (error, stdout, stderr) => {
