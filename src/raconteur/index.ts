@@ -36,8 +36,7 @@ export class Raconteur {
   public async run(): Promise<void> {
     // If HYPEDOC_URL is set, open it immediately
     if (process.env.HYPEDOC_URL) {
-      exec(`open "${process.env.HYPEDOC_URL}"`);
-      console.log(chalk.green("🌐 Opening hypedoc in browser..."));
+      console.log(chalk.green(`🌐 Hypedoc URL: ${chalk.blue.underline(process.env.HYPEDOC_URL)}`));
     }
 
     console.log(chalk.cyan("Fetching merged PRs..."));
