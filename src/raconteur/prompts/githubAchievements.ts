@@ -100,9 +100,9 @@ Performance Categories and Subcategories:
 
 Example Markdown Format:
 ###### December 4, 2024
-- **[Impact > Technical Contributions]** Implemented robust PIN verification system with 99.9% reliability, demonstrating strong technical ownership and customer focus [repo #123](https://github.com/org/repo/pull/123)
-- **[Impact > Design & Architecture]** Created sustainable architecture for customer verification flow, incorporating feedback from 3 senior engineers while maintaining pragmatic implementation balance [repo #124](https://github.com/org/repo/pull/124)
-- **[Behavior > Collaboration]** Led cross-functional solution development with Security and Product teams, demonstrating strong partnership building and global optimization mindset [repo #125](https://github.com/org/repo/pull/125)
+- **[Impact > Technical Contributions]** Implemented robust PIN verification system with 99.9% reliability, demonstrating strong technical ownership and customer focus [somerepo #123](https://github.com/org/somerepo/pull/123)
+- **[Impact > Design & Architecture]** Created sustainable architecture for customer verification flow, incorporating feedback from 3 senior engineers while maintaining pragmatic implementation balance [anotherrepo #124](https://github.com/org/anotherrepo/pull/124)
+- **[Behavior > Collaboration]** Led cross-functional solution development with Security and Product teams, demonstrating strong partnership building and global optimization mindset [somerepo #125](https://github.com/org/somerepo/pull/125)
 - **[Betterment > Reliability, Quality, & Health]** Added comprehensive error monitoring with direct customer impact focus, reducing critical incidents by 40% [repo #126](https://github.com/org/repo/pull/126)
 
 ###### November 28, 2024
