@@ -36,13 +36,17 @@ export class Raconteur {
   public async run(): Promise<void> {
     // If HYPEDOC_URL is set, open it immediately
     if (process.env.HYPEDOC_URL) {
-      console.log(chalk.green(`🌐 Hypedoc URL: ${chalk.blue.underline(process.env.HYPEDOC_URL)}`));
+      console.log(
+        chalk.green(
+          `🌐 Hypedoc URL: ${chalk.blue.underline(process.env.HYPEDOC_URL)}`,
+        ),
+      );
     }
 
     console.log(chalk.cyan("Fetching merged PRs..."));
     await this.setSinceDate();
     try {
-      let prs = await this.fetchMergedPRs();
+      const prs = await this.fetchMergedPRs();
 
       if (!prs || prs.length === 0) {
         console.log(
@@ -50,12 +54,14 @@ export class Raconteur {
             "No PRs found for the specified duration. Have you authorized squareup for your personal access token?",
           ),
         );
-        
+
         // Ask if they want to continue anyway
         const continuePrompt = await prompts({
           type: "toggle",
           name: "value",
-          message: chalk.yellow("Would you like to continue anyway to generate other summaries?"),
+          message: chalk.yellow(
+            "Would you like to continue anyway to generate other summaries?",
+          ),
           initial: true,
           active: "yes",
           inactive: "no",
@@ -64,33 +70,50 @@ export class Raconteur {
         if (!continuePrompt.value) {
           return;
         }
-        
+
         // Skip directly to social achievements prompt
         console.log(
           chalk.blue(
-            "\nWould you like to generate an additional summary from Slack and other apps?",
+            "Would you like to generate an additional summary from Slack and other apps?",
           ),
         );
 
         const generateSocialSummary = await prompts({
           type: "toggle",
           name: "value",
-          message: chalk.yellow(messages.raconteur.openChatPrompt),
+          message: chalk.yellow(
+            process.env.GOOSE_SUMMARY === "true"
+              ? "Would you like to generate a Slack activity summary using Goose?"
+              : messages.raconteur.openChatPrompt,
+          ),
           initial: true,
           active: "yes",
           inactive: "no",
         });
 
         if (generateSocialSummary.value) {
-          if (process.env.GOOSE_SUMMARY === 'true') {
+          if (process.env.GOOSE_SUMMARY === "true") {
             // Use Goose CLI for generating summary
-            console.log(chalk.blue("Generating social achievements summary using Goose..."));
-            
-            const promptPath = path.resolve(__dirname, './prompts/social-achievements.md');
-            const { stdout, stderr } = await new Promise<{stdout: string, stderr: string}>((resolve) => {
-              exec(`goose run --instructions ${promptPath} --with-builtin slack`, (error, stdout, stderr) => {
-                resolve({ stdout: stdout || '', stderr: stderr || '' });
-              });
+            console.log(
+              chalk.blue(
+                "Generating social achievements summary using Goose...",
+              ),
+            );
+
+            const promptPath = path.resolve(
+              __dirname,
+              "./prompts/social-achievements.md",
+            );
+            const { stdout, stderr } = await new Promise<{
+              stdout: string;
+              stderr: string;
+            }>((resolve) => {
+              exec(
+                `goose run --instructions ${promptPath} --with-builtin slack`,
+                (error, stdout, stderr) => {
+                  resolve({ stdout: stdout || "", stderr: stderr || "" });
+                },
+              );
             });
 
             if (stderr) {
@@ -98,7 +121,9 @@ export class Raconteur {
               return;
             }
 
-            console.log(chalk.green("🚀 Social achievements summary generated:\n\n"));
+            console.log(
+              chalk.green("🚀 Social achievements summary generated:\n\n"),
+            );
             console.log(stdout);
 
             // Ask if the user wants to copy the response to the clipboard
@@ -113,14 +138,20 @@ export class Raconteur {
 
             if (copySummaryPrompt.value) {
               await copyToClipboard(stdout);
-              console.log(chalk.green("✅  Social achievements summary copied to clipboard!"));
+              console.log(
+                chalk.green(
+                  "✅  Social achievements summary copied to clipboard!",
+                ),
+              );
             }
           } else {
             // Use existing Square ChatGPT flow
             const copyPrompt = await prompts({
               type: "toggle",
               name: "value",
-              message: chalk.yellow(messages.raconteur.copyChatPromptToClipboard),
+              message: chalk.yellow(
+                messages.raconteur.copyChatPromptToClipboard,
+              ),
               initial: true,
               active: "yes",
               inactive: "no",
@@ -135,7 +166,9 @@ export class Raconteur {
 
             // Open chat in browser
             exec("open https://my.sqprod.co/chat");
-            console.log(chalk.green("🌐  Opening Square ChatGPT in browser..."));
+            console.log(
+              chalk.green("🌐  Opening Square ChatGPT in browser..."),
+            );
           }
         }
         return;
@@ -162,29 +195,46 @@ export class Raconteur {
       // Handle additional summary from Slack and other apps
       console.log(
         chalk.blue(
-          "\nWould you like to generate an additional summary from Slack and other apps?",
+          process.env.GOOSE_SUMMARY === "true"
+            ? "\nWould you like to analyze your recent Slack activity?"
+            : "\nWould you like to generate an additional summary from Slack and other apps?",
         ),
       );
 
       const generateSocialSummary = await prompts({
         type: "toggle",
         name: "value",
-        message: chalk.yellow(messages.raconteur.openChatPrompt),
+        message: chalk.yellow(
+          process.env.GOOSE_SUMMARY === "true"
+            ? "Would you like to generate a Slack activity summary using Goose?"
+            : messages.raconteur.openChatPrompt,
+        ),
         initial: true,
         active: "yes",
         inactive: "no",
       });
 
       if (generateSocialSummary.value) {
-        if (process.env.GOOSE_SUMMARY === 'true') {
+        if (process.env.GOOSE_SUMMARY === "true") {
           // Use Goose CLI for generating summary
-          console.log(chalk.blue("Generating social achievements summary using Goose..."));
-          
-          const promptPath = path.resolve(__dirname, './prompts/social-achievements.md');
-          const { stdout, stderr } = await new Promise<{stdout: string, stderr: string}>((resolve) => {
-            exec(`goose run --instructions ${promptPath} --with-builtin slack`, (error, stdout, stderr) => {
-              resolve({ stdout: stdout || '', stderr: stderr || '' });
-            });
+          console.log(
+            chalk.blue("Generating social achievements summary using Goose..."),
+          );
+
+          const promptPath = path.resolve(
+            __dirname,
+            "./prompts/social-achievements.md",
+          );
+          const { stdout, stderr } = await new Promise<{
+            stdout: string;
+            stderr: string;
+          }>((resolve) => {
+            exec(
+              `goose run --instructions ${promptPath} --with-builtin slack`,
+              (error, stdout, stderr) => {
+                resolve({ stdout: stdout || "", stderr: stderr || "" });
+              },
+            );
           });
 
           if (stderr) {
@@ -192,7 +242,9 @@ export class Raconteur {
             return;
           }
 
-          console.log(chalk.green("🚀 Social achievements summary generated:\n\n"));
+          console.log(
+            chalk.green("🚀 Social achievements summary generated:\n\n"),
+          );
           console.log(stdout);
 
           // Ask if the user wants to copy the response to the clipboard
@@ -207,7 +259,11 @@ export class Raconteur {
 
           if (copySummaryPrompt.value) {
             await copyToClipboard(stdout);
-            console.log(chalk.green("✅  Social achievements summary copied to clipboard!"));
+            console.log(
+              chalk.green(
+                "✅  Social achievements summary copied to clipboard!",
+              ),
+            );
           }
         } else {
           // Use existing Square ChatGPT flow
@@ -272,7 +328,7 @@ export class Raconteur {
 
   private async summarizePRs(prs: PullRequest[]): Promise<string | undefined> {
     let selectedPRs: PullRequest[] = [];
-    
+
     if (prs.length > 0) {
       // Convert PRs to a format suitable for prompts
       const choices = prs
@@ -280,9 +336,9 @@ export class Raconteur {
         .map((pr, index) => {
           const repo = pr.repository_url.split("/").pop();
           const dateStr = chalk.gray(moment(pr.closed_at).format("DD MMM"));
-          const repoInfo = `${chalk.cyan(repo)} ${chalk.yellow('#' + pr.number)}`;
+          const repoInfo = `${chalk.cyan(repo)} ${chalk.yellow("#" + pr.number)}`;
           const title = chalk.white(pr.title);
-          
+
           return {
             title: `⬡ ${dateStr} | ${repoInfo} | ${title}`,
             value: index,
@@ -297,7 +353,7 @@ export class Raconteur {
         choices,
         // hint: "- Space to select. Return to submit",
       });
-      
+
       // Filter PRs based on selected indices
       selectedPRs = response.selectedPRs.map((index: number) => prs[index]);
 
