@@ -78,22 +78,34 @@ Output Instructions:
    REQUIRED: Use multiple tools to find comprehensive evidence for each achievement.
 
    Slack Evidence:
-   IMPORTANT: ONLY include Slack messages and threads where YOU (sgeller@squareup.com) are the
-   author or a key participant.
+   IMPORTANT: ONLY include Slack messages and threads that meet ALL these criteria:
+    1. YOU (sgeller@squareup.com) are the author or a key participant
+    2. The message/thread is from within the last {WEEKS_AGO} weeks
+    3. There is clear evidence of your contribution
 
-   Finding Your Contributions:
-    - Use slack__search_messages with author:"sgeller@squareup.com" plus keywords
-    - Use slack__get_user_info to confirm message authors
-    - Use slack__get_thread_replies to verify your participation in threads
-    - If you're not the author or a key participant, DO NOT use the thread as evidence
+   Finding Your Recent Contributions:
+    - Use slack__search_messages with:
+        * author:"sgeller@squareup.com"
+        * after:"[{WEEKS_AGO} weeks ago]"
+        * Keywords from JIRA tickets/PRs
+    - Use slack__get_channel_messages with:
+        * before_date: now
+        * after_date: [{WEEKS_AGO} weeks ago]
+    - Double-check message timestamps before including as evidence
+    - If a thread started before the {WEEKS_AGO} week window, only include if you had significant
+      contributions within the window
 
    Required Steps:
-    1. Start with slack__search_messages to find YOUR messages
-    2. For each potential thread:
+    1. Calculate the date range:
+        - End date: now
+        - Start date: {WEEKS_AGO} weeks ago
+    2. Search for YOUR messages in that date range
+    3. For each potential thread:
+        - Verify the message/contribution date is within range
         - Verify you are either the author or made significant contributions
         - Ensure the thread demonstrates your impact/behavior/betterment
         - Get full context with slack__get_thread_replies
-    3. Look specifically for:
+    4. Look specifically for:
         * Technical discussions you led
         * Cross-team collaboration where you were key participant
         * Knowledge sharing from you to others
