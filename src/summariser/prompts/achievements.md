@@ -38,14 +38,39 @@ Output Instructions:
     - Use strict Markdown format
     - Each date should be a level 6 heading (######)
     - Each entry should be a Markdown list item starting with "- "
-    - For GitHub contributions, there should only be one entry per pull request, but it can contain
-      multiple categories and subcategories
-    - Category and subcategory tags should be bold (**[Category > Subcategory]**) at start of each
-      entry
     - URLs should be proper Markdown links at the end of entries
     - Must maintain exact date format "Month D, YYYY" in headings
     - Group entries by date in reverse chronological order
     - Integrate both technical and social contributions under the same date headers when applicable
+
+4. Entry Format Requirements:
+   REQUIRED FOR EVERY ENTRY:
+    - Start with category tags in bold: **[Category > Subcategory]**
+    - Multiple categories if applicable: **[Category1 > Subcategory1]** **[Category2 > Subcategory2]
+      **
+    - End with exactly one evidence link in proper Markdown format: [Evidence Type](url)
+    - Evidence types must be
+      specific: [PR #1234], [Meeting Notes], [Document], [Dashboard], [Slack Thread], etc.
+    - Never use raw URLs - always use descriptive link text
+    - Never use TBD or placeholder links - if evidence is missing, find it or omit the entry
+
+   Example correct entry:
+    - **[Impact > Technical Contributions]** **[Impact > Ownership]** Implemented robust PIN
+      verification system with 99.9% reliability [PR #123](https://github.com/org/repo/pull/123)
+
+   Example incorrect entries:
+    - **[Impact > Technical Contributions]** Implemented system (missing evidence link)
+    - **[Impact > Technical Contributions]** Implemented
+      system https://github.com/org/repo/pull/123 (raw URL)
+    - **[Impact > Technical Contributions]** Implemented system [PR #TBD] (placeholder link)
+
+5. Evidence Link Requirements:
+    - GitHub PRs: [PR #number](full-github-url)
+    - Documents: [Document: Title](document-url)
+    - Slack threads: [Slack: Channel > Thread Title](thread-url)
+    - Dashboards: [Dashboard: Name](dashboard-url)
+    - Meeting notes: [Meeting Notes: Date - Topic](notes-url)
+    - JIRA tickets: [JIRA: PROJ-123](ticket-url)
 
 Performance Categories and Subcategories:
 
@@ -165,27 +190,30 @@ Example Markdown Format:
 
 ###### December 4, 2024
 
-- **[Impact > Technical Contributions]** Implemented robust PIN verification system with 99.9%
-  reliability, demonstrating strong technical ownership and customer
-  focus [somerepo #123](https://github.com/org/somerepo/pull/123)
+- **[Impact > Technical Contributions]** **[Impact > Ownership]** Implemented robust PIN
+  verification system with 99.9% reliability, demonstrating strong technical ownership and customer
+  focus [SomeRepo #123](https://github.com/org/somerepo/pull/123)
 - **[Impact > Technical Leadership]** Led technical deep-dive on authentication systems for 3 teams,
-  resulting in aligned architecture decisions and improved cross-team collaboration
+  resulting in aligned architecture
+  decisions [Meeting Notes: Dec 4 - Auth Systems Review](https://docs.google.com/document/d/abc123)
 - **[Behavior > Communication]** Facilitated critical design review meetings between Design and
-  Engineering teams, effectively bridging communication gaps and driving consensus
+  Engineering teams, effectively bridging communication
+  gaps [Document: Auth Design Review](https://docs.google.com/document/d/xyz789)
 - **[Betterment > Team Growth]** Created comprehensive onboarding documentation for authentication
-  systems, reducing ramp-up time for new team members by 40%
+  systems, reducing ramp-up time by
+  40% [Document: Auth Onboarding Guide](https://docs.google.com/document/d/def456)
 
 ###### November 28, 2024
 
 - **[Impact > Ownership]** Successfully delivered end-to-end PII verification feature with clear
-  customer value and reliability focus [repo #789](https://github.com/org/repo/pull/789)
+  customer value [PR #789](https://github.com/org/repo/pull/789)
 - **[Impact > Cross-team Influence]** Built strong partnerships with Security and Product teams,
-  leading to streamlined decision-making processes and faster feature delivery
-- **[Betterment > Process Improvement]** Introduced automated testing practices that improved both
-  local team efficiency and provided global benefits for dependent
-  teams [repo #101](https://github.com/org/repo/pull/101)
-- **[Betterment > Process Improvement]** Introduced new team ritual for sharing technical learnings,
-  increasing knowledge sharing and team engagement
+  leading to streamlined
+  processes [Meeting Notes: Nov 28 - Cross-team Sync](https://docs.google.com/document/d/ghi789)
+- **[Betterment > Process Improvement]** Introduced automated testing practices that improved team
+  efficiency [PR #101](https://github.com/org/repo/pull/101)
+- **[Betterment > Process Improvement]** Introduced new team ritual for sharing technical
+  learnings [Slack: #team > Tech Learning Session](https://slack.com/archives/thread)
 
 Based on the above framework and format requirements, please analyze:
 
