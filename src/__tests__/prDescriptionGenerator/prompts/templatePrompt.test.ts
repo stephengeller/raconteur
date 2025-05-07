@@ -4,6 +4,7 @@ import {
   attachTemplatePrompt,
   findTemplate,
 } from "../../../prDescriptionGenerator/prompts/templatePrompt";
+import { execSync } from "child_process";
 
 jest.spyOn(process, "exit").mockImplementation();
 
@@ -12,12 +13,17 @@ jest.mock("fs", () => ({
   readFileSync: jest.fn(),
 }));
 
+jest.mock("child_process", () => ({
+  execSync: jest.fn(),
+}));
+
 jest.mock("prompts", () => jest.fn());
 
 describe("findTemplate", () => {
   it("returns the template content and path when a template is found", async () => {
     (fs.existsSync as jest.Mock).mockReturnValue(true);
     (fs.readFileSync as jest.Mock).mockReturnValue("template content");
+    (execSync as jest.Mock).mockReturnValue("/path/to/repo");
 
     const result = await findTemplate("/path/to/repo");
 
@@ -29,6 +35,17 @@ describe("findTemplate", () => {
 
   it("returns null when no template is found", async () => {
     (fs.existsSync as jest.Mock).mockReturnValue(false);
+    (execSync as jest.Mock).mockReturnValue("/path/to/repo");
+
+    const result = await findTemplate("/path/to/repo");
+
+    expect(result).toBeNull();
+  });
+
+  it("returns null when not in a git repository", async () => {
+    (execSync as jest.Mock).mockImplementation(() => {
+      throw new Error("not a git repository");
+    });
 
     const result = await findTemplate("/path/to/repo");
 
