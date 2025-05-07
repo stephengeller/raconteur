@@ -1,8 +1,9 @@
+import fs from "fs/promises";
 import path from "path";
 import { Logger } from "../raconteur/logger";
 import { promptForWeeks } from "./prompts";
 import { execAndValidate } from "./utils/exec";
-import { saveSummary, readSummary, cleanupSummaries } from "./utils/files";
+import { readSummary, listSummaries, cleanupSummaries } from "./utils/files";
 
 export class Summariser {
   constructor() {
@@ -14,10 +15,10 @@ export class Summariser {
       // Get the number of weeks to analyze
       const weeksAgo = await promptForWeeks();
 
-      // Generate and save the summary
-      const summaryPath = await this.generateAndSaveSummary(weeksAgo);
+      // Generate the summary using Goose
+      const summaryPath = await this.generateSummary(weeksAgo);
 
-      // Read the saved summary
+      // Read the generated summary
       const summary = await readSummary(summaryPath);
 
       // Display the summary
@@ -38,16 +39,28 @@ export class Summariser {
     }
   }
 
-  private async generateAndSaveSummary(weeksAgo: number): Promise<string> {
+  private async generateSummary(weeksAgo: number): Promise<string> {
     Logger.progress("Generating achievement summary...");
 
     const promptPath = path.resolve(__dirname, "./prompts/achievements.md");
-    const output = await execAndValidate(`goose run --instructions ${promptPath}`);
-    
-    Logger.progress("Saving summary...");
-    const summaryPath = await saveSummary(output);
-    
-    return summaryPath;
+    await execAndValidate(`goose run --instructions ${promptPath}`);
+
+    // Get the most recently created summary file
+    const files = await listSummaries();
+    if (files.length === 0) {
+      throw new Error("No summary file was generated");
+    }
+
+    // Sort by creation time (newest first) and get the latest
+    const sortedFiles = await Promise.all(
+      files.map(async file => ({
+        path: file,
+        ctime: (await fs.stat(file)).ctime
+      }))
+    );
+    sortedFiles.sort((a, b) => b.ctime.getTime() - a.ctime.getTime());
+
+    return sortedFiles[0].path;
   }
 
   private async handleClipboardCopy(content: string): Promise<void> {
