@@ -57,7 +57,8 @@ Output Instructions:
 
    Example correct entry:
     - **[Impact > Technical Contributions]** **[Impact > Ownership]** Implemented robust PIN
-      verification system with 99.9% reliability [PR #123](https://github.com/org/repo/pull/123)
+      verification system with 99.9%
+      reliability [RepoName #123](https://github.com/org/reponame/pull/123)
 
    Example incorrect entries:
     - **[Impact > Technical Contributions]** Implemented system (missing evidence link)
@@ -72,6 +73,64 @@ Output Instructions:
     - Dashboards: [Dashboard: Name](dashboard-url)
     - Meeting notes: [Meeting Notes: Date - Topic](notes-url)
     - JIRA tickets: [JIRA: PROJ-123](ticket-url)
+
+6. Evidence Collection Instructions:
+   REQUIRED: Use multiple tools to find comprehensive evidence for each achievement.
+
+   Slack Evidence:
+    - Use slack__search_messages to find relevant discussions using keywords from JIRA tickets and
+      PRs
+    - Use slack__get_channel_messages to review project channel history
+    - Use slack__get_thread_replies to get full context of important discussions
+    - Look for:
+        * Technical discussions and decisions
+        * Cross-team collaboration
+        * Knowledge sharing
+        * Meeting summaries
+        * Team communications
+
+   GitHub Evidence:
+    - For JIRA tickets mentioned, find related PRs if possible
+    - Look for:
+        * PR descriptions and discussions
+        * Code review feedback
+        * Technical design decisions
+        * Implementation details
+
+   Documentation Evidence:
+    - For each achievement, look for related:
+        * Design documents
+        * Meeting notes
+        * Technical specifications
+        * Process documentation
+        * Dashboard links
+
+   Evidence Hierarchy (try to find highest available):
+    1. Direct evidence: PRs, commits, documents
+    2. Discussion evidence: Slack threads, meeting notes
+    3. Tracking evidence: JIRA tickets
+
+   Category Tag Rules:
+    - ONLY use categories and subcategories exactly as defined in the framework
+    - Valid Technical Impact categories:
+        * **[Impact > Technical Contributions]**
+        * **[Impact > Design & Architecture]**
+        * **[Impact > Ownership]**
+    - Valid Social Impact categories:
+        * **[Impact > Technical Leadership]**
+        * **[Impact > Cross-team Influence]**
+        * **[Impact > Customer Focus]**
+    - Valid Behavior categories:
+        * **[Behavior > Collaboration]**
+        * **[Behavior > Team Building]**
+        * **[Behavior > Communication]**
+    - Valid Technical Betterment categories:
+        * **[Betterment > Reliability, Quality, & Health]**
+        * **[Betterment > Mentorship]**
+        * **[Betterment > Process Improvement]**
+    - Valid Social Betterment categories:
+        * **[Betterment > Team Growth]**
+        * **[Betterment > Culture & Community]**
 
 Performance Categories and Subcategories:
 
