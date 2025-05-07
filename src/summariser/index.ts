@@ -3,7 +3,7 @@ import path from "path";
 import { Logger } from "../raconteur/logger";
 import { promptForWeeks } from "./prompts";
 import { execAndValidate } from "./utils/exec";
-import { readSummary, listSummaries, cleanupSummaries } from "./utils/files";
+import { cleanupSummaries, listSummaries, readSummary } from "./utils/files";
 
 export class Summariser {
   constructor() {
@@ -39,6 +39,13 @@ export class Summariser {
     }
   }
 
+  // TODO: Actually make use of weeksAgo by updating the prompt to contain it
+  /* TODO: Update prompt to ensure:
+   *    - Every single entry has a link to a real source (GitHub or Slack)
+   *    - Every Slack entry is 100% definitely from my user
+   *    - Every GitHub entry is 100% definitely from my user
+   *    -
+   * */
   private async generateSummary(weeksAgo: number): Promise<string> {
     Logger.progress("Generating achievement summary...");
 
@@ -53,10 +60,10 @@ export class Summariser {
 
     // Sort by creation time (newest first) and get the latest
     const sortedFiles = await Promise.all(
-      files.map(async file => ({
+      files.map(async (file) => ({
         path: file,
-        ctime: (await fs.stat(file)).ctime
-      }))
+        ctime: (await fs.stat(file)).ctime,
+      })),
     );
     sortedFiles.sort((a, b) => b.ctime.getTime() - a.ctime.getTime());
 
