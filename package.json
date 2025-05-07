@@ -9,7 +9,8 @@
     "test": "jest",
     "start": "ts-node src/index.ts",
     "prdesc": "ts-node src/prDescriptionGenerator/main.ts",
-    "commit": "ts-node  src/CommitMessageGenerator/main.ts"
+    "commit": "ts-node  src/CommitMessageGenerator/main.ts",
+    "summarise": "ts-node src/summarise.ts"
   },
   "bin": {
     "prdesc": "./src/prDescriptionGenerator/main.ts"
