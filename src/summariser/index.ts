@@ -37,22 +37,45 @@ export class Summariser {
     const promptPath = path.resolve(__dirname, "./prompts/achievements.md");
 
     // Execute Goose with our prompt
-    const { stdout, stderr } = await new Promise<{
+    const { stdout, stderr, code } = await new Promise<{
       stdout: string;
       stderr: string;
+      code: number | null;
     }>((resolve) => {
-      exec(
+      const childProcess = exec(
         `goose run --instructions ${promptPath} --with-builtin github,slack`,
         (error, stdout, stderr) => {
-          resolve({ stdout: stdout || "", stderr: stderr || "" });
+          resolve({
+            stdout: stdout || "",
+            stderr: stderr || "",
+            code: error ? error.code || 1 : 0,
+          });
         },
       );
+
+      // Also handle process exit code
+      childProcess.on("exit", (code) => {
+        if (code !== 0) {
+          Logger.error(`Goose process exited with code ${code}`);
+        }
+      });
     });
 
+    // Handle command execution errors
+    if (code !== 0) {
+      throw new Error(
+        `Goose command failed with exit code ${code}${
+          stderr ? ": " + stderr : ""
+        }`,
+      );
+    }
+
+    // Handle stderr warnings
     if (stderr) {
       Logger.warning(`Goose warning: ${stderr}`);
     }
 
+    // Validate output
     if (!stdout.trim()) {
       throw new Error("No summary generated");
     }

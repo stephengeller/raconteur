@@ -41,6 +41,18 @@ describe('Summariser', () => {
 
   describe('run', () => {
     it('should generate a summary using Goose', async () => {
+      // Mock exec to return a successful summary
+      (exec as unknown as jest.Mock).mockImplementation((cmd: string, callback: Function) => {
+        callback(null, 'Test achievement summary', '');
+        return {
+          on: jest.fn((event, handler) => {
+            if (event === 'exit') {
+              handler(0);
+            }
+          })
+        };
+      });
+
       await summariser.run();
       
       // Verify Goose was called with correct parameters
@@ -57,21 +69,37 @@ describe('Summariser', () => {
     }, 10000); // Increase timeout to 10 seconds
 
     it('should handle Goose warnings', async () => {
-      // Mock exec to return a warning
+      // Mock exec to return a warning but still succeed
       (exec as unknown as jest.Mock).mockImplementation((cmd: string, callback: Function) => {
         callback(null, 'Test summary', 'Test warning');
+        return {
+          on: jest.fn((event, handler) => {
+            if (event === 'exit') {
+              handler(0);
+            }
+          })
+        };
       });
 
       await summariser.run();
       
-      // Verify warning was logged (you might need to mock your logger)
-      // This depends on how you've implemented your logging
+      // Verify process.exit was not called (warning doesn't cause failure)
+      expect(mockExit).not.toHaveBeenCalled();
     }, 10000); // Increase timeout to 10 seconds
 
-    it('should handle empty summaries', async () => {
-      // Mock exec to return an empty summary
+    it('should handle command execution errors', async () => {
+      // Mock exec to simulate a command failure
       (exec as unknown as jest.Mock).mockImplementation((cmd: string, callback: Function) => {
-        callback(null, '', '');
+        const error = new Error('Command failed') as Error & { code?: number };
+        error.code = 1;
+        callback(error, '', 'Command failed');
+        return {
+          on: jest.fn((event, handler) => {
+            if (event === 'exit') {
+              handler(1);
+            }
+          })
+        };
       });
 
       await summariser.run();
@@ -80,9 +108,59 @@ describe('Summariser', () => {
       expect(mockExit).toHaveBeenCalledWith(1);
     });
 
+    it('should handle empty summaries', async () => {
+      // Mock exec to return an empty summary with success exit code
+      (exec as unknown as jest.Mock).mockImplementation((cmd: string, callback: Function) => {
+        callback(null, '', '');
+        return {
+          on: jest.fn((event, handler) => {
+            if (event === 'exit') {
+              handler(0);
+            }
+          })
+        };
+      });
+
+      await summariser.run();
+      
+      // Verify process.exit was called with code 1
+      expect(mockExit).toHaveBeenCalledWith(1);
+    });
+
+    it('should handle successful execution', async () => {
+      // Mock exec to return a successful summary
+      (exec as unknown as jest.Mock).mockImplementation((cmd: string, callback: Function) => {
+        callback(null, 'Test achievement summary', '');
+        return {
+          on: jest.fn((event, handler) => {
+            if (event === 'exit') {
+              handler(0);
+            }
+          })
+        };
+      });
+
+      await summariser.run();
+      
+      // Verify process.exit was not called
+      expect(mockExit).not.toHaveBeenCalled();
+    });
+
     it('should use the number of weeks from user input', async () => {
       // Mock promptForWeeks to return a specific value
       (promptForWeeks as jest.Mock).mockResolvedValue(4);
+
+      // Mock exec to return a successful summary
+      (exec as unknown as jest.Mock).mockImplementation((cmd: string, callback: Function) => {
+        callback(null, 'Test achievement summary', '');
+        return {
+          on: jest.fn((event, handler) => {
+            if (event === 'exit') {
+              handler(0);
+            }
+          })
+        };
+      });
 
       await summariser.run();
       
