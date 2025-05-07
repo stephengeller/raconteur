@@ -1,4 +1,4 @@
-import { exec as childProcessExec, ExecException } from "child_process";
+import { spawn } from "child_process";
 
 export interface ExecResult {
   stdout: string;
@@ -6,23 +6,43 @@ export interface ExecResult {
   code: number | null;
 }
 
-type ExecCallback = (error: ExecException | null, stdout: string, stderr: string) => void;
-
 /**
- * Execute a command and return its output
+ * Execute a command and stream its output in real-time while also capturing it
  * @param command The command to execute
  * @returns Promise resolving to the command output
  */
 export async function exec(command: string): Promise<ExecResult> {
-  return new Promise<ExecResult>((resolve) =>
-    childProcessExec(command, (error: ExecException | null, stdout: string, stderr: string) => {
+  return new Promise<ExecResult>((resolve) => {
+    // Split command into program and arguments
+    const [cmd, ...args] = command.split(" ");
+    const proc = spawn(cmd, args, { stdio: ["inherit", "pipe", "pipe"] });
+
+    let stdout = "";
+    let stderr = "";
+
+    // Stream and capture stdout
+    proc.stdout.on("data", (data) => {
+      const text = data.toString();
+      stdout += text;
+      process.stdout.write(text);
+    });
+
+    // Stream and capture stderr
+    proc.stderr.on("data", (data) => {
+      const text = data.toString();
+      stderr += text;
+      process.stderr.write(text);
+    });
+
+    // Handle process completion
+    proc.on("close", (code) => {
       resolve({
-        stdout: stdout || "",
-        stderr: stderr || "",
-        code: error ? error.code || 1 : 0,
+        stdout,
+        stderr,
+        code,
       });
-    }),
-  );
+    });
+  });
 }
 
 /**

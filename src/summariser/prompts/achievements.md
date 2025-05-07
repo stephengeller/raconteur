@@ -30,9 +30,9 @@ Output Instructions:
     - Use the developer__text_editor tool to write the final summary
 
 2. File Output:
-    - Write the final summary to: tmp/summaries/summary-[timestamp].md
+    - Write the final summary to: {REPO_ROOT}/tmp/summaries/summary-[timestamp].md
     - Use current timestamp in ISO format with hyphens instead of colons
-    - Example: tmp/summaries/summary-2025-05-07T03-45-30-000Z.md
+    - Example: {REPO_ROOT}/tmp/summaries/summary-2025-05-07T03-45-30-000Z.md
 
 3. Summary Format Requirements:
     - Use strict Markdown format

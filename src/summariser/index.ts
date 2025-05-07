@@ -3,11 +3,15 @@ import path from "path";
 import { Logger } from "../raconteur/logger";
 import { promptForWeeks } from "./prompts";
 import { execAndValidate } from "./utils/exec";
-import { cleanupSummaries, listSummaries, readSummary } from "./utils/files";
+import { readSummary, listSummaries, cleanupSummaries } from "./utils/files";
+import { processPromptTemplate } from "./utils/prompt";
 
 export class Summariser {
+  private readonly repoRoot: string;
+
   constructor() {
-    // No configuration needed for now
+    // Calculate the repo root path (assumes we're in src/summariser)
+    this.repoRoot = path.resolve(__dirname, "../..");
   }
 
   async run(): Promise<void> {
@@ -39,18 +43,23 @@ export class Summariser {
     }
   }
 
-  // TODO: Actually make use of weeksAgo by updating the prompt to contain it
-  /* TODO: Update prompt to ensure:
-   *    - Every single entry has a link to a real source (GitHub or Slack)
-   *    - Every Slack entry is 100% definitely from my user
-   *    - Every GitHub entry is 100% definitely from my user
-   *    -
-   * */
   private async generateSummary(weeksAgo: number): Promise<string> {
     Logger.progress("Generating achievement summary...");
 
     const promptPath = path.resolve(__dirname, "./prompts/achievements.md");
-    await execAndValidate(`goose run --instructions ${promptPath}`);
+    
+    // Process the prompt template
+    const processedPrompt = await processPromptTemplate(promptPath, {
+      REPO_ROOT: this.repoRoot
+    });
+
+    // Create a temporary file for the processed prompt
+    const tempPromptPath = path.join(this.repoRoot, "tmp", "prompt.md");
+    await fs.mkdir(path.dirname(tempPromptPath), { recursive: true });
+    await fs.writeFile(tempPromptPath, processedPrompt);
+
+    // Execute Goose with the processed prompt
+    await execAndValidate(`goose run --instructions ${tempPromptPath}`);
 
     // Get the most recently created summary file
     const files = await listSummaries();
@@ -60,10 +69,10 @@ export class Summariser {
 
     // Sort by creation time (newest first) and get the latest
     const sortedFiles = await Promise.all(
-      files.map(async (file) => ({
+      files.map(async file => ({
         path: file,
-        ctime: (await fs.stat(file)).ctime,
-      })),
+        ctime: (await fs.stat(file)).ctime
+      }))
     );
     sortedFiles.sort((a, b) => b.ctime.getTime() - a.ctime.getTime());
 
