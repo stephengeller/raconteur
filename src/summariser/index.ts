@@ -1,7 +1,7 @@
-import { exec } from "child_process";
 import path from "path";
 import { Logger } from "../raconteur/logger";
 import { promptForWeeks } from "./prompts";
+import { execAndValidate } from "./utils/exec";
 
 export class Summariser {
   constructor() {
@@ -35,36 +35,7 @@ export class Summariser {
     Logger.progress("Generating achievement summary...");
 
     const promptPath = path.resolve(__dirname, "./prompts/achievements.md");
-
-    // Execute Goose with our prompt
-    const { stdout, code } = await new Promise<{
-      stdout: string;
-      stderr: string;
-      code: number | null;
-    }>((resolve) =>
-      exec(
-        `goose run --instructions ${promptPath}`,
-        (error, stdout, stderr) => {
-          resolve({
-            stdout: stdout || "",
-            stderr: stderr || "",
-            code: error ? error.code || 1 : 0,
-          });
-        },
-      ),
-    );
-
-    // Handle command execution errors
-    if (code !== 0) {
-      throw new Error(`Goose command failed with exit code ${code}: ${stdout}`);
-    }
-
-    // Validate output
-    if (!stdout.trim()) {
-      throw new Error("No summary generated");
-    }
-
-    return stdout;
+    return execAndValidate(`goose run --instructions ${promptPath}`);
   }
 
   private async handleClipboardCopy(content: string): Promise<void> {
