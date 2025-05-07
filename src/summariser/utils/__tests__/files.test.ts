@@ -13,10 +13,12 @@ const mockedFs = fs as jest.Mocked<typeof fs>;
 
 describe("file utilities", () => {
   const mockCwd = process.cwd();
-  const summariesDir = path.resolve(mockCwd, ".goose/summaries");
+  const summariesDir = path.resolve(mockCwd, "tmp/summaries");
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock mkdir to do nothing (simulating success)
+    mockedFs.mkdir.mockResolvedValue(undefined);
   });
 
   describe("saveSummary", () => {
@@ -24,6 +26,10 @@ describe("file utilities", () => {
       const content = "Test summary content";
       const savedPath = await saveSummary(content);
 
+      expect(mockedFs.mkdir).toHaveBeenCalledWith(
+        path.dirname(savedPath),
+        { recursive: true }
+      );
       expect(mockedFs.writeFile).toHaveBeenCalledWith(
         expect.stringMatching(/summary-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z\.md$/),
         content,
@@ -47,12 +53,27 @@ describe("file utilities", () => {
   describe("listSummaries", () => {
     it("should list all summary files", async () => {
       const mockFiles = ["summary-1.md", "summary-2.md"];
-      // Mock readdir to return file names
       mockedFs.readdir.mockResolvedValue(mockFiles as any);
 
       const files = await listSummaries();
       expect(files).toEqual(mockFiles.map(file => path.join(summariesDir, file)));
       expect(mockedFs.readdir).toHaveBeenCalledWith(summariesDir);
+    });
+
+    it("should return empty array if directory doesn't exist", async () => {
+      const error = new Error("ENOENT") as NodeJS.ErrnoException;
+      error.code = "ENOENT";
+      mockedFs.readdir.mockRejectedValue(error);
+
+      const files = await listSummaries();
+      expect(files).toEqual([]);
+    });
+
+    it("should propagate other errors", async () => {
+      const error = new Error("Other error");
+      mockedFs.readdir.mockRejectedValue(error);
+
+      await expect(listSummaries()).rejects.toThrow("Other error");
     });
   });
 
@@ -86,6 +107,14 @@ describe("file utilities", () => {
       expect(mockedFs.unlink).toHaveBeenCalledWith(
         path.join(summariesDir, "summary-4.md")
       );
+    });
+
+    it("should do nothing if no files exist", async () => {
+      mockedFs.readdir.mockResolvedValue([] as any);
+
+      await cleanupSummaries(2);
+
+      expect(mockedFs.unlink).not.toHaveBeenCalled();
     });
   });
 });

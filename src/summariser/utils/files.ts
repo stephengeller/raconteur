@@ -2,15 +2,18 @@ import fs from "fs/promises";
 import path from "path";
 
 /**
- * Save content to a file in the .goose/summaries directory
+ * Save content to a file in the tmp/summaries directory
  * @param content Content to save
  * @returns Path to the saved file
  */
 export async function saveSummary(content: string): Promise<string> {
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const filename = `summary-${timestamp}.md`;
-  const filepath = path.resolve(process.cwd(), ".goose/summaries", filename);
+  const filepath = path.resolve(process.cwd(), "tmp/summaries", filename);
 
+  // Ensure the directory exists
+  await fs.mkdir(path.dirname(filepath), { recursive: true });
+  
   await fs.writeFile(filepath, content, "utf-8");
   return filepath;
 }
@@ -29,9 +32,18 @@ export async function readSummary(filepath: string): Promise<string> {
  * @returns Array of summary file paths
  */
 export async function listSummaries(): Promise<string[]> {
-  const summariesDir = path.resolve(process.cwd(), ".goose/summaries");
-  const files = await fs.readdir(summariesDir);
-  return files.map(file => path.join(summariesDir, file));
+  const summariesDir = path.resolve(process.cwd(), "tmp/summaries");
+  
+  try {
+    const files = await fs.readdir(summariesDir);
+    return files.map(file => path.join(summariesDir, file));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      // Directory doesn't exist yet, return empty array
+      return [];
+    }
+    throw error;
+  }
 }
 
 /**
@@ -40,6 +52,9 @@ export async function listSummaries(): Promise<string[]> {
  */
 export async function cleanupSummaries(keep: number = 10): Promise<void> {
   const files = await listSummaries();
+  
+  // If no files or directory doesn't exist yet, nothing to do
+  if (files.length === 0) return;
   
   // Sort files by creation time (newest first)
   const sortedFiles = await Promise.all(

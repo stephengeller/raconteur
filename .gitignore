@@ -22,4 +22,4 @@ customRaconteurPrompt.txt
 
 # Temporary Files
 temp_prs_data.json
-.goose/summaries/
+tmp/
