@@ -15,10 +15,35 @@ describe("prompt utilities", () => {
       mockedFs.readFile.mockResolvedValue(template);
 
       const result = await processPromptTemplate("/path/to/template", {
-        REPO_ROOT: "/Users/sgeller/raconteur"
+        REPO_ROOT: "/Users/sgeller/raconteur",
+        WEEKS_AGO: 2
       });
 
       expect(result).toBe("Save to /Users/sgeller/raconteur/tmp/summaries/file.md");
+    });
+
+    it("should replace WEEKS_AGO in template", async () => {
+      const template = "Analyze the past {WEEKS_AGO} weeks of activity";
+      mockedFs.readFile.mockResolvedValue(template);
+
+      const result = await processPromptTemplate("/path/to/template", {
+        REPO_ROOT: "/Users/sgeller/raconteur",
+        WEEKS_AGO: 2
+      });
+
+      expect(result).toBe("Analyze the past 2 weeks of activity");
+    });
+
+    it("should handle both variables together", async () => {
+      const template = "Save to {REPO_ROOT}/tmp/summaries/file.md and analyze {WEEKS_AGO} weeks";
+      mockedFs.readFile.mockResolvedValue(template);
+
+      const result = await processPromptTemplate("/path/to/template", {
+        REPO_ROOT: "/Users/sgeller/raconteur",
+        WEEKS_AGO: 3
+      });
+
+      expect(result).toBe("Save to /Users/sgeller/raconteur/tmp/summaries/file.md and analyze 3 weeks");
     });
 
     it("should leave unmatched variables unchanged", async () => {
@@ -26,21 +51,23 @@ describe("prompt utilities", () => {
       mockedFs.readFile.mockResolvedValue(template);
 
       const result = await processPromptTemplate("/path/to/template", {
-        REPO_ROOT: "/Users/sgeller/raconteur"
+        REPO_ROOT: "/Users/sgeller/raconteur",
+        WEEKS_AGO: 2
       });
 
       expect(result).toBe("Hello {UNMATCHED} and /Users/sgeller/raconteur");
     });
 
-    it("should handle multiple occurrences of the same variable", async () => {
-      const template = "{REPO_ROOT}/one and {REPO_ROOT}/two";
+    it("should handle multiple occurrences of variables", async () => {
+      const template = "{REPO_ROOT}/one and {REPO_ROOT}/two for {WEEKS_AGO} and {WEEKS_AGO} weeks";
       mockedFs.readFile.mockResolvedValue(template);
 
       const result = await processPromptTemplate("/path/to/template", {
-        REPO_ROOT: "/Users/sgeller/raconteur"
+        REPO_ROOT: "/Users/sgeller/raconteur",
+        WEEKS_AGO: 4
       });
 
-      expect(result).toBe("/Users/sgeller/raconteur/one and /Users/sgeller/raconteur/two");
+      expect(result).toBe("/Users/sgeller/raconteur/one and /Users/sgeller/raconteur/two for 4 and 4 weeks");
     });
 
     it("should handle templates with no variables", async () => {
@@ -48,7 +75,8 @@ describe("prompt utilities", () => {
       mockedFs.readFile.mockResolvedValue(template);
 
       const result = await processPromptTemplate("/path/to/template", {
-        REPO_ROOT: "/Users/sgeller/raconteur"
+        REPO_ROOT: "/Users/sgeller/raconteur",
+        WEEKS_AGO: 2
       });
 
       expect(result).toBe("No variables here");

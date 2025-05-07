@@ -48,9 +48,10 @@ export class Summariser {
 
     const promptPath = path.resolve(__dirname, "./prompts/achievements.md");
     
-    // Process the prompt template
+    // Process the prompt template with both variables
     const processedPrompt = await processPromptTemplate(promptPath, {
-      REPO_ROOT: this.repoRoot
+      REPO_ROOT: this.repoRoot,
+      WEEKS_AGO: weeksAgo
     });
 
     // Create a temporary file for the processed prompt

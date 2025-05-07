@@ -2,6 +2,7 @@ import fs from "fs/promises";
 
 interface PromptVariables {
   REPO_ROOT: string;
+  WEEKS_AGO: number;
 }
 
 /**
@@ -18,9 +19,9 @@ export async function processPromptTemplate(
   const template = await fs.readFile(templatePath, "utf-8");
 
   // Replace variables
-  return template.replace(/\{(\w+)\}/g, (match, key) => {
+  return template.replace(/\{(\w+)}/g, (match, key) => {
     if (key in variables) {
-      return variables[key as keyof PromptVariables];
+      return String(variables[key as keyof PromptVariables]);
     }
     // Leave unmatched variables unchanged
     return match;
