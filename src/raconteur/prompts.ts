@@ -49,6 +49,22 @@ export async function confirmSocialSummary(useGoose: boolean): Promise<boolean> 
   return response.value;
 }
 
+export async function promptForSummaryType(): Promise<string> {
+  const response = await prompts({
+    type: "select",
+    name: "value",
+    message: chalk.yellow("What type of summary would you like to generate?"),
+    choices: [
+      { title: "GitHub PR Summary", value: "github" },
+      { title: "Social/Slack Summary", value: "social" },
+      { title: "Combined Summary (GitHub + Social)", value: "combined" },
+      { title: "Both Summaries (Separately)", value: "both" },
+    ],
+    initial: 0,
+  });
+  return response.value || "github";
+}
+
 export async function copyToClipboardWithConfirmation(content: string, message = "Copy to clipboard?"): Promise<void> {
   const response = await prompts({
     type: "toggle",
