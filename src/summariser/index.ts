@@ -3,7 +3,7 @@ import path from "path";
 import { Logger } from "../raconteur/logger";
 import { promptForWeeks } from "./prompts";
 import { execAndValidate } from "./utils/exec";
-import { readSummary, listSummaries, cleanupSummaries } from "./utils/files";
+import { cleanupSummaries, listSummaries, readSummary } from "./utils/files";
 import { processPromptTemplate } from "./utils/prompt";
 
 export class Summariser {
@@ -47,11 +47,11 @@ export class Summariser {
     Logger.progress("Generating achievement summary...");
 
     const promptPath = path.resolve(__dirname, "./prompts/achievements.md");
-    
+
     // Process the prompt template with both variables
     const processedPrompt = await processPromptTemplate(promptPath, {
       REPO_ROOT: this.repoRoot,
-      WEEKS_AGO: weeksAgo
+      WEEKS_AGO: weeksAgo,
     });
 
     // Create a temporary file for the processed prompt
@@ -70,10 +70,10 @@ export class Summariser {
 
     // Sort by creation time (newest first) and get the latest
     const sortedFiles = await Promise.all(
-      files.map(async file => ({
+      files.map(async (file) => ({
         path: file,
-        ctime: (await fs.stat(file)).ctime
-      }))
+        ctime: (await fs.stat(file)).ctime,
+      })),
     );
     sortedFiles.sort((a, b) => b.ctime.getTime() - a.ctime.getTime());
 
