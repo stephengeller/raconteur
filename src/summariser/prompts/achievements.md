@@ -78,39 +78,16 @@ Output Instructions:
    REQUIRED: Use multiple tools to find comprehensive evidence for each achievement.
 
    Slack Evidence:
-   IMPORTANT: ONLY include Slack messages and threads that meet ALL these criteria:
-    1. YOU (sgeller@squareup.com) are the author or a key participant
-    2. The message/thread is from within the last {WEEKS_AGO} weeks
-    3. There is clear evidence of your contribution
-
-   Finding Your Recent Contributions:
-    - Use slack__search_messages with:
-        * author:"sgeller@squareup.com"
-        * after:"[{WEEKS_AGO} weeks ago]"
-        * Keywords from JIRA tickets/PRs
-    - Use slack__get_channel_messages with:
-        * before_date: now
-        * after_date: [{WEEKS_AGO} weeks ago]
-    - Double-check message timestamps before including as evidence
-    - If a thread started before the {WEEKS_AGO} week window, only include if you had significant
-      contributions within the window
-
-   Required Steps:
-    1. Calculate the date range:
-        - End date: now
-        - Start date: {WEEKS_AGO} weeks ago
-    2. Search for YOUR messages in that date range
-    3. For each potential thread:
-        - Verify the message/contribution date is within range
-        - Verify you are either the author or made significant contributions
-        - Ensure the thread demonstrates your impact/behavior/betterment
-        - Get full context with slack__get_thread_replies
-    4. Look specifically for:
-        * Technical discussions you led
-        * Cross-team collaboration where you were key participant
-        * Knowledge sharing from you to others
-        * Meeting summaries you wrote
-        * Team communications you initiated or significantly contributed to
+    - Use slack__search_messages to find relevant discussions using keywords from JIRA tickets and
+      PRs
+    - Use slack__get_channel_messages to review project channel history
+    - Use slack__get_thread_replies to get full context of important discussions
+    - Look for:
+        * Technical discussions and decisions
+        * Cross-team collaboration
+        * Knowledge sharing
+        * Meeting summaries
+        * Team communications
 
    GitHub Evidence:
     - For JIRA tickets mentioned, find related PRs if possible
@@ -155,4 +132,169 @@ Output Instructions:
         * **[Betterment > Team Growth]**
         * **[Betterment > Culture & Community]**
 
-[Rest of the file remains exactly the same...]
+Performance Categories and Subcategories:
+
+1. Impact
+   "The sum of your output. How your work affects your customers, the people around you and the
+   products and platforms you support."
+
+   Technical Subcategories:
+    - **[Impact > Technical Contributions]**
+        - Independent implementation
+        - Clear, tested code
+        - Technical proficiency
+        - System improvements
+        - Reliable, predictable output
+
+    - **[Impact > Design & Architecture]**
+        - Engineering designs
+        - Design feedback
+        - Architecture decisions
+        - Code reviews
+        - Sustainable practices
+
+    - **[Impact > Ownership]**
+        - Project planning
+        - Risk management
+        - Feature releases
+        - Maintenance
+        - Customer focus
+
+   Social Subcategories:
+    - **[Impact > Technical Leadership]**
+        - Design reviews
+        - Architecture guidance
+        - Technical direction
+        - Knowledge sharing
+        - Mentorship impact
+
+    - **[Impact > Cross-team Influence]**
+        - Relationship building
+        - Solution development
+        - Stakeholder alignment
+        - Project coordination
+
+    - **[Impact > Customer Focus]**
+        - User experience improvements
+        - Support effectiveness
+        - Product quality
+        - Customer satisfaction
+
+2. Behavior
+   "How you show up every day to get work done. How you collaborate with your peers and partners."
+
+   Shared Subcategories:
+    - **[Behavior > Collaboration]**
+        - Cross-team partnerships
+        - Solution-oriented approach
+        - Relationship building
+        - Global optimization mindset
+        - Remote-first practices
+
+    - **[Behavior > Team Building]**
+        - Engineering interviews
+        - Talent activities
+        - Community building
+        - Culture contributions
+        - Psychological safety
+        - Inclusive practices
+
+    - **[Behavior > Communication]**
+        - Clear documentation
+        - Knowledge sharing
+        - Effective remote work
+        - Async/sync choices
+        - Proactive updates
+        - Meeting facilitation
+
+3. Betterment
+   "How you make yourself, your team, your peers, your codebase, and the environment around you
+   better."
+
+   Technical Subcategories:
+    - **[Betterment > Reliability, Quality, & Health]**
+        - Technical debt removal
+        - Production monitoring
+        - Quality improvements
+        - System reliability
+        - Customer impact focus
+
+    - **[Betterment > Mentorship]**
+        - Individual teaching
+        - Team learning
+        - Knowledge sharing
+        - Documentation
+        - Training materials
+
+    - **[Betterment > Process Improvement]**
+        - Workflow optimization
+        - Team practices
+        - Development standards
+        - Efficiency gains
+
+   Social Subcategories:
+    - **[Betterment > Team Growth]**
+        - Knowledge sharing
+        - Learning initiatives
+        - Training programs
+        - Documentation improvements
+        - Best practices
+
+    - **[Betterment > Culture & Community]**
+        - Team rituals
+        - Community building
+        - Inclusive practices
+        - Knowledge sharing
+
+Example Markdown Format:
+
+###### December 4, 2024
+
+- **[Impact > Technical Contributions]** **[Impact > Ownership]** Implemented robust PIN
+  verification system with 99.9% reliability, demonstrating strong technical ownership and customer
+  focus [SomeRepo #123](https://github.com/org/somerepo/pull/123)
+- **[Impact > Technical Leadership]** Led technical deep-dive on authentication systems for 3 teams,
+  resulting in aligned architecture
+  decisions [Meeting Notes: Dec 4 - Auth Systems Review](https://docs.google.com/document/d/abc123)
+- **[Behavior > Communication]** Facilitated critical design review meetings between Design and
+  Engineering teams, effectively bridging communication
+  gaps [Document: Auth Design Review](https://docs.google.com/document/d/xyz789)
+- **[Betterment > Team Growth]** Created comprehensive onboarding documentation for authentication
+  systems, reducing ramp-up time by
+  40% [Document: Auth Onboarding Guide](https://docs.google.com/document/d/def456)
+
+###### November 28, 2024
+
+- **[Impact > Ownership]** Successfully delivered end-to-end PII verification feature with clear
+  customer value [PR #789](https://github.com/org/repo/pull/789)
+- **[Impact > Cross-team Influence]** Built strong partnerships with Security and Product teams,
+  leading to streamlined
+  processes [Meeting Notes: Nov 28 - Cross-team Sync](https://docs.google.com/document/d/ghi789)
+- **[Betterment > Process Improvement]** Introduced automated testing practices that improved team
+  efficiency [PR #101](https://github.com/org/repo/pull/101)
+- **[Betterment > Process Improvement]** Introduced new team ritual for sharing technical
+  learnings [Slack: #team > Tech Learning Session](https://slack.com/archives/thread)
+
+Based on the above framework and format requirements, please analyze the past {WEEKS_AGO} weeks of:
+
+1. GitHub pull requests and technical contributions:
+    - Review the provided PR data from the last {WEEKS_AGO} weeks
+    - Identify technical achievements and their impact
+    - Map to appropriate IBB categories
+    - Include direct links to PRs as evidence
+
+2. Social and non-coding contributions:
+    - Analyze Slack conversations and other communication channels from the last {WEEKS_AGO} weeks
+    - Look for evidence of leadership, collaboration, and knowledge sharing
+    - Identify process improvements and team contributions
+    - Map to appropriate IBB categories
+
+3. Combine both contribution types:
+    - Group by date in reverse chronological order
+    - Ensure balanced representation across IBB framework
+    - Highlight connections between technical and social achievements
+    - Maintain consistent formatting and style
+
+The goal is to create a comprehensive, well-structured documentation of achievements that
+demonstrates both technical implementation skills and broader organizational impact, providing a
+holistic picture of performance aligned with Block's IBB framework.
