@@ -101,12 +101,13 @@ confirm_continue
 echo -e "${YELLOW}5. Copy and paste the following into your shell profile (~/.zshrc or ~/.bashrc):${NC}"
 
 echo '# Raconteur Command Setup'
+echo "export RACONTEUR_PATH=\"$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)\""
 echo 'raconteur_cmd() {'
 echo '  local cmd=$1'
 echo '  local dir_arg=$2'
 echo '  local oldpwd=$(pwd)'
 echo ''
-echo '  pushd ~/raconteur >/dev/null'
+echo '  pushd "$RACONTEUR_PATH" >/dev/null'
 echo '  yarn --silent "$cmd" ${dir_arg:+"--dir"} "$oldpwd"'
 echo '  popd >/dev/null'
 echo '}'
