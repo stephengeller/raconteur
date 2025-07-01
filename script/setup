@@ -36,6 +36,12 @@ check_env_var() {
 
 echo -e "${GREEN}Starting setup for Raconteur...${NC}\n"
 
+# Create .env file if it doesn't exist
+if [ ! -f ".env" ]; then
+    echo -e "${BLUE}No .env file detected, creating a new one...${NC}"
+    touch .env
+fi
+
 # Check and prompt for GitHub API key
 if ! check_env_var "GITHUB_TOKEN"; then
     echo -e "${BLUE}1. Generate a new Personal Access Token (PAT) on GitHub with 'repo' scope.${NC}"
