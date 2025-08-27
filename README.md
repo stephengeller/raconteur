@@ -65,6 +65,7 @@ yarn install
 ```bash
 GITHUB_TOKEN=your_github_token_here        # From https://github.com/settings/tokens (needs 'repo' scope)
 OPENAI_API_KEY=your_openai_api_key_here    # From https://platform.openai.com/api-keys
+OPENAI_MODEL=gpt-4o                        # ChatGPT model to use
 GITHUB_USERNAME=your_github_username_here
 SQUAREUP_EMAIL=your_openai_email_here
 JIRA_API_TOKEN=your_jira_api_token_here
