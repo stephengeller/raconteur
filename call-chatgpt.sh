@@ -12,6 +12,8 @@ if [ -z "$OPENAI_API_KEY" ]; then
   exit 1
 fi
 
+MODEL="${OPENAI_MODEL:-gpt-4o}"
+
 PROMPT=$(cat "${PROMPT_FILE}")
 
 # Define your detailed prompt as a variable
@@ -40,7 +42,8 @@ Jan 25, 2024:
 json_payload=$(jq -n \
     --arg prompt "$PROMPT" \
     --arg detailed_prompt "$detailed_prompt" \
-    '{ "model": "gpt-4-0125-preview", "messages": [{ "role": "user", "content": ($detailed_prompt + "\n" + $prompt) }] }')
+    --arg model "$MODEL" \
+    '{ "model": $model, "messages": [{ "role": "user", "content": ($detailed_prompt + "\n" + $prompt) }] }')
 
 # Send the payload to the OpenAI API
 response=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \

@@ -5,10 +5,11 @@ export async function callChatGPTApi(
   userContent: string,
 ): Promise<string> {
   try {
+    const model = process.env.OPENAI_MODEL ?? "gpt-4o";
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-4o",
+        model,
         messages: [
           {
             role: "system",

@@ -7,14 +7,17 @@ describe("ChatGPTApi", () => {
   const mockSystemContent = "system content";
   const mockUserContent = "user content";
   const mockApiKey = "test-api-key";
+  const mockModel = "test-model";
 
   beforeEach(() => {
     process.env.OPENAI_API_KEY = mockApiKey;
+    process.env.OPENAI_MODEL = mockModel;
     jest.clearAllMocks();
   });
 
   afterEach(() => {
     delete process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_MODEL;
   });
 
   it("should call OpenAI API with correct parameters", async () => {
@@ -37,7 +40,7 @@ describe("ChatGPTApi", () => {
     expect(axios.post).toHaveBeenCalledWith(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-4o",
+        model: mockModel,
         messages: [
           {
             role: "system",
